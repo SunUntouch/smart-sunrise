@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Smart-Sunrise</string>
+    <string name="action_settings">Settings</string>
+    <string name="edit_message">Enter a Message</string>
+    <string name="button_send">Send</string>
+    <string name="title_activity_display_message">MyMessage</string>
+
+    <!-- ExampleFragment -->
+    <string name="hello_blank_fragment">Hello Example fragment</string>
+    <string name="title_activity_main2">Main2Activity</string>
+</resources>

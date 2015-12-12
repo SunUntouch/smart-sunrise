@@ -1,0 +1,15 @@
+smart-sunrise Todos
+=======================================
+- wake up function
+	- multiple Times
+	- set Days
+- Set Music
+	- Android Ringtones
+	- own Music
+		- set starting Point
+- set Light
+	- Display
+		- color
+		- fading
+	- LED
+- set message/name

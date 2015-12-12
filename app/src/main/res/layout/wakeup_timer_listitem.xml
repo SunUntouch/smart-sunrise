@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/wakeup_timer_listItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="17dip"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <ToggleButton
+            android:textOn="MO"
+            android:textOff="MO"
+            android:id="@+id/wakeup_monday"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:padding="2dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View android:layout_height="fill_parent"
+            android:layout_width="2px"
+            android:background="#90909090"/>
+
+        <ToggleButton
+            android:textOn="TU"
+            android:textOff="TU"
+            android:id="@+id/wakeup_tuesday"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:padding="2dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View android:layout_height="fill_parent"
+            android:layout_width="2px"
+            android:background="#90909090"/>
+
+        <ToggleButton
+            android:textOn="WE"
+            android:textOff="WE"
+            android:id="@+id/wakeup_wednesday"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:padding="2dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View android:layout_height="fill_parent"
+            android:layout_width="2px"
+            android:background="#90909090"/>
+
+        <ToggleButton
+            android:textOn="TH"
+            android:textOff="TH"
+            android:id="@+id/wakeup_thursday"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:padding="2dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View android:layout_height="fill_parent"
+            android:layout_width="2px"
+            android:background="#90909090"/>
+
+        <ToggleButton
+            android:textOn="FR"
+            android:textOff="FR"
+            android:id="@+id/wakeup_friday"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:padding="2dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View android:layout_height="fill_parent"
+            android:layout_width="2px"
+            android:background="#90909090"/>
+
+        <ToggleButton
+            android:textOn="SA"
+            android:textOff="SA"
+            android:id="@+id/wakeup_saturday"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:padding="2dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View android:layout_height="fill_parent"
+            android:layout_width="2px"
+            android:background="#90909090"/>
+
+        <ToggleButton
+            android:textOn="SU"
+            android:textOff="SU"
+            android:id="@+id/wakeup_sunday"
+            android:scaleType="centerInside"
+            android:layout_weight="1"
+            android:padding="2dip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</LinearLayout>
