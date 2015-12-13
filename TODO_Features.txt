@@ -7,9 +7,14 @@ smart-sunrise Todos
 	- Android Ringtones
 	- own Music
 		- set starting Point
+	- vibration
 - set Light
 	- Display
 		- color
 		- fading
 	- LED
 - set message/name
+
+- set options
+	- Layout Colors
+	- Textsize of all Items
