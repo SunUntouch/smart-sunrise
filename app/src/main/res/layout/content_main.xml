@@ -15,7 +15,7 @@
     <LinearLayout
         android:layout_height="0dp"
         android:layout_width="match_parent"
-        android:layout_weight="3"
+        android:layout_weight="7"
         android:orientation="vertical" >
 
         <ExpandableListView
@@ -26,6 +26,13 @@
 
     <View
         android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="?attr/colorPrimaryDark"/>
+
+    <View
+        android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"
+        android:background="?attr/colorPrimary"
+        android:theme="@style/AppTheme.AppBarOverlay"/>
 </LinearLayout>

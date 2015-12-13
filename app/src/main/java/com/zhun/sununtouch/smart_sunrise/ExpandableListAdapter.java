@@ -1,11 +1,13 @@
 package com.zhun.sununtouch.smart_sunrise;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.HashMap;
@@ -15,6 +17,10 @@ import java.util.List;
  * Created by Sunny on 12.12.2015.
  */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
+    public final static String WAKEUP_DAYS  = "Days";
+    public final static String WAKEUP_TIME  = "Time";
+    public final static String WAKEUP_MUSIC = "Music";
+    public final static String WAKEUP_LIGHT = "Light";
 
     private Context      context;
     private List<String> wakeup_header;
@@ -26,6 +32,21 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.wakeup_child  = _wakeup_child;
     }
 
+    @Override
+    public void registerDataSetObserver(DataSetObserver observer) {
+        super.registerDataSetObserver(observer);
+    }
+
+    private View inflateLayout(View _convertView, int _layoutID, String _childText, int _viewID){
+
+        LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        _convertView = inflater.inflate(_layoutID, null);
+
+        TextView txtListChild = (TextView) _convertView.findViewById(_viewID);
+        txtListChild.setText(_childText);
+
+        return _convertView;
+    }
     //Childs/////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public Object getChild(int groupPosition, int childPosition) {
@@ -42,14 +63,26 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         final String childText = (String) getChild(groupPosition, childPosition);
 
-        if(convertView == null){
-            LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.wakeup_timer_listitem, null);
+        switch (childText){
+            case WAKEUP_DAYS: {
+                convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_days, childText, R.id.wakeup_timer_days_textview);
+            }
+            break;
+            case WAKEUP_TIME: {
+                convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_time, childText, R.id.wakeup_timer_time_textview);
+            }
+            break;
+            case WAKEUP_MUSIC: {
+                convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_music, childText, R.id.wakeup_timer_music_textview);
+            }
+            break;
+            case WAKEUP_LIGHT: {
+                convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_light, childText, R.id.wakeup_timer_light_textview);
+            }
+            break;
+            default:
+                break;
         }
-
-        TextView txtListChild = (TextView) convertView.findViewById(R.id.wakeup_timer_listItem);
-        txtListChild.setText(childText);
-
         return convertView;
     }
 
