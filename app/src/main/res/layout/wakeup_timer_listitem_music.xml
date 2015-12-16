@@ -18,7 +18,8 @@
         android:id="@+id/wakeup_timer_music_buttonMusic"
         android:text="Choose Music"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:onClick="showMusicSettingDialog"/>
 
     <Button
         android:id="@+id/wakeup_timer_music_buttonVibration"

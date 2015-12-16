@@ -33,5 +33,4 @@
         android:src="@android:drawable/ic_menu_add"
         android:tint="#FFFFFF"
         android:clickable="true" />
-
 </android.support.design.widget.CoordinatorLayout>
