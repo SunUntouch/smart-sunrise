@@ -14,17 +14,74 @@
         android:paddingBottom="5dp"
         android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>
 
-    <Button
-        android:id="@+id/wakeup_timer_music_buttonMusic"
-        android:text="Choose Music"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="showMusicSettingDialog"/>
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/wakeup_timer_music_buttonVibration"
-        android:text="Set Vibration"
+        <Button
+            android:id="@+id/wakeup_timer_music_buttonMusic"
+            android:text="Choose Music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:onClick="showMusicSettingDialog"/>
+
+        <Button
+            android:id="@+id/wakeup_timer_music_buttonMusicVolume"
+            android:text="100%"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="showMusicVolumeSettingDialog"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:text="Start Time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_weight="2"/>
+
+        <Button
+            android:id="@+id/wakeup_timer_music_SongStart"
+            android:text="00:00"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick=""/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:text="Fade In"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_weight="2"/>
+
+        <ToggleButton
+            android:id="@+id/wakeup_timer_music_FadeIn"
+            android:text="00:00"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick=""/>
+    </LinearLayout>
+
+        <ToggleButton
+            android:id="@+id/wakeup_timer_music_toggleVibration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="showVibrationSettingDialog"/>
 
 </LinearLayout>

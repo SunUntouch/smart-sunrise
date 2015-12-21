@@ -22,7 +22,9 @@
             android:id="@+id/wakeup_timer_expendbleList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:groupIndicator="@android:drawable/arrow_down_float"/>
+            android:groupIndicator="@android:drawable/arrow_down_float"
+            android:dividerHeight="2dp"
+            android:divider="@color/colorPrimary"/>
     </LinearLayout>
 
     <View

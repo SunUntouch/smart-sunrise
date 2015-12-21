@@ -3,62 +3,43 @@ package com.zhun.sununtouch.smart_sunrise;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Typeface;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-<<<<<<< HEAD
-=======
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
->>>>>>> 4e765a06315718ef0e735876e9e63f2356dacbec
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public final static String WAKEUP_DAYS  = "Days";
     public final static String WAKEUP_TIME  = "Time";
     public final static String WAKEUP_MUSIC = "Music";
     public final static String WAKEUP_LIGHT = "Light";
+    public final static String WAKEUP_DELETE= "Delete";
 
-    public final static String[] WAKEUP_CHILDS  = { WAKEUP_TIME, WAKEUP_DAYS, WAKEUP_MUSIC, WAKEUP_LIGHT};
+    public final static String[] WAKEUP_CHILDS  = {WAKEUP_DELETE, WAKEUP_TIME, WAKEUP_DAYS, WAKEUP_MUSIC, WAKEUP_LIGHT};
 
     private Context      context;
     private List<String> wakeup_header;
     private List<String> wakeup_alarm;
-<<<<<<< HEAD
     private LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> wakeup_child;
 
     public ExpandableListAdapter(Context _context, List<String> _wakeup_alarm, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child){
         this.context       = _context;
         this.wakeup_header = _wakeup_header;
         this.wakeup_alarm  = _wakeup_alarm;
-        this.wakeup_child = _wakeup_child;
+        this.wakeup_child  = _wakeup_child;
     }
 
     public void notifyDataSetChanged(List<String> _wakeup_alarm, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child) {
         this.wakeup_header = _wakeup_header;
         this.wakeup_alarm  = _wakeup_alarm;
-        this.wakeup_child = _wakeup_child;
-        //super.notifyDataSetChanged();
-=======
-    private LinkedHashMap<String, List<String>> wakeup_child;
-
-    private LinkedHashMap<String, LinkedHashMap<String, List<LinkedHashMap<String, Integer>>>> wakeup_child2;
-
-    public ExpandableListAdapter(Context _context, List<String> _wakeup_alarm, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, List<LinkedHashMap<String, Integer>>>> _wakeup_child2){
-        this.context       = _context;
-        this.wakeup_header = _wakeup_header;
-        this.wakeup_alarm  = _wakeup_alarm;
-        this.wakeup_child2 = _wakeup_child2;
->>>>>>> 4e765a06315718ef0e735876e9e63f2356dacbec
+        this.wakeup_child  = _wakeup_child;
     }
 
     @Override
@@ -117,9 +98,19 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 String musicText = "Choose Music"; //TODO set Music text Button Name
                 setMusicButton.setText(musicText);
 
-                Button setVibrationButton = (Button) _convertView.findViewById(_viewID[2]);
-                String vibrationText      = "Set Vibration "; //TODO set Music Vibration Text and Strength
-                setVibrationButton.setText(vibrationText);
+                Button setMusicVolumeButton = (Button) _convertView.findViewById(_viewID[2]);
+                String musicVolumeText = _childValues.get("Volume") + "%";
+                setMusicVolumeButton.setText(musicVolumeText);
+
+                ToggleButton setVibrationButton = (ToggleButton) _convertView.findViewById(_viewID[3]);
+                String vibrationTextOn      = "Vibration is ON with " + _childValues.get("VibrationValue") + " %.";
+                String vibrationTextOff      = "Vibration is OFF";
+
+                setVibrationButton.setTextOn(vibrationTextOn);
+                setVibrationButton.setTextOff(vibrationTextOff);
+
+                boolean checked = (_childValues.get("Vibration") == 1)? true : false;
+                setVibrationButton.setChecked(checked);
             }
             break;
             case WAKEUP_LIGHT:{
@@ -136,6 +127,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 setLEDButton.setText(timeText);
             }
             break;
+            case WAKEUP_DELETE:{
+                Button deleteAlarm = (Button) _convertView.findViewById(R.id.wakeup_timer_deleteButton);
+                String deleteText = "Delete";
+                deleteAlarm.setText(deleteText);
+            }
             default:
                 break;
         }
@@ -144,11 +140,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     //Childs/////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-<<<<<<< HEAD
         return  this.wakeup_child.get(wakeup_alarm.get(groupPosition)).get(WAKEUP_CHILDS[childPosition]);
-=======
-        return  this.wakeup_child2.get(wakeup_alarm.get(groupPosition)).get(WAKEUP_CHILDS[childPosition]);
->>>>>>> 4e765a06315718ef0e735876e9e63f2356dacbec
     }
 
     @Override
@@ -159,17 +151,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-<<<<<<< HEAD
+       //TextView alarmName = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
+        //alarmName.setClickable(true);
+
         final LinkedHashMap<String, Integer> childValues = (LinkedHashMap<String, Integer>)getChild(groupPosition, childPosition);
-=======
-        final List<LinkedHashMap<String, Integer>> childValues = (List<LinkedHashMap<String, Integer>>)getChild(groupPosition, childPosition);
->>>>>>> 4e765a06315718ef0e735876e9e63f2356dacbec
 
         String choosenChild = WAKEUP_CHILDS[childPosition];
 
                 switch (choosenChild){
                     case WAKEUP_DAYS: {
-<<<<<<< HEAD
                         int[] wakeupDay_ID = {
                                 R.id.wakeup_timer_days_textview,
                                 R.id.wakeup_monday,
@@ -195,7 +185,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         int[] wakeup_Music_ID = {
                                 R.id.wakeup_timer_music_textview,
                                 R.id.wakeup_timer_music_buttonMusic,
-                                R.id.wakeup_timer_music_buttonVibration };
+                                R.id.wakeup_timer_music_buttonMusicVolume,
+                                R.id.wakeup_timer_music_toggleVibration };
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_music, choosenChild, childValues, wakeup_Music_ID);
                     }
                     break;
@@ -206,30 +197,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 R.id.wakeup_timer_light_buttonColor,
                                 R.id.wakeup_timer_light_buttonLED };
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_light, choosenChild, childValues, wakeup_Light_ID);
-=======
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_days, choosenChild, R.id.wakeup_timer_days_textview);
                     }
                     break;
-                    case WAKEUP_TIME: {
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_time, choosenChild, R.id.wakeup_timer_time_textview);
+                    case WAKEUP_DELETE: {
+                        int[] wakeup_Delete_ID = {
+                                R.id.wakeup_timer_delete_textview,
+                                R.id.wakeup_timer_deleteButton };
+                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_delete, "", childValues, wakeup_Delete_ID);
                     }
-                    break;
-                    case WAKEUP_MUSIC: {
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_music, choosenChild, R.id.wakeup_timer_music_textview);
-                    }
-                    break;
-                    case WAKEUP_LIGHT: {
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_light, choosenChild, R.id.wakeup_timer_light_textview);
->>>>>>> 4e765a06315718ef0e735876e9e63f2356dacbec
-                    }
-                    break;
                     default:
                         break;
                 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 4e765a06315718ef0e735876e9e63f2356dacbec
              //else Log.e("Invalid Data:", "pairValueName: not in Range",null ); //TODO implement Error Handling!
         return convertView;
     }
@@ -241,11 +219,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-<<<<<<< HEAD
         return this.wakeup_child.get(wakeup_alarm.get(groupPosition)).size();
-=======
-        return this.wakeup_child2.get(wakeup_alarm.get(groupPosition)).size();
->>>>>>> 4e765a06315718ef0e735876e9e63f2356dacbec
     }
 
     //Groups/////////////////////////////////////////////////////////////////////////
@@ -274,12 +248,23 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         txtListHeader.setTypeface(null, Typeface.BOLD);
         txtListHeader.setText(headerTitle);
 
+        if(isExpanded)
+            txtListHeader.setClickable(true);
+        else
+            txtListHeader.setClickable(false);
+
+
         return convertView;
     }
 
     @Override
     public long getGroupId(int groupPosition) {
         return groupPosition;
+    }
+
+    @Override
+    public void onGroupExpanded(int groupPosition) {
+        super.onGroupExpanded(groupPosition);
     }
 
     @Override
