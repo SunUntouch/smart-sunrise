@@ -6,6 +6,17 @@
     android:padding="8dp"
     android:background="#000000">
 
+
+    <EditText
+        android:id="@+id/wakeup_timer_groupItem"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
+        android:textSize="17dp"
+        android:textColor="#f9f93d"/>
+
+    <!--
     <TextView
         android:id="@+id/wakeup_timer_groupItem"
         android:layout_width="wrap_content"
@@ -13,4 +24,5 @@
         android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
         android:textSize="17dp"
         android:textColor="#f9f93d"/>
+    -->
 </LinearLayout>
