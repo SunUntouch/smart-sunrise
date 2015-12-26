@@ -6,16 +6,14 @@
     android:padding="8dp"
     android:background="#99acff">
 
-
-
-    <EditText
+    <TextView
         android:id="@+id/wakeup_timer_groupItem"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
         android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-        android:textSize="17dp"
-        android:textColor="#f9f93d"/>
+        android:textSize="25dp"
+        android:textColor="#000000"
+        android:onClick="showNameSettingDialog"/>
 
     <!--
     <TextView
@@ -26,9 +24,8 @@
         android:textSize="25dp"
         android:textColor="#000000"
         android:onClick="showNameSettingDialog"/>
-        <!--android:clickable="true"-->
 
-    <!--<LinearLayout
+    -<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -48,10 +45,8 @@
             android:textSize="20dp"
             android:textColor="#f9f93d"/>
 
-    </LinearLayout>-->
+    </LinearLayout>-
 
-
-    <!--
     <EditText
         android:id="@+id/wakeup_timer_groupItem"
         android:layout_width="wrap_content"

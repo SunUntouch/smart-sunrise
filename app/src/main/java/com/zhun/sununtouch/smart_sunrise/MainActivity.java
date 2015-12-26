@@ -40,7 +40,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
                     implements TimePickerDialog.OnTimeSetListener{
-    public final static String EXTRA_MESSAGE = "com.zhun.sununtouch.smart_sunrise.MESSAGE";
+    public final static String EXTRA_MESSAGE     = "com.zhun.sununtouch.smart_sunrise.MESSAGE";
     //Shared Pref Settings
     public final static String WAKEUP_TIMER      = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
     public final static String WAKEUP_TIMER_INFO = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS_INFO";
@@ -134,45 +134,9 @@ public class MainActivity extends AppCompatActivity
 
     public int actualAlarm2 = -1;
 
-    private void changeListData(String _name, int _id){
-        //Load sharedPrefereces
-        String settingName = WAKEUP_TIMER + _id;
-        SharedPreferences settings      = getApplicationContext().getSharedPreferences(settingName, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-
-        String alarmName = ALARM + _id;
-
-        boolean contains = expListDataAlarm.contains(alarmName);
-        if(!expListDataAlarm.contains(alarmName))
-        expListDataAlarm.add(alarmName);
-
-        //put StringSet back
-        editor.putString(ALARM_NAME, _name);
-
-        //Time
-        editor.putInt(ALARM_TIME_MINUTES  , actualMin);
-        editor.putInt(ALARM_TIME_HOUR     , actualHour);
-        editor.putInt(ALARM_TIME_SNOOZE   , actualSnooze);
-
-        //Days
-        editor.putInt(ALARM_DAY_MONDAY    , isMonday);
-        editor.putInt(ALARM_DAY_TUESDAY   , isTuesday);
-        editor.putInt(ALARM_DAY_WEDNESDAY , isWednesday);
-        editor.putInt(ALARM_DAY_THURSDAY  , isThursday);
-        editor.putInt(ALARM_DAY_FRIDAY    , isFriday);
-        editor.putInt(ALARM_DAY_SATURDAY  , isSaturday);
-        editor.putInt(ALARM_DAY_SUNDAY    , isSunday);
-
-        //Music
-        editor.putInt(ALARM_MUSIC_VOLUME         , actualVolume);
-        editor.putInt(ALARM_MUSIC_VIBRATION_ACTIV, actualVibra);
-        editor.putInt(ALARM_MUSIC_VIBRATION_VALUE, actualVibraStr);
-
-        //Light
-
-        //apply Values to settings
-        editor.apply();
-    }
+    /***********************************************************************************************
+     * DATA VALUES
+     **********************************************************************************************/
     private void prepareListDataValues(String _alarmName, int _id, int[] _time, int[] _days, int[] _music, int[] _light){
 
         //Load sharedPrefereces
@@ -309,6 +273,45 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void changeListData(String _name, int _id){
+        //Load sharedPrefereces
+        String settingName = WAKEUP_TIMER + _id;
+        SharedPreferences settings      = getApplicationContext().getSharedPreferences(settingName, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+
+        String alarmName = ALARM + _id;
+
+        boolean contains = expListDataAlarm.contains(alarmName);
+        if(!expListDataAlarm.contains(alarmName))
+            expListDataAlarm.add(alarmName);
+
+        //put StringSet back
+        editor.putString(ALARM_NAME, _name);
+
+        //Time
+        editor.putInt(ALARM_TIME_MINUTES  , actualMin);
+        editor.putInt(ALARM_TIME_HOUR     , actualHour);
+        editor.putInt(ALARM_TIME_SNOOZE   , actualSnooze);
+
+        //Days
+        editor.putInt(ALARM_DAY_MONDAY    , isMonday);
+        editor.putInt(ALARM_DAY_TUESDAY   , isTuesday);
+        editor.putInt(ALARM_DAY_WEDNESDAY , isWednesday);
+        editor.putInt(ALARM_DAY_THURSDAY  , isThursday);
+        editor.putInt(ALARM_DAY_FRIDAY    , isFriday);
+        editor.putInt(ALARM_DAY_SATURDAY  , isSaturday);
+        editor.putInt(ALARM_DAY_SUNDAY    , isSunday);
+
+        //Music
+        editor.putInt(ALARM_MUSIC_VOLUME         , actualVolume);
+        editor.putInt(ALARM_MUSIC_VIBRATION_ACTIV, actualVibra);
+        editor.putInt(ALARM_MUSIC_VIBRATION_VALUE, actualVibraStr);
+
+        //Light
+
+        //apply Values to settings
+        editor.apply();
+    }
     private void saveListDataChild(String _name){
 
         SharedPreferences information = getApplicationContext().getSharedPreferences(WAKEUP_TIMER_INFO, Context.MODE_PRIVATE);
@@ -331,8 +334,10 @@ public class MainActivity extends AppCompatActivity
         else
             if(_id < amount)
                 changeListData(_name, _id);
-            else
+            else{
+                loadValuesNew(amount+1);
                 changeListData(_name, amount++);
+            }
 
         editor.putInt(ALARM_VALUE, amount);
         editor.apply();
@@ -430,7 +435,10 @@ public class MainActivity extends AppCompatActivity
         actualLightLED      = settings.getInt(ALARM_LIGHT_USELED       , 0);    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
     }
 
-    @Override
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /***********************************************************************************************
+     * ONCREATE
+     **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -490,6 +498,10 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /***********************************************************************************************
+     * ALARM NAME SETTING DIALOG
+     **********************************************************************************************/
     public void showNameSettingDialog(View v){
 
         //save Text ID
@@ -537,92 +549,9 @@ public class MainActivity extends AppCompatActivity
         prepareLisData();
     }
 
-    public void showTimeSettingsDialog(View v){
-
-        //save Button ID
-        actualButtonID = v.getId();
-
-        //Open TimePicker Dialog
-        DialogFragment newFragment = new SettingTimeFragment();
-        newFragment.show(getFragmentManager(), "timePicker");
-    }
-
-    public void showMinuteSettingDialog(View v) {
-
-        //save Button Id
-        actualButtonID = v.getId();
-
-        //Create new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Set Minutes");
-
-
-        //Fill Values for the Minute Choosing Dialog
-        ArrayList<String> Minutes = new ArrayList<>();
-        int MaxMinutes = 100; int currentMinute = 1;
-        while(currentMinute <= MaxMinutes){
-
-            Minutes.add(Integer.toString(currentMinute));
-            ++currentMinute;
-        }
-
-        //Cast to Array
-        String[] minuteArray = new String[Minutes.size()];
-        minuteArray = Minutes.toArray(minuteArray);
-
-        //Set Builder Settings and Onclikclistener
-        builder.setItems(minuteArray, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-                onSnoozeMinutesSet(which);
-                dialog.dismiss();
-            }
-        });
-
-        //Show Builder
-        builder.show();
-    }
-
-    public void onTimeSet(TimePicker view, int hourOfDay, int minute){
-        //Do Something with the Time
-
-        //save times
-        actualHour = hourOfDay;
-        actualMin  = minute;
-
-        //Set Button Text
-        Button bTime = (Button) findViewById(actualButtonID);
-        String timeText = String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute);
-        bTime.setText(timeText);
-
-        //save Settings
-        String settingsName = WAKEUP_TIMER + actualAlarm;
-        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
-        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
-
-        prepareLisData();
-    }
-
-    private void onSnoozeMinutesSet(int _minutes){
-        //Do Something with the Minutes
-
-        //Save Snooze Minutes
-        actualSnooze = _minutes + 1;  //we Start with 1 minute
-
-        //Set Button Text
-        Button bSnooze = (Button) findViewById(actualButtonID);
-        String timeText = "Snooze " + actualSnooze + " Minutes";
-        bSnooze.setText(timeText);
-
-        //save Settings
-        String settingsName = WAKEUP_TIMER + actualAlarm;
-        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
-        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
-
-        prepareLisData();
-    }
-
+    /***********************************************************************************************
+     * DAY SETTING DIALOG
+     **********************************************************************************************/
     public void onDaysSet(View v){
 
         //save Button Id
@@ -673,6 +602,100 @@ public class MainActivity extends AppCompatActivity
         prepareLisData();
     }
 
+    /***********************************************************************************************
+     * TIME SETTING DIALOG
+     **********************************************************************************************/
+    public void showTimeSettingsDialog(View v){
+
+        //save Button ID
+        actualButtonID = v.getId();
+
+        //Open TimePicker Dialog
+        DialogFragment newFragment = new SettingTimeFragment();
+        newFragment.show(getFragmentManager(), "timePicker");
+    }
+
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute){
+        //Do Something with the Time
+
+        //save times
+        actualHour = hourOfDay;
+        actualMin  = minute;
+
+        //Set Button Text
+        Button bTime = (Button) findViewById(actualButtonID);
+        String timeText = String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute);
+        bTime.setText(timeText);
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
+    }
+
+    /***********************************************************************************************
+     * MINUTE SETTING DIALOG
+     **********************************************************************************************/
+    public void showMinuteSettingDialog(View v) {
+
+        //save Button Id
+        actualButtonID = v.getId();
+
+        //Create new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Set Minutes");
+
+
+        //Fill Values for the Minute Choosing Dialog
+        ArrayList<String> Minutes = new ArrayList<>();
+        int MaxMinutes = 100; int currentMinute = 1;
+        while(currentMinute <= MaxMinutes){
+
+            Minutes.add(Integer.toString(currentMinute));
+            ++currentMinute;
+        }
+
+        //Cast to Array
+        String[] minuteArray = new String[Minutes.size()];
+        minuteArray = Minutes.toArray(minuteArray);
+
+        //Set Builder Settings and Onclikclistener
+        builder.setItems(minuteArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                onSnoozeMinutesSet(which);
+                dialog.dismiss();
+            }
+        });
+
+        //Show Builder
+        builder.show();
+    }
+
+    private void onSnoozeMinutesSet(int _minutes){
+        //Do Something with the Minutes
+
+        //Save Snooze Minutes
+        actualSnooze = _minutes + 1;  //we Start with 1 minute
+
+        //Set Button Text
+        Button bSnooze = (Button) findViewById(actualButtonID);
+        String timeText = "Snooze " + actualSnooze + " Minutes";
+        bSnooze.setText(timeText);
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
+    }
+    /***********************************************************************************************
+     * MUSIC SET DIALOG
+     **********************************************************************************************/
     public void showMusicSettingDialog(View v){
 
         //Create new Builder
@@ -823,7 +846,7 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
 
-    public void playMusic(Uri _SongUri) throws IOException{
+    private void playMusic(Uri _SongUri) throws IOException{
 
         MediaPlayer mediaPlayer = new MediaPlayer();
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
@@ -831,6 +854,10 @@ public class MainActivity extends AppCompatActivity
         mediaPlayer.prepare();
         mediaPlayer.start();
     }
+
+    /***********************************************************************************************
+     * MUSIC VOLUME DIALOG
+     **********************************************************************************************/
 
     public void showMusicVolumeSettingDialog(View v){
 
@@ -919,6 +946,10 @@ public class MainActivity extends AppCompatActivity
 
         prepareLisData();
     }
+
+    /***********************************************************************************************
+     * MUSIC VIBRATION DIALOG
+     **********************************************************************************************/
     public void showVibrationSettingDialog(View v){
 
         //GEt ToggleButton
@@ -1035,6 +1066,9 @@ public class MainActivity extends AppCompatActivity
         prepareLisData();
     }
 
+    /***********************************************************************************************
+     * OPTIONSMENU
+     **********************************************************************************************/
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
