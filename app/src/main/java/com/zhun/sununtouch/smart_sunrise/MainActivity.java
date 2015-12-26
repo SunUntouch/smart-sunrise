@@ -8,6 +8,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -76,12 +79,14 @@ public class MainActivity extends AppCompatActivity
     public final static String ALARM_MUSIC_VIBRATION_VALUE= "Alarm_Vibration_Value";
 
     //Alarm Light
-    public final static String ALARM_LIGHT_SCREEN         = "Alarm_Screen";
-    public final static String ALARM_LIGHT_COLOR1         = "Alarm_ScreenColor1";
-    public final static String ALARM_LIGHT_COLOR2         = "Alarm_ScreenColor2";
-    public final static String ALARM_LIGHT_FADECOLOR      = "Alarm_FadeColor";
-    public final static String ALARM_LIGHT_FADECOLORTIME  = "Alarm_FadeColorTime";
-    public final static String ALARM_LIGHT_USELED         = "Alarm_UseLED";
+    public final static String ALARM_LIGHT_SCREEN            = "Alarm_Screen";
+    public final static String ALARM_LIGHT_SCREEN_BRIGTHNESS = "Alarm_ScreenBrigthness";
+    public final static String ALARM_LIGHT_SCREEN_START_TIME = "Alarm_ScreenStartTime";
+    public final static String ALARM_LIGHT_COLOR1            = "Alarm_ScreenColor1";
+    public final static String ALARM_LIGHT_COLOR2            = "Alarm_ScreenColor2";
+    public final static String ALARM_LIGHT_FADECOLOR         = "Alarm_FadeColor";
+    public final static String ALARM_LIGHT_USELED            = "Alarm_UseLED";
+    public final static String ALARM_LIGHT_LED_START_TIME    = "Alarm_LEDStartTime";
 
     //ChildItems
     public final static String WAKEUP_DAYS    = "Days";
@@ -130,12 +135,14 @@ public class MainActivity extends AppCompatActivity
     private int actualVibraStr   =10;
 
     //Light
-    private int actualScreen        = 0;
-    private int actualLightColor1   = 0;
-    private int actualLightColor2   = 0;
-    private int actualLightFadeCol  = 0;
-    private int actualLightFadeTime = 0;
-    private int actualLightLED      = 0;
+    private int actualScreen           = 0;
+    private int actualScreenBrightness =99;
+    private int actualScreenStartTime  =30;
+    private int actualLightColor1      = 0;
+    private int actualLightColor2      = 0;
+    private int actualLightFade        = 0;
+    private int actualLightLED         = 0;
+    private int actualLightLEDStartTime= 0;
 
     //Last Clicked Button
     private int actualButtonID    = 0;
@@ -153,13 +160,13 @@ public class MainActivity extends AppCompatActivity
 
         expListDataHeader.add(_alarmName);
         //Adding Child Data
-        LinkedHashMap<String, LinkedHashMap<String, Integer>> newAlarm = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
-        LinkedHashMap<String, Integer> alarmvalueTime = new LinkedHashMap<String, Integer>();
-        LinkedHashMap<String, Integer> alarmvalueDay = new LinkedHashMap<String, Integer>();
-        LinkedHashMap<String, Integer> alarmvalueMusic = new LinkedHashMap<String, Integer>();
-        LinkedHashMap<String, Integer> alarmvalueLight = new LinkedHashMap<String, Integer>();
-
-        LinkedHashMap<String, Integer> alarmvalueDelete = new LinkedHashMap<String, Integer>();
+        LinkedHashMap<String,
+                LinkedHashMap<String, Integer>> newAlarm = new LinkedHashMap<String, LinkedHashMap<String, Integer>>();
+        LinkedHashMap<String, Integer> alarmvalueTime    = new LinkedHashMap<String, Integer>();
+        LinkedHashMap<String, Integer> alarmvalueDay     = new LinkedHashMap<String, Integer>();
+        LinkedHashMap<String, Integer> alarmvalueMusic   = new LinkedHashMap<String, Integer>();
+        LinkedHashMap<String, Integer> alarmvalueLight   = new LinkedHashMap<String, Integer>();
+        LinkedHashMap<String, Integer> alarmvalueDelete  = new LinkedHashMap<String, Integer>();
 
         //Putting Value for each child
         //Time
@@ -195,16 +202,18 @@ public class MainActivity extends AppCompatActivity
 
         //Light
         alarmvalueLight.clear();
-        alarmvalueLight.put("UseScreen"   , _light[0]);
-        alarmvalueLight.put("ScreenColor1", _light[1]);
-        alarmvalueLight.put("ScreenColor2", _light[2]);
-        alarmvalueLight.put("FadeColor"   , _light[3]);
-        alarmvalueLight.put("FadeTime"    , _light[4]);
-        alarmvalueLight.put("UseLED"      , _light[5]);
+        alarmvalueLight.put("UseScreen"        , _light[0]);
+        alarmvalueLight.put("ScreenBrightness" , _light[1]);
+        alarmvalueLight.put("ScreenStartTime"  , _light[2]);
+        alarmvalueLight.put("ScreenColor1"     , _light[3]);
+        alarmvalueLight.put("ScreenColor2"     , _light[4]);
+        alarmvalueLight.put("FadeColor"        , _light[5]);
+        alarmvalueLight.put("UseLED"           , _light[6]);
+        alarmvalueLight.put("LEDStartTime"     , _light[7]);
 
-        newAlarm.put(WAKEUP_LIGHT, alarmvalueTime);
+        newAlarm.put(WAKEUP_LIGHT, alarmvalueLight);
 
-        //Light
+        //Delete
         alarmvalueDelete.clear();
         newAlarm.put(WAKEUP_DELETE, alarmvalueDelete);
 
@@ -228,7 +237,7 @@ public class MainActivity extends AppCompatActivity
             int[] time  = {00, 00, 00};         // hour, minute
             int[] days  = {0,0,0,0,0,0,0};  // Monday - Sunday
             int[] music = {0,0,0,0,0,0,0};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration, Vibration Strength
-            int[] light = {0,0,0,0,0,0};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+            int[] light = {0,0,0,0,0,0,0,0};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
             prepareListDataValues("No Alarm Set",0, time, days, music, light);
         }
@@ -268,12 +277,14 @@ public class MainActivity extends AppCompatActivity
                         settings.getInt(ALARM_MUSIC_VIBRATION_VALUE, 0)};      // Song, StartTime, Volume, FadIn, FadeInTime
 
                 int[] light = {
-                        settings.getInt(ALARM_LIGHT_SCREEN       , 0),
-                        settings.getInt(ALARM_LIGHT_COLOR1       , 0),
-                        settings.getInt(ALARM_LIGHT_COLOR2       , 0),
-                        settings.getInt(ALARM_LIGHT_FADECOLOR    , 0),
-                        settings.getInt(ALARM_LIGHT_FADECOLORTIME, 0),
-                        settings.getInt(ALARM_LIGHT_USELED       , 0)};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+                        settings.getInt(ALARM_LIGHT_SCREEN           , 0),
+                        settings.getInt(ALARM_LIGHT_SCREEN_BRIGTHNESS, 0),
+                        settings.getInt(ALARM_LIGHT_SCREEN_START_TIME, 0),
+                        settings.getInt(ALARM_LIGHT_COLOR1           , 0),
+                        settings.getInt(ALARM_LIGHT_COLOR2           , 0),
+                        settings.getInt(ALARM_LIGHT_FADECOLOR        , 0),
+                        settings.getInt(ALARM_LIGHT_USELED           , 0),
+                        settings.getInt(ALARM_LIGHT_LED_START_TIME   , 0)};// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
                 prepareListDataValues(name, _amount, time, days, music, light);
             }
@@ -319,12 +330,14 @@ public class MainActivity extends AppCompatActivity
         editor.putInt(ALARM_MUSIC_VIBRATION_VALUE, actualVibraStr);
 
         //Light
-        editor.putInt(ALARM_LIGHT_SCREEN       , actualScreen);
-        editor.putInt(ALARM_LIGHT_COLOR1       , actualLightColor1);
-        editor.putInt(ALARM_LIGHT_COLOR2       , actualLightColor2);
-        editor.putInt(ALARM_LIGHT_FADECOLOR    , actualFadeIn);
-        editor.putInt(ALARM_LIGHT_FADECOLORTIME, actualFadeInTime);
-        editor.putInt(ALARM_LIGHT_USELED       , actualLightLED);
+        editor.putInt(ALARM_LIGHT_SCREEN            , actualScreen);
+        editor.putInt(ALARM_LIGHT_SCREEN_BRIGTHNESS , actualScreenBrightness);
+        editor.putInt(ALARM_LIGHT_SCREEN_START_TIME , actualScreenStartTime);
+        editor.putInt(ALARM_LIGHT_COLOR1            , actualLightColor1);
+        editor.putInt(ALARM_LIGHT_COLOR2            , actualLightColor2);
+        editor.putInt(ALARM_LIGHT_FADECOLOR         , actualLightFade);
+        editor.putInt(ALARM_LIGHT_USELED            , actualLightLED);
+        editor.putInt(ALARM_LIGHT_LED_START_TIME    , actualLightLEDStartTime);
 
         //apply Values to settings
         editor.apply();
@@ -362,7 +375,19 @@ public class MainActivity extends AppCompatActivity
         prepareLisData();
     }
 
-    public void deleteListDataChild(View v){
+    public void deleteChild(View v){
+
+        Button deleteButton = (Button) v;
+
+        deleteButton.setOnLongClickListener(new View.OnLongClickListener() {
+
+            public boolean onLongClick(View v) {
+                deleteListDataChild(v);
+                return false;
+            }
+        });
+    }
+    private void deleteListDataChild(View v){
 
         int _id = actualAlarm;
 
@@ -444,12 +469,14 @@ public class MainActivity extends AppCompatActivity
         actualVibraStr  = settings.getInt(ALARM_MUSIC_VIBRATION_VALUE, 0);// Song, StartTime, Volume, FadIn, FadeInTime
 
         //Load Light
-        actualScreen        = settings.getInt(ALARM_LIGHT_SCREEN       , 0);
-        actualLightColor1   = settings.getInt(ALARM_LIGHT_COLOR1       , 0);
-        actualLightColor2   = settings.getInt(ALARM_LIGHT_COLOR2       , 0);
-        actualLightFadeCol  = settings.getInt(ALARM_LIGHT_FADECOLOR    , 0);
-        actualLightFadeTime = settings.getInt(ALARM_LIGHT_FADECOLORTIME, 0);
-        actualLightLED      = settings.getInt(ALARM_LIGHT_USELED       , 0);    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+        actualScreen           = settings.getInt(ALARM_LIGHT_SCREEN            , 0);
+        actualScreenBrightness = settings.getInt(ALARM_LIGHT_SCREEN_BRIGTHNESS , 0);
+        actualScreenStartTime  = settings.getInt(ALARM_LIGHT_SCREEN_START_TIME , 0);
+        actualLightColor1      = settings.getInt(ALARM_LIGHT_COLOR1            , 0);
+        actualLightColor2      = settings.getInt(ALARM_LIGHT_COLOR2            , 0);
+        actualLightFade        = settings.getInt(ALARM_LIGHT_FADECOLOR         , 0);
+        actualLightLED         = settings.getInt(ALARM_LIGHT_USELED            , 0);
+        actualLightLEDStartTime= settings.getInt(ALARM_LIGHT_LED_START_TIME    , 0);// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1283,7 +1310,6 @@ public class MainActivity extends AppCompatActivity
         else
             bVibraStrength.setText(vibraOff);
 
-
         bVibraStrength.setTextOn(vibraOn);
         bVibraStrength.setTextOff(vibraOff);
 
@@ -1298,21 +1324,313 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * SCEEN LIGHT SETTING DIALOG
      **********************************************************************************************/
-    public void showScreenLightSettingDialog(){
+    public void showScreenLightSettingDialog(View v){
 
+        //GEt ToggleButton
+        final ToggleButton screenToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_light_buttonLight);
+
+        //Set Screen Checked
+        actualScreen = (screenToggle.isChecked())? 1 : 0;
+
+        //Save ID From Button
+        actualButtonID = v.getId();
+
+        //Set On LongClickListener
+        screenToggle.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                //Create new Builder
+                final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setTitle("Set Screen Brightness");
+
+                //TextView to show Value of SeekBar
+                final TextView textView = new TextView(v.getContext());
+                //textView.setVisibility(View.INVISIBLE);
+
+                //Seekbar
+                final SeekBar seekBar = new SeekBar(v.getContext());
+                seekBar.setMax(99);
+                seekBar.setKeyProgressIncrement(1);
+                seekBar.setProgress(--actualScreenBrightness); //We must -1 because we dont want to have zero brightness
+
+                //LinearLayout
+                LinearLayout linearLayout = new LinearLayout(v.getContext());
+                linearLayout.setOrientation(LinearLayout.VERTICAL);
+                linearLayout.addView(textView);
+                linearLayout.addView(seekBar);
+
+                //Set Alertdialog View
+                builder.setView(linearLayout);
+
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                        //Set Position of Text
+                        int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
+                        textView.setText(++progress + "%");
+                        textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        //textView.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        //textView.setVisibility(View.GONE);
+                    }
+                });
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Set and Save Vibration Strength
+                        int realprogess = seekBar.getProgress() + 1; //+1 because we don't want to have zero brightness set
+                        onScreenBrigthnessSet(realprogess);
+                        screenToggle.setChecked(true);
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                //Show Builder
+                builder.show();
+                return false;
+            }
+        });
+    }
+
+    private void onScreenBrigthnessSet(int _brigthness){
+
+        actualScreenBrightness = _brigthness;
+        actualScreen           = 1; //true
+
+        //Set Button Text
+        ToggleButton bScreenBrightness = (ToggleButton) findViewById(actualButtonID);
+
+        String screenOn =  "SCREEN BRIGTHNESS " + actualScreenBrightness + "%";
+        String screenOff = "SCREEN ILLUMINATION OFF";
+
+        if(bScreenBrightness.isChecked())
+            bScreenBrightness.setText(screenOn);
+        else
+            bScreenBrightness.setText(screenOff);
+
+        bScreenBrightness.setTextOn(screenOn);
+        bScreenBrightness.setTextOff(screenOff);
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
+    }
+
+    public void showScreenLightStartSettingDialog(View v){
+
+        //save Button Id
+        actualButtonID = v.getId();
+
+        //Create new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Set Minutes");
+
+
+        //Fill Values for the Minute Choosing Dialog
+        ArrayList<String> Minutes = new ArrayList<>();
+        int MaxMinutes = 100; int currentMinute = 1;
+        while(currentMinute <= MaxMinutes){
+
+            Minutes.add(Integer.toString(currentMinute));
+            ++currentMinute;
+        }
+
+        //Cast to Array
+        String[] minuteArray = new String[Minutes.size()];
+        minuteArray = Minutes.toArray(minuteArray);
+
+        //Set Builder Settings and Onclikclistener
+        builder.setItems(minuteArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                onScreenStartTimeSet(which);
+                dialog.dismiss();
+            }
+        });
+
+        //Show Builder
+        builder.show();
+    }
+
+    private void onScreenStartTimeSet(int _minutes){
+        //Do Something with the Minutes
+
+        //Save Snooze Minutes
+        actualScreenStartTime = _minutes + 1;  //we Start with 1 minute
+
+        //Set Button Text
+        Button bStartTime = (Button) findViewById(actualButtonID);
+        String timeText = actualScreenStartTime + " Minutes";
+        bStartTime.setText(timeText);
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
     }
 
     /***********************************************************************************************
      * SCREEN COLOR SETTING DIALOG
      **********************************************************************************************/
-    public void showScreenColorSettingDialog(){
+    public void showScreenColor1SettingDialog(View v){
 
+        final Button bColor = (Button) v;
+
+        //TODO Need a better ColorPicker without 0xfffff bug
+        ColorPickingDialog colorPicker = new ColorPickingDialog(v.getContext(), 0xffffff, new ColorPickingDialog.OnColorSelectedListener() {
+            @Override
+            public void colorSelected(Integer color) {
+                bColor.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+                onColorSet(bColor, color);
+            }
+        });
+        colorPicker.setTitle("Choose Color1");
+        colorPicker.show();
+    }
+
+    private void onColorSet(Button _buttonView, int _color){
+
+        switch(_buttonView.getText().toString()){
+
+            case "Color1":
+                actualLightColor1 = _color;
+                break;
+            case "Color2":
+                actualLightColor2 = _color;
+                break;
+            default:
+                //TODO Logging
+                break;
+        }
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
+    }
+
+    /***********************************************************************************************
+     * SCREEN COLOR FADE SETTING DIALOG
+     **********************************************************************************************/
+    public void showScreenColorFadeSettingDialog(View v){
+
+        //GEt ToggleButton
+        final ToggleButton screenFadeToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_light_buttonScreenFade);
+
+        //Set Vibration Checked
+        actualLightFade = (screenFadeToggle.isChecked())? 1 : 0;
+
+        //Save ID From Button
+        actualButtonID = v.getId();
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
     }
     /***********************************************************************************************
      * LED LIGHT SETTING DIALOG
      **********************************************************************************************/
-    public void showLEDLightSettingDialog(){
+    public void showLEDLightSettingDialog(View v){
+        //GEt ToggleButton
+        final ToggleButton LEDToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_light_buttonLED);
 
+        //Set LED Checked
+        actualLightLED = (LEDToggle.isChecked())? 1 : 0;
+
+        //Save ID From Button
+        actualButtonID = v.getId();
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
+    }
+
+    public void showLEDLightStartSettingDialog(View v){
+
+        //save Button Id
+        actualButtonID = v.getId();
+
+        //Create new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Set Minutes");
+
+
+        //Fill Values for the Minute Choosing Dialog
+        ArrayList<String> Minutes = new ArrayList<>();
+        int MaxMinutes = 100; int currentMinute = 1;
+        while(currentMinute <= MaxMinutes){
+
+            Minutes.add(Integer.toString(currentMinute));
+            ++currentMinute;
+        }
+
+        //Cast to Array
+        String[] minuteArray = new String[Minutes.size()];
+        minuteArray = Minutes.toArray(minuteArray);
+
+        //Set Builder Settings and Onclikclistener
+        builder.setItems(minuteArray, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                onLEDStartTimeSet(which);
+                dialog.dismiss();
+            }
+        });
+
+        //Show Builder
+        builder.show();
+    }
+
+    private void onLEDStartTimeSet(int _minutes){
+        //Do Something with the Minutes
+
+        //Save Snooze Minutes
+        actualLightLEDStartTime = _minutes + 1;  //we Start with 1 minute
+
+        //Set Button Text
+        Button bStartTime = (Button) findViewById(actualButtonID);
+        String timeText = actualLightLEDStartTime + " Minutes";
+        bStartTime.setText(timeText);
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
     }
     /***********************************************************************************************
      * OPTIONSMENU

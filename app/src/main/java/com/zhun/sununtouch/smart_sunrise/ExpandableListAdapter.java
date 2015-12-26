@@ -2,6 +2,7 @@ package com.zhun.sununtouch.smart_sunrise;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -140,34 +141,56 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             case WAKEUP_LIGHT:{
                 //Toggle Screen light
                 ToggleButton setLightButton = (ToggleButton) _convertView.findViewById(_viewID[1]);
-                String lightTextOn = "ON"; //TODO set light Text
-                String lightTextOff = "OFF";
-                setLightButton.setTextOn(lightTextOn);
-                setLightButton.setTextOff(lightTextOff);
+                String screenOn =  "SCREEN BRIGTHNESS " + _childValues.get("ScreenBrightness") + "%";
+                String screenOff = "SCREEN ILLUMINATION OFF";
+
+                setLightButton.setTextOn(screenOn);
+                setLightButton.setTextOff(screenOff);
+
+                boolean screenChecked = (_childValues.get("UseScreen") == 1)? true : false;
+                setLightButton.setChecked(screenChecked);
+
+                //Set Start Time Button
+                Button setStartTime = (Button) _convertView.findViewById(_viewID[2]);
+                String startTimeText= _childValues.get("ScreenStartTime") + " Minutes";
+                setStartTime.setText(startTimeText);
 
                 //First Color
-                Button setColorButton1 = (Button) _convertView.findViewById(_viewID[2]);
+                Button setColorButton1 = (Button) _convertView.findViewById(_viewID[3]);
                 String colorText      = "Color1"; //TODO set Light Color Text
                 setColorButton1.setText(colorText);
+                setColorButton1.getBackground().setColorFilter(_childValues.get("ScreenColor1"), PorterDuff.Mode.MULTIPLY);
 
                 //Second Color
-                Button setColorButton2 = (Button) _convertView.findViewById(_viewID[3]);
+                Button setColorButton2 = (Button) _convertView.findViewById(_viewID[4]);
                 String colorText2      = "Color2"; //TODO set Light Color Text
                 setColorButton2.setText(colorText2);
+                setColorButton2.getBackground().setColorFilter(_childValues.get("ScreenColor2"), PorterDuff.Mode.MULTIPLY);
 
                 //Toggle Fading
-                ToggleButton setFadeColor = (ToggleButton) _convertView.findViewById(_viewID[4]);
-                String colorFadeTextOn = "ON"; //TODO set light Text
-                String colorFadeTextOff = "OFF";
-                setFadeColor.setTextOn(colorFadeTextOn);
-                setFadeColor.setTextOff(colorFadeTextOff);
+                ToggleButton setFade = (ToggleButton) _convertView.findViewById(_viewID[5]);
+                String colorFadeTextOn = "Fading"; //TODO set light Text
+                String colorFadeTextOff = "No Fading";
+                setFade.setTextOn(colorFadeTextOn);
+                setFade.setTextOff(colorFadeTextOff);
+
+                boolean FadeChecked = (_childValues.get("FadeColor") == 1)? true : false;
+                setFade.setChecked(FadeChecked);
 
                 //Toggle LED
-                ToggleButton setLEDButton = (ToggleButton) _convertView.findViewById(_viewID[5]);
+                ToggleButton setLEDButton = (ToggleButton) _convertView.findViewById(_viewID[6]);
                 String timeTextOn = "LED ON"; //Todo set LED TExt maybe switch to toggle with time slider
                 String timeTextOff = "LED OFF";
                 setLEDButton.setTextOn(timeTextOn);
                 setLEDButton.setTextOff(timeTextOff);
+
+                boolean LEDChecked = (_childValues.get("UseLED") == 1)? true : false;
+                setLEDButton.setChecked(LEDChecked);
+
+                //Set LED Start Time
+                Button setLEDStartTime = (Button) _convertView.findViewById(_viewID[7]);
+                String startTimeLEDText= _childValues.get("LEDStartTime") + " Minutes";
+                setLEDStartTime.setText(startTimeLEDText);
             }
             break;
             case WAKEUP_DELETE:{
@@ -239,10 +262,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         int[] wakeup_Light_ID = {
                                 R.id.wakeup_timer_light_textview,
                                 R.id.wakeup_timer_light_buttonLight,
+                                R.id.wakeup_timer_light_buttonStart,
                                 R.id.wakeup_timer_light_buttonColor1,
                                 R.id.wakeup_timer_light_buttonColor2,
                                 R.id.wakeup_timer_light_buttonScreenFade,
-                                R.id.wakeup_timer_light_buttonLED };
+                                R.id.wakeup_timer_light_buttonLED,
+                                R.id.wakeup_timer_light_buttonLEDStart};
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_light, choosenChild, childValues, wakeup_Light_ID);
                     }
                     break;
