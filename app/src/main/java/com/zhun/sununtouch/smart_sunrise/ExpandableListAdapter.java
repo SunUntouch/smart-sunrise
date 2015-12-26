@@ -13,6 +13,7 @@ import android.widget.ToggleButton;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public final static String WAKEUP_DAYS  = "Days";
@@ -93,37 +94,80 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             }
             break;
             case WAKEUP_MUSIC:{
+                //Choosing Music Button
                 Button setMusicButton = (Button) _convertView.findViewById(_viewID[1]);
                 String musicText = "Choose Music"; //TODO set Music text Button Name
                 setMusicButton.setText(musicText);
 
+                //Set Volume Button
                 Button setMusicVolumeButton = (Button) _convertView.findViewById(_viewID[2]);
                 String musicVolumeText = _childValues.get("Volume") + "%";
                 setMusicVolumeButton.setText(musicVolumeText);
 
-                ToggleButton setVibrationButton = (ToggleButton) _convertView.findViewById(_viewID[3]);
-                String vibrationTextOn      = "Vibration is ON with " + _childValues.get("VibrationValue") + " %.";
-                String vibrationTextOff      = "Vibration is OFF";
+                //Set Start Time Button
+                Button setMusicStartTime = (Button) _convertView.findViewById(_viewID[3]);
+                int seconds = _childValues.get("StartTime");
+                String startTimeText = String.format(
+                        "%02d:%02d",
+                        TimeUnit.SECONDS.toMinutes(seconds),
+                        seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds)));
+                setMusicStartTime.setText(startTimeText);
+
+                //Set FadeIn ToggleButton
+                ToggleButton setFadeIn = (ToggleButton) _convertView.findViewById(_viewID[4]);
+                int fadeSeconds  = _childValues.get("FadeInTime");
+                String FadeInOn  =  String.format("%02ds", fadeSeconds);
+                String FadeInOff = "OFF";
+
+                setFadeIn.setTextOn(FadeInOn);
+                setFadeIn.setTextOff(FadeInOff);
+
+                boolean fadeChecked = (_childValues.get("FadeIn") == 1)? true : false;
+                setFadeIn.setChecked(fadeChecked);
+
+                //Set Vibration ToggleButton
+                ToggleButton setVibrationButton = (ToggleButton) _convertView.findViewById(_viewID[5]);
+                String vibrationTextOn      = _childValues.get("VibrationValue") + "%";
+                String vibrationTextOff      = "OFF";
 
                 setVibrationButton.setTextOn(vibrationTextOn);
                 setVibrationButton.setTextOff(vibrationTextOff);
 
-                boolean checked = (_childValues.get("Vibration") == 1)? true : false;
-                setVibrationButton.setChecked(checked);
+                boolean vibraChecked = (_childValues.get("Vibration") == 1)? true : false;
+                setVibrationButton.setChecked(vibraChecked);
             }
             break;
             case WAKEUP_LIGHT:{
-                Button setLightButton = (Button) _convertView.findViewById(_viewID[1]);
-                String lightText = "Set Light"; //TODO set light Text
-                setLightButton.setText(lightText);
+                //Toggle Screen light
+                ToggleButton setLightButton = (ToggleButton) _convertView.findViewById(_viewID[1]);
+                String lightTextOn = "ON"; //TODO set light Text
+                String lightTextOff = "OFF";
+                setLightButton.setTextOn(lightTextOn);
+                setLightButton.setTextOff(lightTextOff);
 
-                Button setColorButton = (Button) _convertView.findViewById(_viewID[2]);
-                String colorText      = "Choose Color"; //TODO set Light Color Text
-                setColorButton.setText(colorText);
+                //First Color
+                Button setColorButton1 = (Button) _convertView.findViewById(_viewID[2]);
+                String colorText      = "Color1"; //TODO set Light Color Text
+                setColorButton1.setText(colorText);
 
-                Button setLEDButton = (Button) _convertView.findViewById(_viewID[3]);
-                String timeText = "Set LED"; //Todo set LED TExt maybe switch to toggle with time slider
-                setLEDButton.setText(timeText);
+                //Second Color
+                Button setColorButton2 = (Button) _convertView.findViewById(_viewID[3]);
+                String colorText2      = "Color2"; //TODO set Light Color Text
+                setColorButton2.setText(colorText2);
+
+                //Toggle Fading
+                ToggleButton setFadeColor = (ToggleButton) _convertView.findViewById(_viewID[4]);
+                String colorFadeTextOn = "ON"; //TODO set light Text
+                String colorFadeTextOff = "OFF";
+                setFadeColor.setTextOn(colorFadeTextOn);
+                setFadeColor.setTextOff(colorFadeTextOff);
+
+                //Toggle LED
+                ToggleButton setLEDButton = (ToggleButton) _convertView.findViewById(_viewID[5]);
+                String timeTextOn = "LED ON"; //Todo set LED TExt maybe switch to toggle with time slider
+                String timeTextOff = "LED OFF";
+                setLEDButton.setTextOn(timeTextOn);
+                setLEDButton.setTextOff(timeTextOff);
             }
             break;
             case WAKEUP_DELETE:{
@@ -185,6 +229,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 R.id.wakeup_timer_music_textview,
                                 R.id.wakeup_timer_music_buttonMusic,
                                 R.id.wakeup_timer_music_buttonMusicVolume,
+                                R.id.wakeup_timer_music_SongStart,
+                                R.id.wakeup_timer_music_toggleFadeIn,
                                 R.id.wakeup_timer_music_toggleVibration };
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_music, choosenChild, childValues, wakeup_Music_ID);
                     }
@@ -193,7 +239,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         int[] wakeup_Light_ID = {
                                 R.id.wakeup_timer_light_textview,
                                 R.id.wakeup_timer_light_buttonLight,
-                                R.id.wakeup_timer_light_buttonColor,
+                                R.id.wakeup_timer_light_buttonColor1,
+                                R.id.wakeup_timer_light_buttonColor2,
+                                R.id.wakeup_timer_light_buttonScreenFade,
                                 R.id.wakeup_timer_light_buttonLED };
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_light, choosenChild, childValues, wakeup_Light_ID);
                     }

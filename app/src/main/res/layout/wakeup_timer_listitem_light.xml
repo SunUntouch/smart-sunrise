@@ -13,23 +13,61 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>
-
-    <Button
-        android:id="@+id/wakeup_timer_light_buttonLight"
-        android:text="Set light"
+    
+    <GridLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/wakeup_timer_light_buttonColor"
-        android:text="Choose Color"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <ToggleButton
+            android:id="@+id/wakeup_timer_light_buttonLight"
+            android:textOff="Screen Light Off"
+            android:layout_column="0"
+            android:layout_columnSpan="3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill"
+            android:onClick="showScreenLightSettingDialog" />
 
-    <Button
-        android:id="@+id/wakeup_timer_light_buttonLED"
-        android:text="Set LED"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/wakeup_timer_light_buttonColor1"
+            android:text="Choose Color"
+            android:layout_column="0"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            android:onClick="showScreenColorSettingDialog" />
 
+        <Button
+            android:id="@+id/wakeup_timer_light_buttonColor2"
+            android:text="Choose Color"
+            android:layout_column="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            android:onClick="showScreenColorSettingDialog" />
+
+        <ToggleButton
+            android:id="@+id/wakeup_timer_light_buttonScreenFade"
+            android:textOff="Off"
+            android:layout_column="2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_columnWeight="1"
+            android:layout_gravity="fill"
+            android:onClick="showScreenColorSettingDialog" />
+
+        <ToggleButton
+            android:id="@+id/wakeup_timer_light_buttonLED"
+            android:textOff="LED Light Off"
+            android:layout_column="0"
+            android:layout_columnSpan="3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill"
+            android:onClick="showLEDLightSettingDialog" />
+    </GridLayout>
 </LinearLayout>

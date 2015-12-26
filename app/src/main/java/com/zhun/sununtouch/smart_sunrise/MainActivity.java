@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity
                     implements TimePickerDialog.OnTimeSetListener{
@@ -50,10 +51,12 @@ public class MainActivity extends AppCompatActivity
     public final static String ALARM_NAME                 = "Alarm_Name";
     public final static String ALARM_VALUE                = "Alarm_Value";
 
+    //Alarm Time
     public final static String ALARM_TIME_MINUTES         = "Alarm_Minutes";
     public final static String ALARM_TIME_HOUR            = "Alarm_Hour";
     public final static String ALARM_TIME_SNOOZE          = "Alarm_Snooze";
 
+    //Alarm Days
     public final static String ALARM_DAY_MONDAY           = "Alarm_Monday";
     public final static String ALARM_DAY_TUESDAY          = "Alarm_Tuesday";
     public final static String ALARM_DAY_WEDNESDAY        = "Alarm_Wednesday";
@@ -62,6 +65,7 @@ public class MainActivity extends AppCompatActivity
     public final static String ALARM_DAY_SATURDAY         = "Alarm_Saturday";
     public final static String ALARM_DAY_SUNDAY           = "Alarm_Sunday";
 
+    //Alarm Music
     public final static String ALARM_MUSIC_SONGID         = "Alarm_SongID";
     public final static String ALARM_MUSIC_SONGSTART      = "Alarm_SongStart";
     public final static String ALARM_MUSIC_VOLUME         = "Alarm_Volume";
@@ -71,6 +75,7 @@ public class MainActivity extends AppCompatActivity
     public final static String ALARM_MUSIC_VIBRATION_ACTIV= "Alarm_Vibration_Activ";
     public final static String ALARM_MUSIC_VIBRATION_VALUE= "Alarm_Vibration_Value";
 
+    //Alarm Light
     public final static String ALARM_LIGHT_SCREEN         = "Alarm_Screen";
     public final static String ALARM_LIGHT_COLOR1         = "Alarm_ScreenColor1";
     public final static String ALARM_LIGHT_COLOR2         = "Alarm_ScreenColor2";
@@ -88,9 +93,13 @@ public class MainActivity extends AppCompatActivity
     //ExpendableList
     ExpandableListAdapter         expListAdapter;
     ExpandableListView            expListView;
+
     List<String>                  expListDataHeader;
     List<String>                  expListDataAlarm;
-    LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> expListDataChild;
+
+    LinkedHashMap<String,
+            LinkedHashMap<String,
+                    LinkedHashMap<String, Integer>>> expListDataChild;
 
     //Actual Alarm Values
     private int actualAlarm    = -1;
@@ -131,8 +140,6 @@ public class MainActivity extends AppCompatActivity
     //Last Clicked Button
     private int actualButtonID    = 0;
     private int actualAlarmNameID = 0;
-
-    public int actualAlarm2 = -1;
 
     /***********************************************************************************************
      * DATA VALUES
@@ -176,10 +183,10 @@ public class MainActivity extends AppCompatActivity
 
         //Music
         alarmvalueMusic.clear();
-        alarmvalueMusic.put("Song", _music[0]); //Maybe ID?
+        alarmvalueMusic.put("Song"          , _music[0]); //Maybe ID?
         alarmvalueMusic.put("StartTime"     , _music[1]);
         alarmvalueMusic.put("Volume"        , _music[2]);
-        alarmvalueMusic.put("FadIn"         , _music[3]);
+        alarmvalueMusic.put("FadeIn"        , _music[3]);
         alarmvalueMusic.put("FadeInTime"    , _music[4]);
         alarmvalueMusic.put("Vibration"     , _music[5]);
         alarmvalueMusic.put("VibrationValue", _music[6]);
@@ -188,7 +195,7 @@ public class MainActivity extends AppCompatActivity
 
         //Light
         alarmvalueLight.clear();
-        alarmvalueLight.put("UseScreen", _light[0]);
+        alarmvalueLight.put("UseScreen"   , _light[0]);
         alarmvalueLight.put("ScreenColor1", _light[1]);
         alarmvalueLight.put("ScreenColor2", _light[2]);
         alarmvalueLight.put("FadeColor"   , _light[3]);
@@ -258,15 +265,15 @@ public class MainActivity extends AppCompatActivity
                         settings.getInt(ALARM_MUSIC_FADEIN         , 0),
                         settings.getInt(ALARM_MUSIC_FADEINTIME     , 0),
                         settings.getInt(ALARM_MUSIC_VIBRATION_ACTIV, 0),
-                        settings.getInt(ALARM_MUSIC_VIBRATION_VALUE, 0),};      // Song, StartTime, Volume, FadIn, FadeInTime
+                        settings.getInt(ALARM_MUSIC_VIBRATION_VALUE, 0)};      // Song, StartTime, Volume, FadIn, FadeInTime
 
                 int[] light = {
-                        settings.getInt(ALARM_LIGHT_SCREEN, 0),
-                        settings.getInt(ALARM_LIGHT_COLOR1,0),
-                        settings.getInt(ALARM_LIGHT_COLOR2,0),
-                        settings.getInt(ALARM_LIGHT_FADECOLOR,0),
-                        settings.getInt(ALARM_LIGHT_FADECOLORTIME,0),
-                        settings.getInt(ALARM_LIGHT_USELED, 0)};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+                        settings.getInt(ALARM_LIGHT_SCREEN       , 0),
+                        settings.getInt(ALARM_LIGHT_COLOR1       , 0),
+                        settings.getInt(ALARM_LIGHT_COLOR2       , 0),
+                        settings.getInt(ALARM_LIGHT_FADECOLOR    , 0),
+                        settings.getInt(ALARM_LIGHT_FADECOLORTIME, 0),
+                        settings.getInt(ALARM_LIGHT_USELED       , 0)};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
                 prepareListDataValues(name, _amount, time, days, music, light);
             }
@@ -303,11 +310,21 @@ public class MainActivity extends AppCompatActivity
         editor.putInt(ALARM_DAY_SUNDAY    , isSunday);
 
         //Music
+        editor.putInt(ALARM_MUSIC_SONGID         , actualSongID);
         editor.putInt(ALARM_MUSIC_VOLUME         , actualVolume);
+        editor.putInt(ALARM_MUSIC_SONGSTART      , actualSongStart);
+        editor.putInt(ALARM_MUSIC_FADEIN         , actualFadeIn);
+        editor.putInt(ALARM_MUSIC_FADEINTIME     , actualFadeInTime);
         editor.putInt(ALARM_MUSIC_VIBRATION_ACTIV, actualVibra);
         editor.putInt(ALARM_MUSIC_VIBRATION_VALUE, actualVibraStr);
 
         //Light
+        editor.putInt(ALARM_LIGHT_SCREEN       , actualScreen);
+        editor.putInt(ALARM_LIGHT_COLOR1       , actualLightColor1);
+        editor.putInt(ALARM_LIGHT_COLOR2       , actualLightColor2);
+        editor.putInt(ALARM_LIGHT_FADECOLOR    , actualFadeIn);
+        editor.putInt(ALARM_LIGHT_FADECOLORTIME, actualFadeInTime);
+        editor.putInt(ALARM_LIGHT_USELED       , actualLightLED);
 
         //apply Values to settings
         editor.apply();
@@ -858,7 +875,6 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * MUSIC VOLUME DIALOG
      **********************************************************************************************/
-
     public void showMusicVolumeSettingDialog(View v){
 
         //Save ID From Button
@@ -948,6 +964,220 @@ public class MainActivity extends AppCompatActivity
     }
 
     /***********************************************************************************************
+     * MUSIC START TIME DIALOG
+     **********************************************************************************************/
+    public void showMusicStartSettingDialog(View v){
+
+
+        //Save ID From Button
+        actualButtonID = v.getId();
+
+        //Create new Builder
+        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+        builder.setTitle("Set Start Time");
+
+        //TextView to show Value of SeekBar
+        final TextView textView = new TextView(v.getContext());
+        //textView.setVisibility(View.INVISIBLE);
+
+        //Seekbar
+        final SeekBar seekBar = new SeekBar(v.getContext());
+        seekBar.setMax(100); //TODO get Seconds from choosen Song and Fill Into
+        seekBar.setKeyProgressIncrement(1);
+        seekBar.setProgress(actualSongStart);
+
+        //LinearLayout
+        LinearLayout linearLayout = new LinearLayout(v.getContext());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.addView(textView);
+        linearLayout.addView(seekBar);
+
+        //Set Alertdialog View
+        builder.setView(linearLayout);
+
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                //Set Position of Text
+                int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
+                textView.setText(progress + "s");
+                textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //textView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //textView.setVisibility(View.GONE);
+            }
+        });
+
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Set and Save Vibration Strength
+                onMusicStartSet(seekBar.getProgress());
+                dialog.dismiss();
+            }
+        });
+
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        //Show Builder
+        builder.show();
+
+    }
+
+    private void onMusicStartSet(int _seconds){
+
+        //Set ActualStart
+        actualSongStart = _seconds;
+
+        //Find Button and set Text
+        Button bStartTime = (Button) findViewById(actualButtonID);
+        String startTimeText = String.format(
+                "%02d:%02d",
+                TimeUnit.SECONDS.toMinutes(_seconds),
+                _seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(_seconds)));
+        bStartTime.setText(startTimeText);
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
+    }
+
+    /***********************************************************************************************
+     * MUSIC FADEIN TIME DIALOG
+     **********************************************************************************************/
+    public void showFadeInSettingsDialog(View v){
+
+        //GEt ToggleButton
+        final ToggleButton fadeInToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_music_toggleFadeIn);
+
+        //Set Vibration Checked
+        actualFadeIn = (fadeInToggle.isChecked())? 1 : 0;
+
+        //Save ID From Button
+        actualButtonID = v.getId();
+
+        //Set On LongClickListener
+        fadeInToggle.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+
+                //Create new Builder
+                final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                builder.setTitle("Set FadeIn Time");
+
+                //TextView to show Value of SeekBar
+                final TextView textView = new TextView(v.getContext());
+                //textView.setVisibility(View.INVISIBLE);
+
+                //Seekbar
+                final SeekBar seekBar = new SeekBar(v.getContext());
+                seekBar.setMax(100); //TODO Songlength - StartTime = max FadeIn
+                seekBar.setKeyProgressIncrement(1);
+                seekBar.setProgress(actualFadeInTime);
+
+                //LinearLayout
+                LinearLayout linearLayout = new LinearLayout(v.getContext());
+                linearLayout.setOrientation(LinearLayout.VERTICAL);
+                linearLayout.addView(textView);
+                linearLayout.addView(seekBar);
+
+                //Set Alertdialog View
+                builder.setView(linearLayout);
+
+                seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+                        //Set Position of Text
+                        int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
+                        textView.setText(progress + "s");
+                        textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
+                    }
+
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) {
+                        //textView.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) {
+                        //textView.setVisibility(View.GONE);
+                    }
+                });
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Set and Save Vibration Strength
+                        onFadeInTimeSet(seekBar.getProgress());
+                        fadeInToggle.setChecked(true);
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                //Show Builder
+                builder.show();
+                return false;
+            }
+        });
+    }
+
+    private void onFadeInTimeSet(int _seconds){
+        //Do Something with the Vibration Strength
+
+        //Save Snooze Minutes
+        actualFadeInTime = _seconds;
+        actualFadeIn     = 1; //true
+
+        //Set Button Text
+        ToggleButton bFadeIn = (ToggleButton) findViewById(actualButtonID);
+
+        String vibraOn =  String.format("%02ds", actualFadeInTime);
+        String vibraOff = "OFF";
+
+        if(bFadeIn.isChecked())
+            bFadeIn.setText(vibraOn);
+        else
+            bFadeIn.setText(vibraOff);
+
+
+        bFadeIn.setTextOn(vibraOn);
+        bFadeIn.setTextOff(vibraOff);
+
+        //save Settings
+        String settingsName = WAKEUP_TIMER + actualAlarm;
+        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+        saveListDataChild(settings.getString(ALARM_NAME, ALARM), actualAlarm);
+
+        prepareLisData();
+    }
+
+    /***********************************************************************************************
      * MUSIC VIBRATION DIALOG
      **********************************************************************************************/
     public void showVibrationSettingDialog(View v){
@@ -969,7 +1199,6 @@ public class MainActivity extends AppCompatActivity
                 //Create new Builder
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                 builder.setTitle("Set Vibration Strength");
-                builder.setMessage("Please Select Vibration Strength");
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
@@ -997,7 +1226,7 @@ public class MainActivity extends AppCompatActivity
 
                         //Set Position of Text
                         int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
-                        textView.setText("" + progress);
+                        textView.setText(progress + "%");
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                     }
 
@@ -1046,8 +1275,8 @@ public class MainActivity extends AppCompatActivity
         //Set Button Text
         ToggleButton bVibraStrength = (ToggleButton) findViewById(actualButtonID);
 
-        String vibraOn = "Vibration is ON with " + actualVibraStr + " %.";
-        String vibraOff = "Vibration is OFF";
+        String vibraOn =  actualVibraStr + "%";
+        String vibraOff = "OFF";
 
         if(bVibraStrength.isChecked())
             bVibraStrength.setText(vibraOn);
@@ -1066,6 +1295,25 @@ public class MainActivity extends AppCompatActivity
         prepareLisData();
     }
 
+    /***********************************************************************************************
+     * SCEEN LIGHT SETTING DIALOG
+     **********************************************************************************************/
+    public void showScreenLightSettingDialog(){
+
+    }
+
+    /***********************************************************************************************
+     * SCREEN COLOR SETTING DIALOG
+     **********************************************************************************************/
+    public void showScreenColorSettingDialog(){
+
+    }
+    /***********************************************************************************************
+     * LED LIGHT SETTING DIALOG
+     **********************************************************************************************/
+    public void showLEDLightSettingDialog(){
+
+    }
     /***********************************************************************************************
      * OPTIONSMENU
      **********************************************************************************************/
