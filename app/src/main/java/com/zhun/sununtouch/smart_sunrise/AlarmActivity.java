@@ -15,6 +15,7 @@ import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -41,10 +42,12 @@ public class AlarmActivity extends AppCompatActivity {
     private CaptureRequest.Builder mBuilder;
     private CameraDevice           mCameraDevice;
 
+    private PowerManager.WakeLock m_WakeLock;
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        m_WakeLock.release();
     }
 
     private android.os.Handler dateHandler = new android.os.Handler();
@@ -63,22 +66,36 @@ public class AlarmActivity extends AppCompatActivity {
 
 
         //SCREEN BRIGHTNESS/////////////////////////////////////////////////////////////////////////
-        boolean useScreen = (light[0] == 1) ? true : false;
+        final boolean useScreen = (light[0] == 1) ? true : false;
+        boolean useLED = (light[6] == 1) ? true : false;
         if(useScreen){
 
-            setBrightness(light);
-//            if(light[2] > light[7])
-//                setBrightness(light);
-//            else {
-//                android.os.Handler screenLightHandler = new android.os.Handler();
-//                Runnable screenLightRunnable = new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        setBrightness(light);
-//                    }
-//                };
-//                screenLightHandler.postDelayed(screenLightRunnable, TimeUnit.MINUTES.toMillis(light[7] - light[2]));
-//            }
+            if(light[2] > light[7])
+                setBrightness(light);
+            else {
+                android.os.Handler screenLightHandler = new android.os.Handler();
+                Runnable screenLightRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        setBrightness(light);
+                    }
+                };
+                screenLightHandler.postDelayed(screenLightRunnable, TimeUnit.MINUTES.toMillis(light[7] - light[2]));
+            }
+        }
+        else if(useLED){
+
+            android.os.Handler screenTimerHandler = new android.os.Handler();
+            Runnable screenTimerRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    startScreen();
+                }
+            };
+            screenTimerHandler.postDelayed(screenTimerRunnable, TimeUnit.MINUTES.toMillis(light[7]));
+        }
+        else{
+            startScreen();
         }
 
         //SCREEN////////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +150,6 @@ public class AlarmActivity extends AppCompatActivity {
         }
 
         //LED///////////////////////////////////////////////////////////////////////////////////////
-        boolean useLED = (light[6] == 1) ? true : false;
         if(useLED){
             if(light[2] > light[7]) { //If LED StartTime is bigger as LED Start Time
 
@@ -158,31 +174,34 @@ public class AlarmActivity extends AppCompatActivity {
         String dayName = "";
         switch(_calendar.get(Calendar.DAY_OF_WEEK)){
             case Calendar.MONDAY:
-                dayName = "Monday";
+                dayName = this.getString(R.string.wakeup_day_monday);
                 break;
             case Calendar.TUESDAY:
-                dayName = "Tuesday";
+                dayName = this.getString(R.string.wakeup_day_tuesday);
                 break;
             case Calendar.WEDNESDAY:
-                dayName = "Wednesday";
+                dayName = this.getString(R.string.wakeup_day_wednesday);
                 break;
             case Calendar.THURSDAY:
-                dayName = "Thursday";
+                dayName = this.getString(R.string.wakeup_day_thursday);
                 break;
             case Calendar.FRIDAY:
-                dayName = "Friday";
+                dayName = this.getString(R.string.wakeup_day_friday);
                 break;
             case Calendar.SATURDAY:
-                dayName = "Saturday";
+                dayName = this.getString(R.string.wakeup_day_saturday);
                 break;
             case Calendar.SUNDAY:
-                dayName = "Sunday";
+                dayName = this.getString(R.string.wakeup_day_sunday);
                 break;
         }
         return dayName;
     }
 
     private void setBrightness(final int[] _lightValues){
+
+        startScreen();
+
         WindowManager.LayoutParams layout = getWindow().getAttributes();
         layout.screenBrightness = 0.0F;
         getWindow().setAttributes(layout);
@@ -206,6 +225,11 @@ public class AlarmActivity extends AppCompatActivity {
             }
         };
         screenLightHandler.postDelayed(screenLightRunnable, millis); //All 10 Seconds more Light
+    }
+
+    private void startScreen(){
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
     private void startLED(){
         android.hardware.Camera cam = android.hardware.Camera.open();

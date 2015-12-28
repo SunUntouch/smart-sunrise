@@ -38,6 +38,8 @@
     <!-- Time Text -->
     <string name="wakeup_time">Time</string>
     <string name="wakeup_time_minutes">Minutes</string>
+
+    <string name="wakeup_time_wakeup">Wake Up</string>
     <string name="wakeup_time_snooze">Snooze</string>
 
     <!-- Day Text -->

@@ -3,10 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:keepScreenOn="true"
     android:id="@+id/wakeup_timer_wakescreen">
 
     <Button
-        android:text="WAKE UP"
+        android:text="@string/wakeup_time_wakeup"
         android:textSize="50dp"
         android:textColor="#80000000"
         android:layout_width="match_parent"
@@ -58,7 +59,7 @@
     </LinearLayout>
 
     <Button
-        android:text="SNOOZE"
+        android:text="@string/wakeup_time_snooze"
         android:textSize="50dp"
         android:textColor="#80000000"
         android:layout_width="match_parent"

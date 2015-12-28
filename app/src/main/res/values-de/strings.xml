@@ -13,23 +13,17 @@
 
     <!-- Alarm Text -->
     <string name="wakeup_no_alarm">Kein Alarm</string>
-
     <string name="wakeup_set_alarm_name">Benenne Alarm</string>
-
     <string name="wakeup_set_alarm_minutes">Wähle Minuten</string>
-
     <string name="wakeup_set_alarm_song_menu">Wähle Alarmart</string>
     <string name="wakeup_set_alarm_song">Wähle Alarmton</string>
     <string name="wakeup_set_alarm_song_Volume">Lautstärke</string>
     <string name="wakeup_set_alarm_song_Start">Startzeit</string>
     <string name="wakeup_set_alarm_song_fadeIn">Setze FadeIn Zeit</string>
     <string name="wakeup_set_alarm_song_vibration">Setze Vibrationsstärke</string>
-
     <string name="wakeup_set_alarm_light_brightness">Setze Helligkeit</string>
     <string name="wakeup_set_alarm_light_minutes">Wähle Minuten</string>
-
     <string name="wakeup_set_alarm_color">Wähle Farbe</string>
-
     <string name="wakeup_set_alarm_LED_time">Wähle Minuten</string>
 
     <string name="wakeup_OK">OK</string>
@@ -38,6 +32,7 @@
     <!-- Time Text -->
     <string name="wakeup_time">Zeit</string>
     <string name="wakeup_time_minutes">Minuten</string>
+    <string name="wakeup_time_wakeup">Aufwachen</string>
     <string name="wakeup_time_snooze">Schlummer</string>
 
     <!-- Day Text -->
@@ -74,10 +69,8 @@
     <string name="wakeup_light">Licht</string>
     <string name="wakeup_light_screen_brightness">Bildschirm Helligkeit</string>
     <string name="wakeup_light_screen_brightness_off">Bildschirmbeleuchtung aus</string>
-
     <string name="wakeup_light_screen_color1">Farbe1</string>
     <string name="wakeup_light_screen_color2">Farbe2</string>
-
     <string name="wakeup_light_screen_fadingOn">Fading</string>
     <string name="wakeup_light_screen_fadingOff">Fading aus</string>
 
