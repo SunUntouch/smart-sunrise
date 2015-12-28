@@ -21,8 +21,8 @@
         android:orientation="horizontal">
 
         <ToggleButton
-            android:textOn="MO"
-            android:textOff="MO"
+            android:textOn="@string/wakeup_day_monday_short"
+            android:textOff="@string/wakeup_day_monday_short"
             android:id="@+id/wakeup_monday"
             android:scaleType="centerInside"
             android:layout_weight="1"
@@ -36,8 +36,8 @@
             android:background="#90909090"/>
 
         <ToggleButton
-            android:textOn="TU"
-            android:textOff="TU"
+            android:textOn="@string/wakeup_day_tuesday_short"
+            android:textOff="@string/wakeup_day_tuesday_short"
             android:id="@+id/wakeup_tuesday"
             android:scaleType="centerInside"
             android:layout_weight="1"
@@ -51,8 +51,8 @@
             android:background="#90909090"/>
 
         <ToggleButton
-            android:textOn="WE"
-            android:textOff="WE"
+            android:textOn="@string/wakeup_day_wednesday_short"
+            android:textOff="@string/wakeup_day_wednesday_short"
             android:id="@+id/wakeup_wednesday"
             android:scaleType="centerInside"
             android:layout_weight="1"
@@ -66,8 +66,8 @@
             android:background="#90909090"/>
 
         <ToggleButton
-            android:textOn="TH"
-            android:textOff="TH"
+            android:textOn="@string/wakeup_day_thursday_short"
+            android:textOff="@string/wakeup_day_thursday_short"
             android:id="@+id/wakeup_thursday"
             android:scaleType="centerInside"
             android:layout_weight="1"
@@ -81,8 +81,8 @@
             android:background="#90909090"/>
 
         <ToggleButton
-            android:textOn="FR"
-            android:textOff="FR"
+            android:textOn="@string/wakeup_day_friday_short"
+            android:textOff="@string/wakeup_day_friday_short"
             android:id="@+id/wakeup_friday"
             android:scaleType="centerInside"
             android:layout_weight="1"
@@ -96,8 +96,8 @@
             android:background="#90909090"/>
 
         <ToggleButton
-            android:textOn="SA"
-            android:textOff="SA"
+            android:textOn="@string/wakeup_day_saturday_short"
+            android:textOff="@string/wakeup_day_saturday_short"
             android:id="@+id/wakeup_saturday"
             android:scaleType="centerInside"
             android:layout_weight="1"
@@ -111,8 +111,8 @@
             android:background="#90909090"/>
 
         <ToggleButton
-            android:textOn="SU"
-            android:textOff="SU"
+            android:textOn="@string/wakeup_day_sunday_short"
+            android:textOff="@string/wakeup_day_sunday_short"
             android:id="@+id/wakeup_sunday"
             android:scaleType="centerInside"
             android:layout_weight="1"
@@ -121,7 +121,4 @@
             android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
     </LinearLayout>
-
-
-
 </LinearLayout>

@@ -49,13 +49,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         _convertView = inflater.inflate(_layoutID, null);
 
-        //Get TextChild from View
-        TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
-        txtListChild.setText(_childText);
-
         //Switch Behaviour for every Setting View
         switch(_childText){
             case AlarmConstants.WAKEUP_TIME:{
+
+                //Get TextChild from View
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_time));
 
                 Button setTimeButton = (Button) _convertView.findViewById(_viewID[1]);
 
@@ -69,6 +69,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             }
             break;
             case AlarmConstants.WAKEUP_DAYS:{
+
+                //Get TextChild from View
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_day));
+
                 ToggleButton setMonday = (ToggleButton) _convertView.findViewById(_viewID[1]);
                 setMonday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_MONDAY) > 0) ? true : false);
 
@@ -92,6 +97,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             }
             break;
             case AlarmConstants.WAKEUP_MUSIC:{
+
+                //Get TextChild from View
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_music));
+
                 //Choosing Music Button
                 Button setMusicButton = (Button) _convertView.findViewById(_viewID[1]);
                 String musicText = _convertView.getContext().getString(R.string.wakeup_music_choose); //TODO set Music text Button Name
@@ -136,6 +146,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             }
             break;
             case AlarmConstants.WAKEUP_LIGHT:{
+
+                //Get TextChild from View
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_light));
+
                 //Toggle Screen light
                 ToggleButton setLightButton = (ToggleButton) _convertView.findViewById(_viewID[1]);
                 String screenOn =  _convertView.getContext().getString(R.string.wakeup_light_screen_brightness) + " " +
@@ -194,6 +209,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             }
             break;
             case AlarmConstants.WAKEUP_DELETE:{
+                //Get TextChild from View
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                txtListChild.setText(_childText);
+
                 Button deleteAlarm = (Button) _convertView.findViewById(R.id.wakeup_timer_deleteButton);
                 String deleteText = _convertView.getContext().getString(R.string.wakeup_delete);
                 deleteAlarm.setText(deleteText);
@@ -236,7 +255,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 R.id.wakeup_saturday,
                                 R.id.wakeup_sunday };
 
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_days, choosenChild,  childValues, wakeupDay_ID);
+                        convertView = inflateLayout(
+                                convertView,
+                                R.layout.wakeup_timer_listitem_days,
+                                choosenChild,
+                                childValues,
+                                wakeupDay_ID);
                     }
                     break;
                     case AlarmConstants.WAKEUP_TIME: {
@@ -244,7 +268,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 R.id.wakeup_timer_time_textview,
                                 R.id.wakeup_timer_time_buttonTime,
                                 R.id.wakeup_timer_time_buttonSnooze };
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_time, choosenChild, childValues, wakeupTime_ID);
+
+                        convertView = inflateLayout(
+                                convertView,
+                                R.layout.wakeup_timer_listitem_time,
+                                choosenChild,
+                                childValues,
+                                wakeupTime_ID);
                     }
                     break;
                     case AlarmConstants.WAKEUP_MUSIC: {
@@ -255,7 +285,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 R.id.wakeup_timer_music_SongStart,
                                 R.id.wakeup_timer_music_toggleFadeIn,
                                 R.id.wakeup_timer_music_toggleVibration };
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_music, choosenChild, childValues, wakeup_Music_ID);
+
+                        convertView = inflateLayout(
+                                convertView,
+                                R.layout.wakeup_timer_listitem_music,
+                                choosenChild,
+                                childValues,
+                                wakeup_Music_ID);
                     }
                     break;
                     case AlarmConstants.WAKEUP_LIGHT: {
@@ -268,14 +304,26 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                                 R.id.wakeup_timer_light_buttonScreenFade,
                                 R.id.wakeup_timer_light_buttonLED,
                                 R.id.wakeup_timer_light_buttonLEDStart};
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_light, choosenChild, childValues, wakeup_Light_ID);
+
+                        convertView = inflateLayout(
+                                convertView,
+                                R.layout.wakeup_timer_listitem_light,
+                                choosenChild,
+                                childValues,
+                                wakeup_Light_ID);
                     }
                     break;
                     case AlarmConstants.WAKEUP_DELETE: {
                         int[] wakeup_Delete_ID = {
                                 R.id.wakeup_timer_delete_textview,
                                 R.id.wakeup_timer_deleteButton };
-                        convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_delete, "", childValues, wakeup_Delete_ID);
+
+                        convertView = inflateLayout(
+                                convertView,
+                                R.layout.wakeup_timer_listitem_delete,
+                                "",
+                                childValues,
+                                wakeup_Delete_ID);
                     }
                     default:
                         break;

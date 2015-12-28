@@ -18,7 +18,7 @@
         android:id="@+id/wakeup_timer_deleteButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Delete"
+        android:text="@string/wakeup_delete"
         android:focusable="false"
         android:onClick="deleteChild"/>
 

@@ -36,10 +36,12 @@
     <string name="wakeup_Cancel">Cancel</string>
 
     <!-- Time Text -->
+    <string name="wakeup_time">Time</string>
     <string name="wakeup_time_minutes">Minutes</string>
     <string name="wakeup_time_snooze">Snooze</string>
 
     <!-- Day Text -->
+    <string name="wakeup_day">Days</string>
     <string name="wakeup_day_monday">Monday</string>
     <string name="wakeup_day_tuesday">Tuesday</string>
     <string name="wakeup_day_wednesday">Wednesday</string>
@@ -48,14 +50,28 @@
     <string name="wakeup_day_saturday">Saturday</string>
     <string name="wakeup_day_sunday">Sunday</string>
 
+    <string name="wakeup_day_monday_short">MO</string>
+    <string name="wakeup_day_tuesday_short">TU</string>
+    <string name="wakeup_day_wednesday_short">WE</string>
+    <string name="wakeup_day_thursday_short">TH</string>
+    <string name="wakeup_day_friday_short">FR</string>
+    <string name="wakeup_day_saturday_short">SA</string>
+    <string name="wakeup_day_sunday_short">SU</string>
+
     <!-- Music Text -->
+    <string name="wakeup_music">Music</string>
     <string name="wakeup_music_choose">Choose Music</string>
     <string name="wakeup_music_ringtone">Ringtone</string>
     <string name="wakeup_music_music">Music</string>
     <string name="wakeup_music_vibraOff">OFF</string>
     <string name="wakeup_music_fadeOff">OFF</string>
 
+    <string name="wakeup_music_text_startTime">Start Time</string>
+    <string name="wakeup_music_text_fadeIn">FadeIn</string>
+    <string name="wakeup_music_text_vibration">Vibration</string>
+
     <!-- Light Text -->
+    <string name="wakeup_light">Light</string>
     <string name="wakeup_light_screen_brightness">Screen Brightness</string>
     <string name="wakeup_light_screen_brightness_off">Screen Illumination Off</string>
 
@@ -67,6 +83,8 @@
 
     <string name="wakeup_light_screen_LEDOn">LED ON</string>
     <string name="wakeup_light_screen_LEDOff">LED OFF</string>
+
+    <string name="wakeup_light_text_startTime">Start Time before Alarm</string>
 
     <!-- Delete Text -->
     <string name="wakeup_delete">Delete</string>

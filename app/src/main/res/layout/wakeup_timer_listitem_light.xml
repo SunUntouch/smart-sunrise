@@ -31,7 +31,7 @@
             android:onClick="showScreenLightSettingDialog" />
 
         <TextView
-            android:text="Start Time before Alarm"
+            android:text="@string/wakeup_light_text_startTime"
             android:layout_column="0"
             android:layout_columnSpan="2"
             android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
             android:onClick="showLEDLightSettingDialog" />
 
         <TextView
-            android:text="Start Time before Alarm"
+            android:text="@string/wakeup_light_text_startTime"
             android:layout_column="0"
             android:layout_columnSpan="2"
             android:layout_width="wrap_content"

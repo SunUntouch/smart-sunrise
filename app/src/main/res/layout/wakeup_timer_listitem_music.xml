@@ -38,7 +38,7 @@
             android:onClick="showMusicVolumeSettingDialog"/>
 
         <TextView
-            android:text="Start Time"
+            android:text="@string/wakeup_music_text_startTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
@@ -52,7 +52,7 @@
             android:onClick="showMusicStartSettingDialog"/>
 
         <TextView
-            android:text="Fade In"
+            android:text="@string/wakeup_music_text_fadeIn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
@@ -65,7 +65,7 @@
             android:onClick="showFadeInSettingsDialog"/>
 
         <TextView
-            android:text="Vibration"
+            android:text="@string/wakeup_music_text_vibration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"/>
