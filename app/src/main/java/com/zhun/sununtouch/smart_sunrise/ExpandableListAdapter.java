@@ -17,13 +17,8 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
-    public final static String WAKEUP_DAYS  = "Days";
-    public final static String WAKEUP_TIME  = "Time";
-    public final static String WAKEUP_MUSIC = "Music";
-    public final static String WAKEUP_LIGHT = "Light";
-    public final static String WAKEUP_DELETE= "Delete";
 
-    public final static String[] WAKEUP_CHILDS  = {WAKEUP_DELETE, WAKEUP_TIME, WAKEUP_DAYS, WAKEUP_MUSIC, WAKEUP_LIGHT};
+    private final static String[] WAKEUP_CHILDS  = {AlarmConstants.WAKEUP_DELETE, AlarmConstants.WAKEUP_TIME, AlarmConstants.WAKEUP_DAYS, AlarmConstants.WAKEUP_MUSIC, AlarmConstants.WAKEUP_LIGHT};
 
     private Context      context;
     private List<String> wakeup_header;
@@ -60,54 +55,56 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Switch Behaviour for every Setting View
         switch(_childText){
-            case WAKEUP_TIME:{
+            case AlarmConstants.WAKEUP_TIME:{
 
                 Button setTimeButton = (Button) _convertView.findViewById(_viewID[1]);
-                String timeText = String.format("%02d",_childValues.get("Hour")) + ":" + String.format("%02d", _childValues.get("Minute"));
+
+                String timeText = String.format("%02d",_childValues.get(AlarmConstants.ALARM_TIME_HOUR)) +
+                        ":" + String.format("%02d", _childValues.get(AlarmConstants.ALARM_TIME_MINUTES));
                 setTimeButton.setText(timeText);
 
                 Button setSnoozeButton = (Button) _convertView.findViewById(_viewID[2]);
-                String snoozeText      = "SNOOZE: " + _childValues.get("Snooze") + " Minutes";
+                String snoozeText      = _convertView.getContext().getString(R.string.wakeup_time_snooze) + " " + _childValues.get(AlarmConstants.ALARM_TIME_SNOOZE) + " " + _convertView.getContext().getString(R.string.wakeup_time_minutes);
                 setSnoozeButton.setText(snoozeText);
             }
             break;
-            case WAKEUP_DAYS:{
+            case AlarmConstants.WAKEUP_DAYS:{
                 ToggleButton setMonday = (ToggleButton) _convertView.findViewById(_viewID[1]);
-                setMonday.setChecked((_childValues.get("Monday") > 0) ? true : false);
+                setMonday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_MONDAY) > 0) ? true : false);
 
                 ToggleButton setTuesday = (ToggleButton) _convertView.findViewById(_viewID[2]);
-                setTuesday.setChecked((_childValues.get("Tuesday") > 0) ? true : false);
+                setTuesday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_TUESDAY) > 0) ? true : false);
 
                 ToggleButton setWednesday = (ToggleButton) _convertView.findViewById(_viewID[3]);
-                setWednesday.setChecked((_childValues.get("Wednesday") > 0) ? true : false);
+                setWednesday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_WEDNESDAY) > 0) ? true : false);
 
                 ToggleButton setThursday = (ToggleButton) _convertView.findViewById(_viewID[4]);
-                setThursday.setChecked((_childValues.get("Thursday") > 0) ? true : false);
+                setThursday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_THURSDAY) > 0) ? true : false);
 
                 ToggleButton setFriday = (ToggleButton) _convertView.findViewById(_viewID[5]);
-                setFriday.setChecked((_childValues.get("Friday") > 0) ? true : false);
+                setFriday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_FRIDAY) > 0) ? true : false);
 
                 ToggleButton setSaturday = (ToggleButton) _convertView.findViewById(_viewID[6]);
-                setSaturday.setChecked((_childValues.get("Saturday") > 0) ? true : false);
+                setSaturday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_SATURDAY) > 0) ? true : false);
 
                 ToggleButton setSunday = (ToggleButton) _convertView.findViewById(_viewID[7]);
-                setSunday.setChecked((_childValues.get("Sunday") > 0) ? true : false);
+                setSunday.setChecked((_childValues.get(AlarmConstants.ALARM_DAY_SUNDAY) > 0) ? true : false);
             }
             break;
-            case WAKEUP_MUSIC:{
+            case AlarmConstants.WAKEUP_MUSIC:{
                 //Choosing Music Button
                 Button setMusicButton = (Button) _convertView.findViewById(_viewID[1]);
-                String musicText = "Choose Music"; //TODO set Music text Button Name
+                String musicText = _convertView.getContext().getString(R.string.wakeup_music_choose); //TODO set Music text Button Name
                 setMusicButton.setText(musicText);
 
                 //Set Volume Button
                 Button setMusicVolumeButton = (Button) _convertView.findViewById(_viewID[2]);
-                String musicVolumeText = _childValues.get("Volume") + "%";
+                String musicVolumeText = _childValues.get(AlarmConstants.ALARM_MUSIC_VOLUME) + "%";
                 setMusicVolumeButton.setText(musicVolumeText);
 
                 //Set Start Time Button
                 Button setMusicStartTime = (Button) _convertView.findViewById(_viewID[3]);
-                int seconds = _childValues.get("StartTime");
+                int seconds = _childValues.get(AlarmConstants.ALARM_MUSIC_SONGSTART);
                 String startTimeText = String.format(
                         "%02d:%02d",
                         TimeUnit.SECONDS.toMinutes(seconds),
@@ -116,86 +113,89 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                 //Set FadeIn ToggleButton
                 ToggleButton setFadeIn = (ToggleButton) _convertView.findViewById(_viewID[4]);
-                int fadeSeconds  = _childValues.get("FadeInTime");
+                int fadeSeconds  = _childValues.get(AlarmConstants.ALARM_MUSIC_FADEINTIME);
                 String FadeInOn  =  String.format("%02ds", fadeSeconds);
-                String FadeInOff = "OFF";
+                String FadeInOff = _convertView.getContext().getString(R.string.wakeup_music_fadeOff);
 
                 setFadeIn.setTextOn(FadeInOn);
                 setFadeIn.setTextOff(FadeInOff);
 
-                boolean fadeChecked = (_childValues.get("FadeIn") == 1)? true : false;
+                boolean fadeChecked = (_childValues.get(AlarmConstants.ALARM_MUSIC_FADEIN) == 1)? true : false;
                 setFadeIn.setChecked(fadeChecked);
 
                 //Set Vibration ToggleButton
                 ToggleButton setVibrationButton = (ToggleButton) _convertView.findViewById(_viewID[5]);
-                String vibrationTextOn      = _childValues.get("VibrationValue") + "%";
-                String vibrationTextOff      = "OFF";
+                String vibrationTextOn       = _childValues.get(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE) + "%";
+                String vibrationTextOff      = _convertView.getContext().getString(R.string.wakeup_music_vibraOff);
 
                 setVibrationButton.setTextOn(vibrationTextOn);
                 setVibrationButton.setTextOff(vibrationTextOff);
 
-                boolean vibraChecked = (_childValues.get("Vibration") == 1)? true : false;
+                boolean vibraChecked = (_childValues.get(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV) == 1)? true : false;
                 setVibrationButton.setChecked(vibraChecked);
             }
             break;
-            case WAKEUP_LIGHT:{
+            case AlarmConstants.WAKEUP_LIGHT:{
                 //Toggle Screen light
                 ToggleButton setLightButton = (ToggleButton) _convertView.findViewById(_viewID[1]);
-                String screenOn =  "SCREEN BRIGTHNESS " + _childValues.get("ScreenBrightness") + "%";
-                String screenOff = "SCREEN ILLUMINATION OFF";
+                String screenOn =  _convertView.getContext().getString(R.string.wakeup_light_screen_brightness) + " " +
+                        _childValues.get(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS) + "%";
+                String screenOff = _convertView.getContext().getString(R.string.wakeup_light_screen_brightness_off);
 
                 setLightButton.setTextOn(screenOn);
                 setLightButton.setTextOff(screenOff);
 
-                boolean screenChecked = (_childValues.get("UseScreen") == 1)? true : false;
+                boolean screenChecked = (_childValues.get(AlarmConstants.ALARM_LIGHT_SCREEN) == 1)? true : false;
                 setLightButton.setChecked(screenChecked);
 
                 //Set Start Time Button
                 Button setStartTime = (Button) _convertView.findViewById(_viewID[2]);
-                String startTimeText= _childValues.get("ScreenStartTime") + " Minutes";
+                String startTimeText= _childValues.get(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME) + " " +
+                        _convertView.getContext().getString(R.string.wakeup_time_minutes);
                 setStartTime.setText(startTimeText);
 
                 //First Color
                 Button setColorButton1 = (Button) _convertView.findViewById(_viewID[3]);
-                String colorText      = "Color1"; //TODO set Light Color Text
+                String colorText      = _convertView.getContext().getString(R.string.wakeup_light_screen_color1); //TODO set Light Color Text
                 setColorButton1.setText(colorText);
-                setColorButton1.getBackground().setColorFilter(_childValues.get("ScreenColor1"), PorterDuff.Mode.MULTIPLY);
+                setColorButton1.getBackground().setColorFilter(_childValues.get(AlarmConstants.ALARM_LIGHT_COLOR1), PorterDuff.Mode.MULTIPLY);
 
                 //Second Color
                 Button setColorButton2 = (Button) _convertView.findViewById(_viewID[4]);
-                String colorText2      = "Color2"; //TODO set Light Color Text
+                String colorText2      = _convertView.getContext().getString(R.string.wakeup_light_screen_color2); //TODO set Light Color Text
                 setColorButton2.setText(colorText2);
-                setColorButton2.getBackground().setColorFilter(_childValues.get("ScreenColor2"), PorterDuff.Mode.MULTIPLY);
+                setColorButton2.getBackground().setColorFilter(_childValues.get(AlarmConstants.ALARM_LIGHT_COLOR2), PorterDuff.Mode.MULTIPLY);
 
                 //Toggle Fading
                 ToggleButton setFade = (ToggleButton) _convertView.findViewById(_viewID[5]);
-                String colorFadeTextOn = "Fading"; //TODO set light Text
-                String colorFadeTextOff = "No Fading";
+                String colorFadeTextOn = _convertView.getContext().getString(R.string.wakeup_light_screen_fadingOn); //TODO set light Text
+                String colorFadeTextOff = _convertView.getContext().getString(R.string.wakeup_light_screen_fadingOff);
                 setFade.setTextOn(colorFadeTextOn);
                 setFade.setTextOff(colorFadeTextOff);
 
-                boolean FadeChecked = (_childValues.get("FadeColor") == 1)? true : false;
+                boolean FadeChecked = (_childValues.get(AlarmConstants.ALARM_LIGHT_FADECOLOR) == 1)? true : false;
                 setFade.setChecked(FadeChecked);
 
                 //Toggle LED
                 ToggleButton setLEDButton = (ToggleButton) _convertView.findViewById(_viewID[6]);
-                String timeTextOn = "LED ON"; //Todo set LED TExt maybe switch to toggle with time slider
-                String timeTextOff = "LED OFF";
+                String timeTextOn = _convertView.getContext().getString(R.string.wakeup_light_screen_LEDOn); //Todo set LED TExt maybe switch to toggle with time slider
+                String timeTextOff = _convertView.getContext().getString(R.string.wakeup_light_screen_LEDOff);
                 setLEDButton.setTextOn(timeTextOn);
                 setLEDButton.setTextOff(timeTextOff);
 
-                boolean LEDChecked = (_childValues.get("UseLED") == 1)? true : false;
+                boolean LEDChecked = (_childValues.get(AlarmConstants.ALARM_LIGHT_USELED) == 1)? true : false;
                 setLEDButton.setChecked(LEDChecked);
 
                 //Set LED Start Time
                 Button setLEDStartTime = (Button) _convertView.findViewById(_viewID[7]);
-                String startTimeLEDText= _childValues.get("LEDStartTime") + " Minutes";
+                String startTimeLEDText= _childValues.get(AlarmConstants.ALARM_LIGHT_LED_START_TIME) + " " +
+                        _convertView.getContext().getString(R.string.wakeup_time_minutes);
                 setLEDStartTime.setText(startTimeLEDText);
             }
             break;
-            case WAKEUP_DELETE:{
+            case AlarmConstants.WAKEUP_DELETE:{
                 Button deleteAlarm = (Button) _convertView.findViewById(R.id.wakeup_timer_deleteButton);
-                String deleteText = "Delete";
+                String deleteText = _convertView.getContext().getString(R.string.wakeup_delete);
                 deleteAlarm.setText(deleteText);
             }
             default:
@@ -225,7 +225,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         String choosenChild = WAKEUP_CHILDS[childPosition];
 
                 switch (choosenChild){
-                    case WAKEUP_DAYS: {
+                    case AlarmConstants.WAKEUP_DAYS: {
                         int[] wakeupDay_ID = {
                                 R.id.wakeup_timer_days_textview,
                                 R.id.wakeup_monday,
@@ -239,7 +239,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_days, choosenChild,  childValues, wakeupDay_ID);
                     }
                     break;
-                    case WAKEUP_TIME: {
+                    case AlarmConstants.WAKEUP_TIME: {
                         int[] wakeupTime_ID = {
                                 R.id.wakeup_timer_time_textview,
                                 R.id.wakeup_timer_time_buttonTime,
@@ -247,7 +247,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_time, choosenChild, childValues, wakeupTime_ID);
                     }
                     break;
-                    case WAKEUP_MUSIC: {
+                    case AlarmConstants.WAKEUP_MUSIC: {
                         int[] wakeup_Music_ID = {
                                 R.id.wakeup_timer_music_textview,
                                 R.id.wakeup_timer_music_buttonMusic,
@@ -258,7 +258,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_music, choosenChild, childValues, wakeup_Music_ID);
                     }
                     break;
-                    case WAKEUP_LIGHT: {
+                    case AlarmConstants.WAKEUP_LIGHT: {
                         int[] wakeup_Light_ID = {
                                 R.id.wakeup_timer_light_textview,
                                 R.id.wakeup_timer_light_buttonLight,
@@ -271,7 +271,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                         convertView = inflateLayout(convertView, R.layout.wakeup_timer_listitem_light, choosenChild, childValues, wakeup_Light_ID);
                     }
                     break;
-                    case WAKEUP_DELETE: {
+                    case AlarmConstants.WAKEUP_DELETE: {
                         int[] wakeup_Delete_ID = {
                                 R.id.wakeup_timer_delete_textview,
                                 R.id.wakeup_timer_deleteButton };

@@ -132,45 +132,45 @@ public class MainActivity extends AppCompatActivity
         //Putting Value for each child
         //Time
         alarmvalueTime.clear();
-        alarmvalueTime.put("Hour"  , _time[0]);
-        alarmvalueTime.put("Minute", _time[1]);
-        alarmvalueTime.put("Snooze", _time[2]);
+        alarmvalueTime.put(AlarmConstants.ALARM_TIME_HOUR   , _time[0]);
+        alarmvalueTime.put(AlarmConstants.ALARM_TIME_MINUTES, _time[1]);
+        alarmvalueTime.put(AlarmConstants.ALARM_TIME_SNOOZE , _time[2]);
         newAlarm.put(AlarmConstants.WAKEUP_TIME, alarmvalueTime);
 
         //Day
         alarmvalueDay.clear();
-        alarmvalueDay.put("Monday"   , _days[0]);
-        alarmvalueDay.put("Tuesday"  , _days[1]);
-        alarmvalueDay.put("Wednesday", _days[2]);
-        alarmvalueDay.put("Thursday" , _days[3]);
-        alarmvalueDay.put("Friday"   , _days[4]);
-        alarmvalueDay.put("Saturday" , _days[5]);
-        alarmvalueDay.put("Sunday"   , _days[6]);
+        alarmvalueDay.put(AlarmConstants.ALARM_DAY_MONDAY   , _days[0]);
+        alarmvalueDay.put(AlarmConstants.ALARM_DAY_TUESDAY  , _days[1]);
+        alarmvalueDay.put(AlarmConstants.ALARM_DAY_WEDNESDAY, _days[2]);
+        alarmvalueDay.put(AlarmConstants.ALARM_DAY_THURSDAY , _days[3]);
+        alarmvalueDay.put(AlarmConstants.ALARM_DAY_FRIDAY   , _days[4]);
+        alarmvalueDay.put(AlarmConstants.ALARM_DAY_SATURDAY , _days[5]);
+        alarmvalueDay.put(AlarmConstants.ALARM_DAY_SUNDAY   , _days[6]);
 
         newAlarm.put(AlarmConstants.WAKEUP_DAYS, alarmvalueDay);
 
         //Music
         alarmvalueMusic.clear();
-        alarmvalueMusic.put("Song", _music[0]); //Maybe ID?
-        alarmvalueMusic.put("StartTime"     , _music[1]);
-        alarmvalueMusic.put("Volume"        , _music[2]);
-        alarmvalueMusic.put("FadeIn"        , _music[3]);
-        alarmvalueMusic.put("FadeInTime"    , _music[4]);
-        alarmvalueMusic.put("Vibration"     , _music[5]);
-        alarmvalueMusic.put("VibrationValue", _music[6]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_SONGID          , _music[0]); //Maybe ID?
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_SONGSTART       , _music[1]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VOLUME          , _music[2]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_FADEIN          , _music[3]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_FADEINTIME      , _music[4]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV , _music[5]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE , _music[6]);
 
         newAlarm.put(AlarmConstants.WAKEUP_MUSIC, alarmvalueMusic);
 
         //Light
         alarmvalueLight.clear();
-        alarmvalueLight.put("UseScreen"        , _light[0]);
-        alarmvalueLight.put("ScreenBrightness" , _light[1]);
-        alarmvalueLight.put("ScreenStartTime"  , _light[2]);
-        alarmvalueLight.put("ScreenColor1"     , _light[3]);
-        alarmvalueLight.put("ScreenColor2"     , _light[4]);
-        alarmvalueLight.put("FadeColor"        , _light[5]);
-        alarmvalueLight.put("UseLED"           , _light[6]);
-        alarmvalueLight.put("LEDStartTime"     , _light[7]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_SCREEN            , _light[0]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS , _light[1]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME , _light[2]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_COLOR1            , _light[3]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_COLOR2            , _light[4]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_FADECOLOR         , _light[5]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_USELED            , _light[6]);
+        alarmvalueLight.put(AlarmConstants.ALARM_LIGHT_LED_START_TIME    , _light[7]);
 
         newAlarm.put(AlarmConstants.WAKEUP_LIGHT, alarmvalueLight);
 
@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity
             int[] music = {0,0,0,0,0,0,0};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration, Vibration Strength
             int[] light = {0,0,0,0,0,0,0,0};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
-            prepareListDataValues("No Alarm Set",0, time, days, music, light);
+            prepareListDataValues(this.getString(R.string.wakeup_no_alarm),0, time, days, music, light);
         }
         else {
 
@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity
                 SharedPreferences settings = getApplicationContext().getSharedPreferences(settingName, Context.MODE_PRIVATE);
 
                 //GetData
-                String name = settings.getString(AlarmConstants.ALARM_NAME, "No Alarm Set");
+                String name = settings.getString(AlarmConstants.ALARM_NAME, this.getString(R.string.wakeup_no_alarm));
 
                 //Putting Value for each child
                 int[] time  = {
@@ -515,7 +515,7 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Set Alarm Name");
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_name));
 
         final EditText newName = new EditText(this);
 
@@ -523,7 +523,7 @@ public class MainActivity extends AppCompatActivity
 
         builder.setView(newName);
 
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //Use the new Name
@@ -531,7 +531,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(this.getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
@@ -653,7 +653,7 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Set Minutes");
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_minutes));
 
 
         //Fill Values for the Minute Choosing Dialog
@@ -691,7 +691,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set Button Text
         Button bSnooze = (Button) findViewById(actualButtonID);
-        String timeText = "Snooze " + actualSnooze + " Minutes";
+        String timeText = this.getString(R.string.wakeup_time_snooze) + " " + actualSnooze + " " + this.getString(R.string.wakeup_time_minutes);
         bSnooze.setText(timeText);
 
         //save Settings
@@ -708,9 +708,9 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Choose Alarm Tone");
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_menu));
 
-        String[] ringtoneMode = { "Ringtones", "Music"};
+        String[] ringtoneMode = { this.getString(R.string.wakeup_music_ringtone), this.getString(R.string.wakeup_music_music)};
 
         builder.setItems(ringtoneMode, new DialogInterface.OnClickListener() {
             @Override
@@ -801,7 +801,7 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Choose Alarm");
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song));
 
         //Get SongNames from SongInformationArray
         final ArrayList<SongInformation> Songs = _Songs;
@@ -873,7 +873,7 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-        builder.setTitle("Set Music Volume");
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Volume));
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
@@ -916,7 +916,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //Set and Save Vibration Strength
@@ -925,7 +925,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(this.getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
@@ -965,7 +965,7 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-        builder.setTitle("Set Start Time");
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Start));
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
@@ -1071,7 +1071,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Create new Builder
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                builder.setTitle("Set FadeIn Time");
+                builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_song_fadeIn));
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
@@ -1114,7 +1114,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Set and Save Vibration Strength
@@ -1124,7 +1124,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -1148,17 +1148,17 @@ public class MainActivity extends AppCompatActivity
         //Set Button Text
         ToggleButton bFadeIn = (ToggleButton) findViewById(actualButtonID);
 
-        String vibraOn =  String.format("%02ds", actualFadeInTime);
-        String vibraOff = "OFF";
+        String fadeInOn =  String.format("%02ds", actualFadeInTime);
+        String fadeInOff = this.getString(R.string.wakeup_music_fadeOff);
 
         if(bFadeIn.isChecked())
-            bFadeIn.setText(vibraOn);
+            bFadeIn.setText(fadeInOn);
         else
-            bFadeIn.setText(vibraOff);
+            bFadeIn.setText(fadeInOff);
 
 
-        bFadeIn.setTextOn(vibraOn);
-        bFadeIn.setTextOff(vibraOff);
+        bFadeIn.setTextOn(fadeInOn);
+        bFadeIn.setTextOff(fadeInOff);
 
         //save Settings
         String settingsName = AlarmConstants.WAKEUP_TIMER + actualAlarm;
@@ -1189,7 +1189,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Create new Builder
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                builder.setTitle("Set Vibration Strength");
+                builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_song_vibration));
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
@@ -1232,7 +1232,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Set and Save Vibration Strength
@@ -1242,7 +1242,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -1267,7 +1267,7 @@ public class MainActivity extends AppCompatActivity
         ToggleButton bVibraStrength = (ToggleButton) findViewById(actualButtonID);
 
         String vibraOn =  actualVibraStr + "%";
-        String vibraOff = "OFF";
+        String vibraOff = this.getString(R.string.wakeup_music_vibraOff);
 
         if(bVibraStrength.isChecked())
             bVibraStrength.setText(vibraOn);
@@ -1306,7 +1306,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Create new Builder
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
-                builder.setTitle("Set Screen Brightness");
+                builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_light_brightness));
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
@@ -1349,7 +1349,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         //Set and Save Vibration Strength
@@ -1360,7 +1360,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -1382,8 +1382,8 @@ public class MainActivity extends AppCompatActivity
         //Set Button Text
         ToggleButton bScreenBrightness = (ToggleButton) findViewById(actualButtonID);
 
-        String screenOn =  "SCREEN BRIGTHNESS " + actualScreenBrightness + "%";
-        String screenOff = "SCREEN ILLUMINATION OFF";
+        String screenOn =  this.getString(R.string.wakeup_light_screen_brightness) + " " + actualScreenBrightness + "%";
+        String screenOff = this.getString(R.string.wakeup_light_screen_brightness_off);
 
         if(bScreenBrightness.isChecked())
             bScreenBrightness.setText(screenOn);
@@ -1408,7 +1408,7 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Set Minutes");
+        builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_light_minutes));
 
 
         //Fill Values for the Minute Choosing Dialog
@@ -1424,7 +1424,7 @@ public class MainActivity extends AppCompatActivity
         String[] minuteArray = new String[Minutes.size()];
         minuteArray = Minutes.toArray(minuteArray);
 
-        //Set Builder Settings and Onclikclistener
+        //Set Builder Settings and onClickListener
         builder.setItems(minuteArray, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -1446,7 +1446,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set Button Text
         Button bStartTime = (Button) findViewById(actualButtonID);
-        String timeText = actualScreenStartTime + " Minutes";
+        String timeText = actualScreenStartTime + " " + this.getString(R.string.wakeup_time_minutes);
         bStartTime.setText(timeText);
 
         //save Settings
@@ -1472,24 +1472,20 @@ public class MainActivity extends AppCompatActivity
                 onColorSet(bColor, color);
             }
         });
-        colorPicker.setTitle("Choose Color1");
+        colorPicker.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_color));
         colorPicker.show();
     }
 
     private void onColorSet(Button _buttonView, int _color){
 
-        switch(_buttonView.getText().toString()){
+        final String color1 = this.getString(R.string.wakeup_light_screen_color1);
+        final String color2 = this.getString(R.string.wakeup_light_screen_color2);
 
-            case "Color1":
-                actualLightColor1 = _color;
-                break;
-            case "Color2":
-                actualLightColor2 = _color;
-                break;
-            default:
-                //TODO Logging
-                break;
-        }
+        if(_buttonView.getText().toString() == color1)
+            actualLightColor1 = _color;
+        else if(_buttonView.getText().toString() == color2)
+            actualLightColor2 = _color;
+        //TODO else with Logging
 
         //save Settings
         String settingsName = AlarmConstants.WAKEUP_TIMER + actualAlarm;
@@ -1548,7 +1544,7 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Set Minutes");
+        builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_LED_time));
 
 
         //Fill Values for the Minute Choosing Dialog
@@ -1586,7 +1582,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set Button Text
         Button bStartTime = (Button) findViewById(actualButtonID);
-        String timeText = actualLightLEDStartTime + " Minutes";
+        String timeText = actualLightLEDStartTime + " " + this.getString(R.string.wakeup_time_minutes);
         bStartTime.setText(timeText);
 
         //save Settings
@@ -1622,7 +1618,7 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences settings = getApplicationContext().getSharedPreferences(settingName, Context.MODE_PRIVATE);
 
         //GetData
-        String name = settings.getString(AlarmConstants.ALARM_NAME, "No Alarm Set");
+        String name = settings.getString(AlarmConstants.ALARM_NAME, this.getString(R.string.wakeup_no_alarm));
 
         //Putting Value for each child
         int[] time  = {

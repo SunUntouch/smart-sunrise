@@ -11,4 +11,64 @@
     <string name="permlab_flashlight">Flashlight</string>
     <string name="permdesc_flashlight">Make use of the Flashlight</string>
 
+    <!-- Alarm Text -->
+    <string name="wakeup_no_alarm">No Alarm Set</string>
+
+    <string name="wakeup_set_alarm_name">Set Alarm Name</string>
+
+    <string name="wakeup_set_alarm_minutes">Set Minutes</string>
+
+    <string name="wakeup_set_alarm_song_menu">Choose Alarm</string>
+    <string name="wakeup_set_alarm_song">Choose Alarm Tone</string>
+    <string name="wakeup_set_alarm_song_Volume">Set Music Volume</string>
+    <string name="wakeup_set_alarm_song_Start">Set Start Time</string>
+    <string name="wakeup_set_alarm_song_fadeIn">Set FadeIn Time</string>
+    <string name="wakeup_set_alarm_song_vibration">Set Vibration Strength</string>
+
+    <string name="wakeup_set_alarm_light_brightness">Set Screen Brightness</string>
+    <string name="wakeup_set_alarm_light_minutes">Set Minutes</string>
+
+    <string name="wakeup_set_alarm_color">Choose Color</string>
+
+    <string name="wakeup_set_alarm_LED_time">Set Minutes</string>
+
+    <string name="wakeup_OK">OK</string>
+    <string name="wakeup_Cancel">Cancel</string>
+
+    <!-- Time Text -->
+    <string name="wakeup_time_minutes">Minutes</string>
+    <string name="wakeup_time_snooze">Snooze</string>
+
+    <!-- Day Text -->
+    <string name="wakeup_day_monday">Monday</string>
+    <string name="wakeup_day_tuesday">Tuesday</string>
+    <string name="wakeup_day_wednesday">Wednesday</string>
+    <string name="wakeup_day_thursday">Thursday</string>
+    <string name="wakeup_day_friday">Friday</string>
+    <string name="wakeup_day_saturday">Saturday</string>
+    <string name="wakeup_day_sunday">Sunday</string>
+
+    <!-- Music Text -->
+    <string name="wakeup_music_choose">Choose Music</string>
+    <string name="wakeup_music_ringtone">Ringtone</string>
+    <string name="wakeup_music_music">Music</string>
+    <string name="wakeup_music_vibraOff">OFF</string>
+    <string name="wakeup_music_fadeOff">OFF</string>
+
+    <!-- Light Text -->
+    <string name="wakeup_light_screen_brightness">Screen Brightness</string>
+    <string name="wakeup_light_screen_brightness_off">Screen Illumination Off</string>
+
+    <string name="wakeup_light_screen_color1">Color1</string>
+    <string name="wakeup_light_screen_color2">Color2</string>
+
+    <string name="wakeup_light_screen_fadingOn">Fading</string>
+    <string name="wakeup_light_screen_fadingOff">No Fading</string>
+
+    <string name="wakeup_light_screen_LEDOn">LED ON</string>
+    <string name="wakeup_light_screen_LEDOff">LED OFF</string>
+
+    <!-- Delete Text -->
+    <string name="wakeup_delete">Delete</string>
+
 </resources>
