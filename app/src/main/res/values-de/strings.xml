@@ -1,0 +1,74 @@
+<resources>
+    <string name="app_name">Smart-Sunrise</string>
+    <string name="action_settings">Settings</string>
+    <string name="edit_message">Enter a Message</string>
+    <string name="button_send">Send</string>
+    <string name="title_activity_display_message">MyMessage</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_alarm">Alarm</string>
+    <string name="permlab_flashlight">Flashlight</string>
+    <string name="permdesc_flashlight">Make use of the Flashlight</string>
+
+    <!-- Alarm Text -->
+    <string name="wakeup_no_alarm">Kein Alarm</string>
+
+    <string name="wakeup_set_alarm_name">Benenne Alarm</string>
+
+    <string name="wakeup_set_alarm_minutes">Wähle Minuten</string>
+
+    <string name="wakeup_set_alarm_song_menu">Wähle Alarmart</string>
+    <string name="wakeup_set_alarm_song">Wähle Alarmton</string>
+    <string name="wakeup_set_alarm_song_Volume">Lautstärke</string>
+    <string name="wakeup_set_alarm_song_Start">Startzeit</string>
+    <string name="wakeup_set_alarm_song_fadeIn">Setze FadeIn Zeit</string>
+    <string name="wakeup_set_alarm_song_vibration">Setze Vibrationsstärke</string>
+
+    <string name="wakeup_set_alarm_light_brightness">Setze Helligkeit</string>
+    <string name="wakeup_set_alarm_light_minutes">Wähle Minuten</string>
+
+    <string name="wakeup_set_alarm_color">Wähle Farbe</string>
+
+    <string name="wakeup_set_alarm_LED_time">Wähle Minuten</string>
+
+    <string name="wakeup_OK">OK</string>
+    <string name="wakeup_Cancel">Abbrechen</string>
+
+    <!-- Time Text -->
+    <string name="wakeup_time_minutes">Minuten</string>
+    <string name="wakeup_time_snooze">Schlummer</string>
+
+    <!-- Day Text -->
+    <string name="wakeup_day_monday">Monday</string>
+    <string name="wakeup_day_tuesday">Tuesday</string>
+    <string name="wakeup_day_wednesday">Wednesday</string>
+    <string name="wakeup_day_thursday">Thursday</string>
+    <string name="wakeup_day_friday">Friday</string>
+    <string name="wakeup_day_saturday">Saturday</string>
+    <string name="wakeup_day_sunday">Sunday</string>
+
+    <!-- Music Text -->
+    <string name="wakeup_music_choose">Wähle Musik</string>
+    <string name="wakeup_music_ringtone">Klingelton</string>
+    <string name="wakeup_music_music">Musik</string>
+    <string name="wakeup_music_vibraOff">AUS</string>
+    <string name="wakeup_music_fadeOff">AUS</string>
+
+    <!-- Light Text -->
+    <string name="wakeup_light_screen_brightness">Bildschirm Helligkeit</string>
+    <string name="wakeup_light_screen_brightness_off">Bildschirmbeleuchtung aus</string>
+
+    <string name="wakeup_light_screen_color1">Farbe1</string>
+    <string name="wakeup_light_screen_color2">Farbe2</string>
+
+    <string name="wakeup_light_screen_fadingOn">Fading</string>
+    <string name="wakeup_light_screen_fadingOff">Fading aus</string>
+
+    <string name="wakeup_light_screen_LEDOn">LED an</string>
+    <string name="wakeup_light_screen_LEDOff">LED aus</string>
+
+    <!-- Delete Text -->
+    <string name="wakeup_delete">Löschen</string>
+
+</resources>
