@@ -1,12 +1,8 @@
 package com.zhun.sununtouch.smart_sunrise;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.support.v4.content.WakefulBroadcastReceiver;
-import android.view.View;
 
 /**
  * Created by Sunny on 26.12.2015.

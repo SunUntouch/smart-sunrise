@@ -2,38 +2,20 @@ package com.zhun.sununtouch.smart_sunrise;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
-import android.app.Dialog;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.Camera;
-import android.graphics.SurfaceTexture;
-import android.hardware.camera2.CameraAccessException;
+import android.graphics.Color;
 import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PowerManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Surface;
-import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.security.Policy;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 public class AlarmActivity extends AppCompatActivity {
 
@@ -42,12 +24,9 @@ public class AlarmActivity extends AppCompatActivity {
     private CaptureRequest.Builder mBuilder;
     private CameraDevice           mCameraDevice;
 
-    private PowerManager.WakeLock m_WakeLock;
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        m_WakeLock.release();
     }
 
     private android.os.Handler dateHandler = new android.os.Handler();
@@ -139,14 +118,32 @@ public class AlarmActivity extends AppCompatActivity {
 
 
         //COLOR FADING//////////////////////////////////////////////////////////////////////////////
-        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.wakeup_wakescreen_layout);
-        linearLayout.setBackgroundColor(light[3]);
+        final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.wakeup_wakescreen_layout);
+
 
         boolean colorFading = (light[5] == 1) ? true  : false;
         if(colorFading){
-            ObjectAnimator colorFade = ObjectAnimator.ofObject(linearLayout,"backgroundColor", new ArgbEvaluator(), light[3], light[4]);
-            colorFade.setDuration(TimeUnit.MINUTES.toMillis(light[2]));
-            colorFade.start();
+            linearLayout.setBackgroundColor(Color.BLACK);
+            ObjectAnimator colorFade1 = ObjectAnimator.ofObject(linearLayout,"backgroundColor", new ArgbEvaluator(), Color.BLACK, light[3]);
+            final long duration = TimeUnit.MINUTES.toMillis(light[2]) / 4;
+            colorFade1.setDuration(duration);
+            colorFade1.start();
+
+            Handler colorHandler = new Handler();
+            Runnable colorRunnable = new Runnable() {
+                @Override
+                public void run() {
+
+                    ObjectAnimator colorFade2 = ObjectAnimator.ofObject(linearLayout,"backgroundColor", new ArgbEvaluator(), light[3], light[4]);
+                    colorFade2.setDuration(duration * 3);
+                    colorFade2.start();
+
+                }
+            };
+            colorHandler.postDelayed(colorRunnable, duration );
+        }
+        else{
+            linearLayout.setBackgroundColor(light[3]);
         }
 
         //LED///////////////////////////////////////////////////////////////////////////////////////

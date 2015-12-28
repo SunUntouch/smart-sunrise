@@ -2,7 +2,6 @@ package com.zhun.sununtouch.smart_sunrise;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.os.Bundle;
 
 /**
  * Created by Sunny on 27.12.2015.
