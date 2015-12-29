@@ -1,6 +1,7 @@
 package com.zhun.sununtouch.smart_sunrise;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -23,19 +24,22 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Context      context;
     private List<String> wakeup_header;
     private List<String> wakeup_alarm;
+    private List <String>  wakeup_musicURIs;
     private LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> wakeup_child;
 
-    public ExpandableListAdapter(Context _context, List<String> _wakeup_alarm, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child){
-        this.context       = _context;
-        this.wakeup_header = _wakeup_header;
-        this.wakeup_alarm  = _wakeup_alarm;
-        this.wakeup_child  = _wakeup_child;
+    public ExpandableListAdapter(Context _context, List<String> _wakeup_alarm, List<String> _wake_up_musicURIs, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child){
+        this.context         = _context;
+        this.wakeup_header   = _wakeup_header;
+        this.wakeup_alarm    = _wakeup_alarm;
+        this.wakeup_child    = _wakeup_child;
+        this.wakeup_musicURIs = _wake_up_musicURIs;
     }
 
-    public void notifyDataSetChanged(List<String> _wakeup_alarm, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child) {
-        this.wakeup_header = _wakeup_header;
-        this.wakeup_alarm  = _wakeup_alarm;
-        this.wakeup_child  = _wakeup_child;
+    public void notifyDataSetChanged(List<String> _wakeup_alarm, List<String> _wake_up_musicURIs, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child) {
+        this.wakeup_header   = _wakeup_header;
+        this.wakeup_alarm    = _wakeup_alarm;
+        this.wakeup_child    = _wakeup_child;
+        this.wakeup_musicURIs = _wake_up_musicURIs;
     }
 
     @Override
@@ -43,7 +47,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         super.registerDataSetObserver(observer);
     }
 
-    private View inflateLayout(View _convertView, int _layoutID, String _childText, LinkedHashMap<String, Integer> _childValues, int[] _viewID){
+    private View inflateLayout(View _convertView, int _groupPosition, int _layoutID, String _childText, LinkedHashMap<String, Integer> _childValues, int[] _viewID){
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -103,9 +107,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_music));
 
                 //Choosing Music Button
+                String newMusicURI  = wakeup_musicURIs.get(_groupPosition);
+                String newMusicText = newMusicURI.substring(newMusicURI.lastIndexOf('/') + 1);
+                newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
+
                 Button setMusicButton = (Button) _convertView.findViewById(_viewID[1]);
-                String musicText = _convertView.getContext().getString(R.string.wakeup_music_choose); //TODO set Music text Button Name
-                setMusicButton.setText(musicText);
+                setMusicButton.setText(newMusicText);
 
                 //Set Volume Button
                 Button setMusicVolumeButton = (Button) _convertView.findViewById(_viewID[2]);
@@ -257,6 +264,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                         convertView = inflateLayout(
                                 convertView,
+                                groupPosition,
                                 R.layout.wakeup_timer_listitem_days,
                                 choosenChild,
                                 childValues,
@@ -271,6 +279,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                         convertView = inflateLayout(
                                 convertView,
+                                groupPosition,
                                 R.layout.wakeup_timer_listitem_time,
                                 choosenChild,
                                 childValues,
@@ -288,6 +297,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                         convertView = inflateLayout(
                                 convertView,
+                                groupPosition,
                                 R.layout.wakeup_timer_listitem_music,
                                 choosenChild,
                                 childValues,
@@ -307,6 +317,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                         convertView = inflateLayout(
                                 convertView,
+                                groupPosition,
                                 R.layout.wakeup_timer_listitem_light,
                                 choosenChild,
                                 childValues,
@@ -320,6 +331,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                         convertView = inflateLayout(
                                 convertView,
+                                groupPosition,
                                 R.layout.wakeup_timer_listitem_delete,
                                 "",
                                 childValues,

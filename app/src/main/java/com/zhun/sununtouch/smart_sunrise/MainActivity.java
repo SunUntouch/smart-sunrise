@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -50,11 +51,13 @@ public class MainActivity extends AppCompatActivity
     public final static String EXTRA_MESSAGE     = "com.zhun.sununtouch.smart_sunrise.MESSAGE";
 
     //ExpendableList
-    ExpandableListAdapter         expListAdapter;
-    ExpandableListView            expListView;
+    ExpandableListAdapter expListAdapter;
+    ExpandableListView    expListView;
 
-    List<String>                  expListDataHeader;
-    List<String>                  expListDataAlarm;
+    List<String>          expListDataHeader;
+    List<String>          expListDataAlarm;
+    List<String>          expListDataMusicURI;
+
 
     LinkedHashMap<String,
             LinkedHashMap<String,
@@ -80,7 +83,7 @@ public class MainActivity extends AppCompatActivity
     private int isSunday    = 0;
 
     //Music
-    private int actualSongID     = 0;
+    private String actualSongURI = "";
     private int actualSongStart  = 0;
     private int actualVolume     =10;
     private int actualFadeIn     = 0;
@@ -108,17 +111,19 @@ public class MainActivity extends AppCompatActivity
 
     private static int timeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
     private static int timeMinute = Calendar.getInstance().get(Calendar.MINUTE);
+    private MediaPlayer mediaPlayer;
 
     /***********************************************************************************************
      * DATA VALUES
      **********************************************************************************************/
-    private void prepareListDataValues(String _alarmName, int _id, int[] _time, int[] _days, int[] _music, int[] _light){
+    private void prepareListDataValues(String _alarmName,String _musicURI, int _id, int[] _time, int[] _days, int[] _music, int[] _light){
 
         //Load sharedPrefereces
         String settingName = AlarmConstants.ALARM + _id;
-        if(!expListDataAlarm.contains(settingName))
+        if(!expListDataAlarm.contains(settingName)) //TODO add Alarm URi and Values correct
         expListDataAlarm.add(settingName);
 
+        expListDataMusicURI.add(_musicURI);
         expListDataHeader.add(_alarmName);
         //Adding Child Data
         LinkedHashMap<String,
@@ -151,13 +156,12 @@ public class MainActivity extends AppCompatActivity
 
         //Music
         alarmvalueMusic.clear();
-        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_SONGID          , _music[0]); //Maybe ID?
-        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_SONGSTART       , _music[1]);
-        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VOLUME          , _music[2]);
-        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_FADEIN          , _music[3]);
-        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_FADEINTIME      , _music[4]);
-        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV , _music[5]);
-        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE , _music[6]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_SONGSTART       , _music[0]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VOLUME          , _music[1]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_FADEIN          , _music[2]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_FADEINTIME      , _music[3]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV , _music[4]);
+        alarmvalueMusic.put(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE , _music[5]);
 
         newAlarm.put(AlarmConstants.WAKEUP_MUSIC, alarmvalueMusic);
 
@@ -181,12 +185,13 @@ public class MainActivity extends AppCompatActivity
         expListDataChild.put(expListDataAlarm.get(_id), newAlarm);
 
         if(expListAdapter != null)
-            expListAdapter.notifyDataSetChanged(expListDataAlarm, expListDataHeader, expListDataChild);
+            expListAdapter.notifyDataSetChanged(expListDataAlarm, expListDataMusicURI, expListDataHeader, expListDataChild);
     }
     private void prepareLisData(){
         //List
         expListDataHeader = new ArrayList<String>();
         expListDataAlarm  = new ArrayList<String>();
+        expListDataMusicURI= new ArrayList<String>();
         expListDataChild  = new LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>>();
 
         SharedPreferences information = getApplicationContext().getSharedPreferences(AlarmConstants.WAKEUP_TIMER_INFO, Context.MODE_PRIVATE);
@@ -197,10 +202,10 @@ public class MainActivity extends AppCompatActivity
             //Putting Value for each child
             int[] time  = {00, 00, 00};         // hour, minute
             int[] days  = {0,0,0,0,0,0,0};  // Monday - Sunday
-            int[] music = {0,0,0,0,0,0,0};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration, Vibration Strength
+            int[] music = {0,0,0,0,0,0};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration, Vibration Strength
             int[] light = {0,0,0,0,0,0,0,0};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
-            prepareListDataValues(this.getString(R.string.wakeup_no_alarm),0, time, days, music, light);
+            prepareListDataValues(this.getString(R.string.wakeup_no_alarm), "", 0, time, days, music, light); //TODO Set SongID to Standard URI
         }
         else {
 
@@ -213,11 +218,13 @@ public class MainActivity extends AppCompatActivity
                 //GetData
                 String name = settings.getString(AlarmConstants.ALARM_NAME, this.getString(R.string.wakeup_no_alarm));
 
+                String musicURI = settings.getString(AlarmConstants.ALARM_MUSIC_SONGID, Settings.System.DEFAULT_ALARM_ALERT_URI.getPath());
+
                 //Putting Value for each child
                 int[] time  = {
-                        settings.getInt(AlarmConstants.ALARM_TIME_HOUR, 00),
+                        settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , 00),
                         settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, 00),
-                        settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE, 10)};    // hour, minute, snooze
+                        settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , 10)};    // hour, minute, snooze
 
                 int[] days  = {
                         settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , 0),
@@ -229,13 +236,12 @@ public class MainActivity extends AppCompatActivity
                         settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0)};  // Monday - Sunday
 
                 int[] music = {
-                        settings.getInt(AlarmConstants.ALARM_MUSIC_SONGID         , 0),
                         settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , 0),
                         settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , 0),
                         settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , 0),
                         settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , 0),
                         settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, 0),
-                        settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, 0)};      // Song, StartTime, Volume, FadIn, FadeInTime
+                        settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, 0)};      // StartTime, Volume, FadIn, FadeInTime
 
                 int[] light = {
                         settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , 0),
@@ -247,7 +253,7 @@ public class MainActivity extends AppCompatActivity
                         settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , 0),
                         settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , 0)};// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
-                prepareListDataValues(name, _amount, time, days, music, light);
+                prepareListDataValues(name, musicURI, _amount, time, days, music, light);
             }
         }
     }
@@ -281,7 +287,7 @@ public class MainActivity extends AppCompatActivity
         editor.putInt(AlarmConstants.ALARM_DAY_SUNDAY    , isSunday);
 
         //Music
-        editor.putInt(AlarmConstants.ALARM_MUSIC_SONGID         , actualSongID);
+        editor.putString(AlarmConstants.ALARM_MUSIC_SONGID      , actualSongURI);
         editor.putInt(AlarmConstants.ALARM_MUSIC_VOLUME         , actualVolume);
         editor.putInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , actualSongStart);
         editor.putInt(AlarmConstants.ALARM_MUSIC_FADEIN         , actualFadeIn);
@@ -417,10 +423,10 @@ public class MainActivity extends AppCompatActivity
         isThursday  = settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , 0);
         isFriday    = settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , 0);
         isSaturday  = settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0);
-        isSunday    = settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0); // Monday - Sunday
+        isSunday    = settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY, 0); // Monday - Sunday
 
         //Load Music
-        actualSongID    = settings.getInt(AlarmConstants.ALARM_MUSIC_SONGID         , 0);
+        actualSongURI   = settings.getString(AlarmConstants.ALARM_MUSIC_SONGID      , Settings.System.DEFAULT_ALARM_ALERT_URI.getPath());
         actualSongStart = settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , 0);
         actualVolume    = settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , 0);
         actualFadeIn    = settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , 0);
@@ -453,7 +459,7 @@ public class MainActivity extends AppCompatActivity
         expListView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendbleList);
         //prepare list data
         prepareLisData();
-        expListAdapter = new ExpandableListAdapter(this, expListDataAlarm, expListDataHeader, expListDataChild);
+        expListAdapter = new ExpandableListAdapter(this, expListDataAlarm, expListDataMusicURI, expListDataHeader, expListDataChild);
         //setting list adapter
         expListView.setAdapter(expListAdapter);
 
@@ -495,13 +501,18 @@ public class MainActivity extends AppCompatActivity
                 //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 //        .setAction("Action", null).show();
                 saveListDataChild(AlarmConstants.ALARM);
-                ExpandableListAdapter expListAdapterNew = new ExpandableListAdapter(expListView.getContext(), expListDataAlarm, expListDataHeader, expListDataChild);
+                ExpandableListAdapter expListAdapterNew = new ExpandableListAdapter(expListView.getContext(), expListDataAlarm, expListDataMusicURI, expListDataHeader, expListDataChild);
                 expListAdapter = expListAdapterNew;
                 expListView.setAdapter(expListAdapter);
             }
         });
 
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -706,6 +717,7 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showMusicSettingDialog(View v){
 
+        actualButtonID = v.getId();
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_menu));
@@ -737,12 +749,6 @@ public class MainActivity extends AppCompatActivity
 
         //Set Values for the Resolver
         String[] STAR = { "*" };
-
-        String[] projection = new String[] {
-                MediaStore.Audio.Artists._ID,
-                MediaStore.Audio.Artists.ARTIST,
-                MediaStore.Audio.Artists.NUMBER_OF_ALBUMS,
-                MediaStore.Audio.Artists.NUMBER_OF_TRACKS };
 
         ContentResolver musicResolver = expListView.getContext().getContentResolver();
         Cursor cursor = musicResolver.query(allSongUri, STAR, null, null, null);
@@ -806,22 +812,42 @@ public class MainActivity extends AppCompatActivity
         //Get SongNames from SongInformationArray
         final ArrayList<SongInformation> Songs = _Songs;
         ArrayList<String> songNameArrayList = new ArrayList<>();
-        for(SongInformation songs : Songs)
-            songNameArrayList.add(songs.getTitle());
+        for(SongInformation songs : Songs){
+            String nameWithoutExtension  = songs.getTitle();
 
+            if(nameWithoutExtension != null && nameWithoutExtension.contains("."))
+                nameWithoutExtension = nameWithoutExtension.substring(0, nameWithoutExtension.lastIndexOf('.'));
+
+            songNameArrayList.add(nameWithoutExtension);
+        }
         //Get Song Name Array and set it for Alarm Dialog
         final String[] songNameArray = songNameArrayList.toArray(new String[0]);
 
         builder.setItems(songNameArray, new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
+                actualSongURI = _Songs.get(which).getPath();
+
+                String newMusicURI  = _Songs.get(which).getPath();
+                String newMusicText = newMusicURI.substring(newMusicURI.lastIndexOf('/') + 1);
+                newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
+
+                Button musicButton = (Button) findViewById(actualButtonID);
+                musicButton.setText(newMusicText);
+
+                //save Settings
+                String settingsName = AlarmConstants.WAKEUP_TIMER + actualAlarm;
+                SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+                saveListDataChild(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM), actualAlarm);
+
+                prepareLisData();
+
                 dialog.dismiss();
                 //return;
             }
         });
 
         final AlertDialog alertDialog = builder.create();
-
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
 
             public void onShow(DialogInterface dialog) {
@@ -832,16 +858,9 @@ public class MainActivity extends AppCompatActivity
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
                         Uri fileUri = Uri.parse(_Songs.get(position).getPath());
-                        MediaPlayer mediaPlayer = new MediaPlayer();
-                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-                        try {
-                            //playMusic(fileUri);  TODO Error Handling!!
-                            mediaPlayer.setDataSource(getApplicationContext(), fileUri);
-                            mediaPlayer.prepare();
-                        } catch (IOException e) {
-                            Log.e("Exception: ", e.getMessage());
-                        }
+                        try { prepareMusic(fileUri); }
+                        catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
 
                         mediaPlayer.start();
                         return true;
@@ -850,17 +869,36 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                stopMusic();
+            }
+        });
         //Show Builder
-        builder.show();
+        alertDialog.show();
     }
 
-    private void playMusic(Uri _SongUri) throws IOException{
+    private void prepareMusic(Uri _SongUri) throws IOException{
 
-        MediaPlayer mediaPlayer = new MediaPlayer();
+        if(mediaPlayer == null)
+            mediaPlayer = new MediaPlayer();
+        else
+            mediaPlayer.reset();
+
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         mediaPlayer.setDataSource(getApplicationContext(), _SongUri);
         mediaPlayer.prepare();
-        mediaPlayer.start();
+    }
+
+    private void stopMusic(){
+
+        if(mediaPlayer!=null){
+
+            mediaPlayer.stop();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        }
     }
 
     /***********************************************************************************************
@@ -958,7 +996,6 @@ public class MainActivity extends AppCompatActivity
      * MUSIC START TIME DIALOG
      **********************************************************************************************/
     public void showMusicStartSettingDialog(View v){
-
 
         //Save ID From Button
         actualButtonID = v.getId();
@@ -1675,7 +1712,6 @@ public class MainActivity extends AppCompatActivity
 
         //music
         int[] musicvalues = {
-                settings.getInt(AlarmConstants.ALARM_MUSIC_SONGID         , 0),
                 settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , 0),
                 settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , 0),
                 settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , 0),
@@ -1683,7 +1719,7 @@ public class MainActivity extends AppCompatActivity
                 settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, 0),
                 settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, 0)};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration Aktiv, Vibration Strength
 
-        bundle.putIntArray( AlarmConstants.WAKEUP_MUSIC,musicvalues);
+        bundle.putIntArray(AlarmConstants.WAKEUP_MUSIC, musicvalues);
 
         //light
         int[] lightvalues = {
@@ -1696,7 +1732,10 @@ public class MainActivity extends AppCompatActivity
                 settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , 0),
                 settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , 0)}; // UseScreen, ScreenBrightness, ScreenStrartTime, Color1, Color2, FadeColor, UseLed, LedStartTime
 
-        bundle.putIntArray( AlarmConstants.WAKEUP_LIGHT,lightvalues);
+        bundle.putIntArray(AlarmConstants.WAKEUP_LIGHT, lightvalues);
+
+        String musicURI = settings.getString(AlarmConstants.ALARM_MUSIC_SONGID, Settings.System.DEFAULT_ALARM_ALERT_URI.getPath());
+        bundle.putString(AlarmConstants.ALARM_MUSIC_SONGID, musicURI);
 
         intent.putExtras(bundle);
         //Create new PendingIntent
