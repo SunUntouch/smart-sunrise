@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;

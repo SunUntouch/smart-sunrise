@@ -1,7 +1,6 @@
 package com.zhun.sununtouch.smart_sunrise;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.DataSetObserver;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;

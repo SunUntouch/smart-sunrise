@@ -1,14 +1,11 @@
 package com.zhun.sununtouch.smart_sunrise;
 
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
-import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
@@ -16,7 +13,6 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
@@ -39,7 +35,6 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -835,7 +830,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int which) {
                 actualSongURI = _Songs.get(which).getPath();
 
-                String newMusicURI  = _Songs.get(which).getPath();
+                String newMusicURI = _Songs.get(which).getPath();
                 String newMusicText = newMusicURI.substring(newMusicURI.lastIndexOf('/') + 1);
                 newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
 
@@ -866,8 +861,11 @@ public class MainActivity extends AppCompatActivity
 
                         Uri fileUri = Uri.parse(_Songs.get(position).getPath());
 
-                        try { prepareMusic(fileUri); }
-                        catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
+                        try {
+                            prepareMusic(fileUri);
+                        } catch (IOException e) {
+                            Log.e("Exception: ", e.getMessage());
+                        }
 
                         mediaPlayer.start();
                         return true;
