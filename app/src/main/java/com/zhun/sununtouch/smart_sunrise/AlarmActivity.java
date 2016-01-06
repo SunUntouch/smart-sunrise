@@ -40,6 +40,7 @@ public class AlarmActivity extends AppCompatActivity {
     private int actualAlarm = -1;
     private Handler alarmHandler;
 
+    private boolean snoozed = false;
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -48,6 +49,11 @@ public class AlarmActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+
+        if(!snoozed){
+            AlarmManage newAlarm = new AlarmManage(this);
+            newAlarm.cancelAlarm(actualAlarm);
+        }
 
         alarmHandler.removeCallbacksAndMessages(null);
         setVibrationStop();
@@ -458,14 +464,13 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     public void onWakeUpClick(View v){
 
-        AlarmManage newAlarm = new AlarmManage(this);
-        newAlarm.cancelAlarm(actualAlarm);
         this.finish();
     }
 
     public void onSnoozeClick(View v){
 
         AlarmManage newAlarm = new AlarmManage(this);
+        snoozed = true;
         newAlarm.snoozeAlarm(actualAlarm);
         this.finish();
     }

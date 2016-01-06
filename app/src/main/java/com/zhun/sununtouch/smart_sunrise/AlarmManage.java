@@ -161,33 +161,33 @@ public class AlarmManage extends AppCompatActivity {
 
         //Load Calendar Instance and get Actual Day of the Week
         Calendar calendar = Calendar.getInstance();
-        int tomorrowDay = calendar.get(Calendar.DAY_OF_WEEK);
+        int currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
 
         //get Days till Next Alarm
         int daysToNextAlarm = 0;
-        for(int day = 0; day < 6; ++day){
-            //Get Current Day
-            int nextDay = tomorrowDay + day;
 
+        if(days[0] == 1 || days[1] == 1 || days[2] == 1 || days[3] == 1 || days[4] == 1 || days[5] == 1 || days[6] == 1)
+        for(int day = 0; day < 7; ++day){
+
+            //Get Current Day
+            int nextDay = currentDay + day ;
             //If Sunday is Arrived switch to Monday index
-            if(nextDay > 6)
-                nextDay -= tomorrowDay;
+            nextDay = (nextDay > 6) ? nextDay - 7 : nextDay;
 
             //If Next Day don't has a Alarm add 1 to daysNextAlarm else break loop
             if(days[nextDay] == 0)
                 ++daysToNextAlarm;
-            else
+            else{
+                ++daysToNextAlarm;
                 break;
+            }
         }
 
         createAlarmManager();
-
         //If there are Days between next Alarm multiply else Cancel Alarm
-        if(daysToNextAlarm > 0){
-
-            long MillisToNextAlarm = AlarmManager.INTERVAL_DAY * daysToNextAlarm;
-            setNewAlarm(_id, false, MillisToNextAlarm);
-        }else
+        if(daysToNextAlarm > 0)
+            setNewAlarm(_id, false, AlarmManager.INTERVAL_DAY * daysToNextAlarm);
+        else
             alarmManager.cancel(pendingIntent);
     }
 }
