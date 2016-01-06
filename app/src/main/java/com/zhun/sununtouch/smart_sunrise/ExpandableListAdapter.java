@@ -109,7 +109,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 //Choosing Music Button
                 String newMusicURI  = wakeup_musicURIs.get(_groupPosition);
                 String newMusicText = newMusicURI.substring(newMusicURI.lastIndexOf('/') + 1);
-                newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
+                if(newMusicText.indexOf('.') != -1)
+                    newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
 
                 Button setMusicButton = (Button) _convertView.findViewById(_viewID[1]);
                 setMusicButton.setText(newMusicText);

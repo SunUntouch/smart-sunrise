@@ -3,6 +3,7 @@ package com.zhun.sununtouch.smart_sunrise;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
@@ -16,6 +17,7 @@ import android.os.PowerManager;
 import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,21 +37,30 @@ public class AlarmActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private Vibrator m_Vibrator;
 
+    private int actualAlarm = -1;
+    private Handler alarmHandler;
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        alarmHandler.removeCallbacksAndMessages(null);
         setVibrationStop();
         stopMusic();
         stopLED();
     }
 
-    private android.os.Handler dateHandler = new android.os.Handler();
-    private android.os.Handler timeHandler = new android.os.Handler();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm);
+
+        alarmHandler = new Handler();
 
         Bundle intentExtras = getIntent().getExtras();
         int[] time  = intentExtras.getIntArray(AlarmConstants.WAKEUP_TIME); //Time, Minutes, Snooze
@@ -58,6 +69,9 @@ public class AlarmActivity extends AppCompatActivity {
         int[] light = intentExtras.getIntArray(AlarmConstants.WAKEUP_LIGHT);// UseScreen, ScreenBrightness, ScreenStrartTime, Color1, Color2, FadeColor, UseLed, LedStartTime
 
         String musicURI = intentExtras.getString(AlarmConstants.ALARM_MUSIC_SONGID);
+
+        actualAlarm = intentExtras.getInt(AlarmConstants.ALARM_ID);
+
         //Boolean Values
         //Screen
         boolean useScreen      = (light[0] == 1) ? true : false;
@@ -78,7 +92,7 @@ public class AlarmActivity extends AppCompatActivity {
 
         //SCREEN BRIGHTNESS/////////////////////////////////////////////////////////////////////////
         if(useScreen)
-            doBrightness(minuteScreenStart);
+            doBrightness(minuteScreenStart, light[2], light[1]);
 
         //SCREEN VIEWS//////////////////////////////////////////////////////////////////////////////
         doViews();
@@ -126,16 +140,9 @@ public class AlarmActivity extends AppCompatActivity {
         return dayName;
     }
 
-    private void doBrightness(int minutes){
-        android.os.Handler screenTimerHandler = new android.os.Handler();
-        Runnable screenTimerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                startScreen();
-            }
-        };
-        screenTimerHandler.postDelayed(screenTimerRunnable, TimeUnit.MINUTES.toMillis(minutes));
-    }
+    /***********************************************************************************************
+     * CONSTRUCT VIEWS
+     **********************************************************************************************/
     private void doViews(){
         //SetViews
         //Date
@@ -156,7 +163,6 @@ public class AlarmActivity extends AppCompatActivity {
         timeText.setText(String.format("%02d:%02d", currentHour, currentMinute));
 
         //Set new Handler for Updating Date and Time
-        timeHandler = new android.os.Handler();
         final Runnable timeRunnable = new Runnable() {
             @Override
             public void run() {
@@ -170,18 +176,21 @@ public class AlarmActivity extends AppCompatActivity {
                         (calendarNew.get(Calendar.MONTH) + 1) + "." +
                         calendarNew.get(Calendar.YEAR));
 
-                timeHandler.postDelayed(this, 100); //1 second check for new Time
+                alarmHandler.postDelayed(this, 100); //1 second check for new Time
             }
         };
-        timeHandler.postDelayed(timeRunnable, 100); //1 second check for new Time
+        alarmHandler.postDelayed(timeRunnable, 100); //1 second check for new Time
     }
+
+    /***********************************************************************************************
+     * COLOR FADING
+     **********************************************************************************************/
     private void doColorFading(final boolean _colorFading, int minutes, final int _minutesScreen, final int _color1, final int _color2){
 
         //Open LinearLayout to Change Color
         final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.wakeup_wakescreen_layout);
         linearLayout.setBackgroundColor(Color.BLACK);
 
-        Handler initialColorFadeHandler = new Handler();
         Runnable initialColorFadeRunnable = new Runnable() {
             @Override
             public void run() {
@@ -191,14 +200,13 @@ public class AlarmActivity extends AppCompatActivity {
 
                 //ObjectAnimator
                 ObjectAnimator colorFade1 = ObjectAnimator.ofObject(linearLayout,"backgroundColor", new ArgbEvaluator(), Color.BLACK, _color1);
-                colorFade1.setDuration(duration-1);
+                colorFade1.setDuration(duration);
                 colorFade1.start();
 
                 //Check if Fading is true
                 if(_colorFading){
 
                     //Second ColorHandler
-                    Handler colorHandler = new Handler();
                     Runnable colorRunnable = new Runnable() {
                         @Override
                         public void run() {
@@ -208,76 +216,112 @@ public class AlarmActivity extends AppCompatActivity {
                             colorFade2.start();
                         }
                     };
-                    colorHandler.postDelayed(colorRunnable, duration );
+                    alarmHandler.postDelayed(colorRunnable, duration + 1 );
                 }
             }
         };
-        initialColorFadeHandler.postDelayed(initialColorFadeRunnable, TimeUnit.MINUTES.toMillis(minutes));
+        alarmHandler.postDelayed(initialColorFadeRunnable, TimeUnit.MINUTES.toMillis(minutes));
     }
-    private void doLED(int minutes){
 
-        //New Handler for Waiting Till Time to show LED
-        final android.os.Handler handler = new android.os.Handler();
+    /***********************************************************************************************
+     * BRIGHTNESS
+     **********************************************************************************************/
 
-        Runnable runLED = new Runnable() {
-                @Override
-                public void run() {
-                    startLED();
+    private void doBrightness(int minutes, final int _screenStartTime, final int _screenBrightness ){
+        Runnable screenTimerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                setBrightness(_screenStartTime, _screenBrightness);
+            }
+        };
+        alarmHandler.postDelayed(screenTimerRunnable, TimeUnit.MINUTES.toMillis(minutes));
+    }
+    private void setBrightness(int _screenStartTime, int _screenBrightness){
+
+        //Start with Basic parameters
+        startScreen();
+
+        //GetCurrent Layout and Set new Brightness
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.screenBrightness = 0.0F;
+        getWindow().setAttributes(layout);
+
+        //time for each step ti illuminate
+        final long  millis     =  ( TimeUnit.MINUTES.toMillis(_screenStartTime) == 0) ? 0 : TimeUnit.MINUTES.toMillis(_screenStartTime) / 100;  //divide milliseconds with 100 because we have 100 steps till full illumination
+        final float brightness = (float) _screenBrightness / 100;
+
+        //New Time Handler
+        Runnable screenLightRunnable = new Runnable() {
+            @Override
+            public void run() {
+
+                //get Layout and Update LightValue till Max
+                WindowManager.LayoutParams layoutNew = getWindow().getAttributes();
+                if(layoutNew.screenBrightness < brightness){
+
+                    layoutNew.screenBrightness += 0.01F;
+                    getWindow().setAttributes(layoutNew);
+
+                    alarmHandler.postDelayed(this, millis);
                 }
-            };
-        //Start Delayed
-        handler.postDelayed(runLED, TimeUnit.MINUTES.toMillis(minutes));
+            }
+        };
+        alarmHandler.postDelayed(screenLightRunnable, millis); //All 10 Seconds more Light
     }
 
+    /***********************************************************************************************
+     * MUSIC
+     **********************************************************************************************/
+    private int currentVolume;
     private void doPlayMusic(boolean _FadeIn, final int _musicVolume, int minutes, final int _fadingSeconds, final String _musicURI){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
 
         try { prepareMusic(_musicURI); }
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
 
         final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+
         //Get MaxVolume of Music
-        final int maxVolume = Math.round((float) _musicVolume / 6.67f);
+        final int maxVolumeAndroid = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolumeAndroid, 0);
 
         if(_FadeIn){
 
-            //Set Stream Volume Silent
-            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0); //TODO Change Volume Slider to 1-15 or find way to implement absolute volume
-
-            final Handler musicFadeInHandler = new Handler();
+            currentVolume = 0;
+            mediaPlayer.setVolume(currentVolume, currentVolume);
             Runnable musicFadeInRunnable = new Runnable() {
                 @Override
                 public void run() {
 
-                    int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-
                     if(!mediaPlayer.isPlaying())
                         mediaPlayer.start();
 
-                    if( currentVolume < maxVolume){
+                    if( currentVolume <= _musicVolume){
                         //Get Time For Fading and Sequenze to 15 Steps
                         long millis =  TimeUnit.SECONDS.toMillis(_fadingSeconds);
-                        long millis_steps = millis / 15;
+                        long millis_steps = millis / 100;
 
                         //Set AudioManager
-                        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, ++currentVolume, 0);
-                        musicFadeInHandler.postDelayed(this, millis_steps);
+                        float volume= 1 - (float)(Math.log(_musicVolume-currentVolume)/Math.log(_musicVolume));
+                        mediaPlayer.setVolume(volume, volume);
+                        currentVolume +=1;
+                        alarmHandler.postDelayed(this, millis_steps);
                     }
                 }
             };
-            musicFadeInHandler.postDelayed(musicFadeInRunnable, TimeUnit.MINUTES.toMillis(minutes));
+            alarmHandler.postDelayed(musicFadeInRunnable, TimeUnit.MINUTES.toMillis(minutes) + 1);
         }
         else{
 
-            Handler  musicPlayHandler  = new Handler();
             Runnable musicPlayRunnable = new Runnable() {
                 @Override
                 public void run() {
 
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolume, 0); //TODO Change Volume Slider to 1-15 or find way to implement absolute volume
+                    float volume= 1 - (float)(Math.log(_musicVolume-_musicVolume)/Math.log(_musicVolume));
+                    mediaPlayer.setVolume(volume, volume);
                     mediaPlayer.start();
                 }
             };
-            musicPlayHandler.postDelayed(musicPlayRunnable, TimeUnit.MINUTES.toMillis(minutes));
+            alarmHandler.postDelayed(musicPlayRunnable, TimeUnit.MINUTES.toMillis(minutes));
         }
     }
     private void prepareMusic(String _SongUri) throws IOException {
@@ -291,6 +335,7 @@ public class AlarmActivity extends AppCompatActivity {
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         Uri newSongUri = Uri.parse(_SongUri);
         mediaPlayer.setDataSource(getApplicationContext(), newSongUri);
+        mediaPlayer.setLooping(true);
         mediaPlayer.prepare();
     }
 
@@ -299,14 +344,18 @@ public class AlarmActivity extends AppCompatActivity {
         //Stop and Release Music
         if(mediaPlayer!=null){
 
-            mediaPlayer.stop();
-            mediaPlayer.reset();
+            if(mediaPlayer.isPlaying())
+                mediaPlayer.stop();
             mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
+
+    /***********************************************************************************************
+     * VIBRATION
+     **********************************************************************************************/
     private void doVibrate(int minutes, final int _vibrationStrength){
         //Set new Handler
-        Handler vibrationHandler = new Handler();
         Runnable vibrationRunnable = new Runnable() {
             @Override
             public void run() {
@@ -315,40 +364,7 @@ public class AlarmActivity extends AppCompatActivity {
         };
 
         //Get Time Value till Vibration Starts
-        vibrationHandler.postDelayed(vibrationRunnable, TimeUnit.MINUTES.toMillis(minutes));
-    }
-
-    private void setBrightness(final int[] _lightValues){
-
-        //Start with Basic parameters
-        startScreen();
-
-        //GetCurrent Layout and Set new Brightness
-        WindowManager.LayoutParams layout = getWindow().getAttributes();
-        layout.screenBrightness = 0.0F;
-        getWindow().setAttributes(layout);
-
-        //time for each step ti illuminate
-        final long  millis =  TimeUnit.MINUTES.toMillis(_lightValues[2]) / 100;  //divide milliseconds with 100 because we have 100 steps till full illumination
-
-        //New Time Handler
-        final android.os.Handler screenLightHandler = new android.os.Handler();
-        Runnable screenLightRunnable = new Runnable() {
-            @Override
-            public void run() {
-
-                //get Layout and Update LightValue till Max
-                WindowManager.LayoutParams layoutNew = getWindow().getAttributes();
-                if(layoutNew.screenBrightness < (float) _lightValues[1] / 100){
-
-                    layoutNew.screenBrightness += 0.01F;
-                    getWindow().setAttributes(layoutNew);
-
-                    screenLightHandler.postDelayed(this, millis);
-                }
-            }
-        };
-        screenLightHandler.postDelayed(screenLightRunnable, millis); //All 10 Seconds more Light
+        alarmHandler.postDelayed(vibrationRunnable, TimeUnit.MINUTES.toMillis(minutes));
     }
 
     private void setVibrationStart(){
@@ -394,9 +410,25 @@ public class AlarmActivity extends AppCompatActivity {
         }
     }
 
+    /***********************************************************************************************
+     * SCREEN AND LED
+     **********************************************************************************************/
     private void startScreen(){
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+    }
+
+    private void doLED(int minutes){
+
+        //New Handler for Waiting Till Time to show LED
+        Runnable runLED = new Runnable() {
+            @Override
+            public void run() {
+                startLED();
+            }
+        };
+        //Start Delayed
+        alarmHandler.postDelayed(runLED, TimeUnit.MINUTES.toMillis(minutes));
     }
     private void startLED(){
 
@@ -417,6 +449,24 @@ public class AlarmActivity extends AppCompatActivity {
         if(m_Cam != null){
             m_Cam.stopPreview();
             m_Cam.release();
+            m_Cam = null;
         }
+    }
+
+    /***********************************************************************************************
+     * WAKEUP AND SNOOZE BUTTON
+     **********************************************************************************************/
+    public void onWakeUpClick(View v){
+
+        AlarmManage newAlarm = new AlarmManage(this);
+        newAlarm.cancelAlarm(actualAlarm);
+        this.finish();
+    }
+
+    public void onSnoozeClick(View v){
+
+        AlarmManage newAlarm = new AlarmManage(this);
+        newAlarm.snoozeAlarm(actualAlarm);
+        this.finish();
     }
 }

@@ -6,11 +6,13 @@ package com.zhun.sununtouch.smart_sunrise;
 public abstract class AlarmConstants {
 
     //Shared Pref Settings
-    public final static String WAKEUP_TIMER      = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
-    public final static String WAKEUP_TIMER_INFO = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS_INFO";
+    public final static String WAKEUP_TIMER            = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
+    public final static String WAKEUP_TIMER_INFO       = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS_INFO";
+    public final static String WAKEUP_TIMER_LAST_ACTIV = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS_LAST_ACTIVE";
 
     //Alarm
     public final static String ALARM                      = "Alarm";
+    public final static String ALARM_ID                   = "Alarm_ID";
     public final static String ALARM_NAME                 = "Alarm_Name";
     public final static String ALARM_VALUE                = "Alarm_Value";
 
@@ -54,4 +56,5 @@ public abstract class AlarmConstants {
     public final static String WAKEUP_MUSIC   = "Music";
     public final static String WAKEUP_LIGHT   = "Light";
     public final static String WAKEUP_DELETE  = "Delete";
+
 }

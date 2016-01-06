@@ -36,8 +36,10 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -83,7 +85,7 @@ public class MainActivity extends AppCompatActivity
     private int isSunday    = 0;
 
     //Music
-    private String actualSongURI = "";
+    private String actualSongURI = Settings.System.DEFAULT_ALARM_ALERT_URI.getPath();
     private int actualSongStart  = 0;
     private int actualVolume     =10;
     private int actualFadeIn     = 0;
@@ -105,9 +107,6 @@ public class MainActivity extends AppCompatActivity
     private int actualButtonID    = 0;
     private int actualAlarmNameID = 0;
 
-    //AlarmManager
-    AlarmManager alarmManager;
-    private PendingIntent pendingIntent;
 
     private static int timeHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
     private static int timeMinute = Calendar.getInstance().get(Calendar.MINUTE);
@@ -506,8 +505,6 @@ public class MainActivity extends AppCompatActivity
                 expListView.setAdapter(expListAdapter);
             }
         });
-
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
     }
 
     @Override
@@ -651,7 +648,9 @@ public class MainActivity extends AppCompatActivity
 
         prepareLisData();
 
-        setNewAlarm(actualAlarm);
+        AlarmManage newAlarm = new AlarmManage(this);
+        newAlarm.setNewAlarm(actualAlarm, false, 0);
+        //setNewAlarm(actualAlarm, false, 0);
     }
 
     /***********************************************************************************************
@@ -729,6 +728,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int which) {
 
                 onMusicSet(which);
+                stopMusic();
                 dialog.dismiss();
             }
         });
@@ -750,57 +750,64 @@ public class MainActivity extends AppCompatActivity
         //Set Values for the Resolver
         String[] STAR = { "*" };
 
-        ContentResolver musicResolver = expListView.getContext().getContentResolver();
-        Cursor cursor = musicResolver.query(allSongUri, STAR, null, null, null);
+        boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
 
-        //ArrayList for MusicEntrys
-        ArrayList<SongInformation> songList = new ArrayList<>();
+        if(isSDPresent || _modeID == 0){
+            ContentResolver musicResolver = expListView.getContext().getContentResolver();
+            Cursor cursor = musicResolver.query(allSongUri, STAR, null, null, null);
 
-        //Search Cursor for Values
-        if(cursor != null){
+            //ArrayList for MusicEntrys
+            ArrayList<SongInformation> songList = new ArrayList<>();
 
-            if(cursor.moveToFirst()){
-                do{
-                    String song_name = cursor
-                            .getString(cursor
-                                    .getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+            //Search Cursor for Values
+            if(cursor != null){
 
-                    int song_id = cursor.getInt(cursor
-                            .getColumnIndex(MediaStore.Audio.Media._ID));
+                if(cursor.moveToFirst()){
+                    do{
+                        String song_name = cursor
+                                .getString(cursor
+                                        .getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
 
-                    String fullpath = cursor.getString(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.DATA));
+                        int song_id = cursor.getInt(cursor
+                                .getColumnIndex(MediaStore.Audio.Media._ID));
 
-                    String album_name = cursor.getString(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                    int album_id = cursor.getInt(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
+                        String fullpath = cursor.getString(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.DATA));
 
-                    String artist_name = cursor.getString(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                    int artist_id = cursor.getInt(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
+                        String album_name = cursor.getString(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                        int album_id = cursor.getInt(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
 
-                    int isAlarm = cursor.getInt(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.IS_ALARM));
+                        String artist_name = cursor.getString(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                        int artist_id = cursor.getInt(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
 
-                    int isMusic = cursor.getInt(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
+                        int isAlarm = cursor.getInt(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.IS_ALARM));
 
-                    int isRingtone = cursor.getInt(cursor
-                            .getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
+                        int isMusic = cursor.getInt(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
 
-                    if(isMusic == 1 && _modeID == 1)
-                        songList.add(new SongInformation(song_id,  song_name, artist_name, album_name, fullpath));
-                    else
-                        songList.add(new SongInformation(song_id,  song_name, artist_name, album_name, fullpath));
+                        int isRingtone = cursor.getInt(cursor
+                                .getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
+
+                        if(isMusic == 1 && _modeID == 1)
+                            songList.add(new SongInformation(song_id,  song_name, artist_name, album_name, fullpath));
+                        else
+                            songList.add(new SongInformation(song_id,  song_name, artist_name, album_name, fullpath));
+                    }
+                    while(cursor.moveToNext());
                 }
-                while(cursor.moveToNext());
+                //Choose an Alarm
+                chooseAlarmSongDialog(songList);
             }
+            else
+                Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
         }
-
-        //Choose an Alarm
-        chooseAlarmSongDialog(songList);
+        else
+            Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
     }
 
     private void chooseAlarmSongDialog(final ArrayList<SongInformation> _Songs){
@@ -895,9 +902,12 @@ public class MainActivity extends AppCompatActivity
 
         if(mediaPlayer!=null){
 
-            mediaPlayer.stop();
-            mediaPlayer.reset();
+            if(mediaPlayer.isPlaying())
+                mediaPlayer.stop();
+
+            //mediaPlayer.reset();
             mediaPlayer.release();
+            mediaPlayer = null;
         }
     }
 
@@ -1553,6 +1563,7 @@ public class MainActivity extends AppCompatActivity
 
         prepareLisData();
     }
+
     /***********************************************************************************************
      * LED LIGHT SETTING DIALOG
      **********************************************************************************************/
@@ -1628,119 +1639,6 @@ public class MainActivity extends AppCompatActivity
         saveListDataChild(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM), actualAlarm);
 
         prepareLisData();
-    }
-
-    /***********************************************************************************************
-     * SET AlarmConstants.ALARM
-     **********************************************************************************************/
-    class AlarmHandler extends android.os.Handler{
-
-        @Override
-        public void handleMessage(Message msg) {
-
-            Bundle bundle = msg.getData();
-            timeHour   = bundle.getInt(AlarmConstants.ALARM_TIME_HOUR);
-            timeMinute = bundle.getInt(AlarmConstants.ALARM_TIME_MINUTES);
-
-            TextView textView = (TextView) findViewById(R.id.wakeup_timer_wakescreen_textview);
-            textView.setText(timeHour + ":" + timeMinute);
-            setNewAlarm(0);
-        }
-    }
-
-    private void setNewAlarm(int _id){
-
-        //sharedPrefereces
-        String settingName = AlarmConstants.WAKEUP_TIMER + _id;
-        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingName, Context.MODE_PRIVATE);
-
-        //GetData
-        String name = settings.getString(AlarmConstants.ALARM_NAME, this.getString(R.string.wakeup_no_alarm));
-
-        //Putting Value for each child
-        int[] time  = {
-                settings.getInt(AlarmConstants.ALARM_TIME_HOUR, 00),
-                settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, 00),
-                settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE, 10)};    // hour, minute, snooze
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, time[0]);
-        calendar.set(Calendar.MINUTE, time[1]);
-
-        pendingIntent = getPendingIntent(0, _id);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-    }
-
-    public  void cancelAlarm(View v){
-        if(alarmManager != null){
-            alarmManager.cancel(pendingIntent);
-        }
-    }
-
-    public void snoozeAlarm(View v){
-
-    }
-
-    private PendingIntent getPendingIntent(int _requestCode, int _alarmId){
-
-        Intent intent = new Intent(this, AlarmReceiver.class);
-
-        //sharedPrefereces
-        String settingsName = AlarmConstants.WAKEUP_TIMER + _alarmId;
-        SharedPreferences settings = getApplicationContext().getSharedPreferences(settingsName, Context.MODE_PRIVATE);
-
-        Bundle bundle = new Bundle();
-        //Time
-        int[] timevalues = {
-                settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , 0),
-                settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, 0),
-                settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , 0)};
-
-        bundle.putIntArray( AlarmConstants.WAKEUP_TIME,timevalues);
-
-        //Days
-        int[] daysvalues = {
-                settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0)};
-
-        bundle.putIntArray( AlarmConstants.WAKEUP_DAYS,daysvalues);
-
-        //music
-        int[] musicvalues = {
-                settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, 0)};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration Aktiv, Vibration Strength
-
-        bundle.putIntArray(AlarmConstants.WAKEUP_MUSIC, musicvalues);
-
-        //light
-        int[] lightvalues = {
-                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR        , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , 0)}; // UseScreen, ScreenBrightness, ScreenStrartTime, Color1, Color2, FadeColor, UseLed, LedStartTime
-
-        bundle.putIntArray(AlarmConstants.WAKEUP_LIGHT, lightvalues);
-
-        String musicURI = settings.getString(AlarmConstants.ALARM_MUSIC_SONGID, Settings.System.DEFAULT_ALARM_ALERT_URI.getPath());
-        bundle.putString(AlarmConstants.ALARM_MUSIC_SONGID, musicURI);
-
-        intent.putExtras(bundle);
-        //Create new PendingIntent
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, _requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        return  pendingIntent;
     }
 
     /***********************************************************************************************

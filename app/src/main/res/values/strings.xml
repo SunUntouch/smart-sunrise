@@ -90,5 +90,7 @@
 
     <!-- Delete Text -->
     <string name="wakeup_delete">Delete</string>
+    <string name="wakeup_music_no_music">No Music on Device</string>
+    <string name="wakeup_music_no_sd_card">No External Storage Available</string>
 
 </resources>

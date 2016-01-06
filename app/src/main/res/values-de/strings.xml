@@ -81,5 +81,7 @@
 
     <!-- Delete Text -->
     <string name="wakeup_delete">Löschen</string>
+    <string name="wakeup_music_no_music">Keine Musik auf dem Gerät</string>
+    <string name="wakeup_music_no_sd_card">Kein Externer Speicher auf dem Gerät</string>
 
 </resources>
