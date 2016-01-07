@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
@@ -35,7 +36,27 @@ public class AlarmManage extends AppCompatActivity {
     }
 
     private PendingIntent getPendingIntent(int _alarmId){
+        //Create new PendingIntent
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, _alarmId, getIntent(_alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
 
+        return pendingIntent;
+    }
+
+    private PendingIntent getOnTapPendingIntent(){
+
+        Intent intent = new Intent("WAKEUP_TIMER_ON_TAP_INTENT");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
+        return pendingIntent;
+    }
+
+    public boolean checkForPendingIntent(int _alarmId){
+
+        //Check if Intent exists
+        boolean alarmUp = (PendingIntent.getBroadcast(context, _alarmId, getIntent(_alarmId), PendingIntent.FLAG_NO_CREATE) != null);
+        return alarmUp;
+    }
+
+    private Intent getIntent(int _alarmId){
         Intent intent = new Intent(context, AlarmReceiver.class);
 
         //sharedPrefereces
@@ -96,10 +117,8 @@ public class AlarmManage extends AppCompatActivity {
 
         //Fill Intent
         intent.putExtras(bundle);
-        //Create new PendingIntent
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, _alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        return pendingIntent;
+        return intent;
     }
 
     public void setNewAlarm(int _id, boolean snooze, long repeatMillis){
@@ -132,7 +151,16 @@ public class AlarmManage extends AppCompatActivity {
 
         createAlarmManager();
         alarmManager.cancel(pendingIntent);
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() + snoozeTime + repeatMillis, pendingIntent);
+
+        //Check for SDK Version and Use different AlarmManager Functions
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+
+            //Newer API Level provides a Symbol when Alarm is active
+            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis() + snoozeTime + repeatMillis, pendingIntent);
+            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
+        }
+        else
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() + snoozeTime + repeatMillis, pendingIntent);
     }
 
     public void snoozeAlarm(int _id){

@@ -12,6 +12,9 @@
     <string name="permdesc_flashlight">Make use of the Flashlight</string>
 
     <!-- Alarm Text -->
+    <string name="wakeup_AlarmSet">Alarm is active</string>
+    <string name="wakeup_AlarmNotSet">Alarm is inactive</string>
+
     <string name="wakeup_no_alarm">No Alarm Set</string>
 
     <string name="wakeup_set_alarm_name">Set Alarm Name</string>
@@ -92,5 +95,6 @@
     <string name="wakeup_delete">Delete</string>
     <string name="wakeup_music_no_music">No Music on Device</string>
     <string name="wakeup_music_no_sd_card">No External Storage Available</string>
+    <string name="wakeup_music_no_fadeIn">Start Time to long, No Time left for FadeIn</string>
 
 </resources>

@@ -109,7 +109,7 @@ public class AlarmActivity extends AppCompatActivity {
             doLED(minutesLEDSTart);
 
         //MUSIC FADE IN/////////////////////////////////////////////////////////////////////////////
-        doPlayMusic(useFadeIn, music[1], minutesMax, music[3], musicURI );
+        doPlayMusic(music[0], useFadeIn, music[1], minutesMax, music[3], musicURI );
 
         //MUSIC VIBRATION///////////////////////////////////////////////////////////////////////////
         if(useVibration)
@@ -277,7 +277,7 @@ public class AlarmActivity extends AppCompatActivity {
      * MUSIC
      **********************************************************************************************/
     private int currentVolume;
-    private void doPlayMusic(boolean _FadeIn, final int _musicVolume, int minutes, final int _fadingSeconds, final String _musicURI){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
+    private void doPlayMusic(int _startSeconds, boolean _FadeIn, final int _musicVolume, int minutes, final int _fadingSeconds, final String _musicURI){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
 
         try { prepareMusic(_musicURI); }
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
@@ -288,6 +288,7 @@ public class AlarmActivity extends AppCompatActivity {
         final int maxVolumeAndroid = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolumeAndroid, 0);
 
+        mediaPlayer.seekTo( (int) TimeUnit.SECONDS.toMillis(_startSeconds));
         if(_FadeIn){
 
             currentVolume = 0;

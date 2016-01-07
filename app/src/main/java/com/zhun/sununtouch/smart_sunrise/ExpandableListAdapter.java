@@ -131,7 +131,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 //Set FadeIn ToggleButton
                 ToggleButton setFadeIn = (ToggleButton) _convertView.findViewById(_viewID[4]);
                 int fadeSeconds  = _childValues.get(AlarmConstants.ALARM_MUSIC_FADEINTIME);
-                String FadeInOn  =  String.format("%02ds", fadeSeconds);
+                String fadeTimeText = String.format(
+                        "%02d:%02d",
+                        TimeUnit.SECONDS.toMinutes(fadeSeconds),
+                        fadeSeconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(fadeSeconds)));
+                String FadeInOn  =  String.format(fadeTimeText);
                 String FadeInOff = _convertView.getContext().getString(R.string.wakeup_music_fadeOff);
 
                 setFadeIn.setTextOn(FadeInOn);
@@ -223,6 +227,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 Button deleteAlarm = (Button) _convertView.findViewById(R.id.wakeup_timer_deleteButton);
                 String deleteText = _convertView.getContext().getString(R.string.wakeup_delete);
                 deleteAlarm.setText(deleteText);
+
+                boolean checked = (_childValues.get(AlarmConstants.ALARM_SET) == 1) ? true : false;
+                ToggleButton setNewAlarm = (ToggleButton) _convertView.findViewById(R.id.wakeup_timer_setAlarmButton);
+                setNewAlarm.setChecked(checked);
             }
             default:
                 break;
@@ -327,13 +335,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                     case AlarmConstants.WAKEUP_DELETE: {
                         int[] wakeup_Delete_ID = {
                                 R.id.wakeup_timer_delete_textview,
-                                R.id.wakeup_timer_deleteButton };
+                                R.id.wakeup_timer_deleteButton,
+                                R.id.wakeup_timer_setAlarmButton };
 
                         convertView = inflateLayout(
                                 convertView,
                                 groupPosition,
                                 R.layout.wakeup_timer_listitem_delete,
-                                "",
+                                choosenChild,
                                 childValues,
                                 wakeup_Delete_ID);
                     }

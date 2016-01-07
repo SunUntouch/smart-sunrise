@@ -14,12 +14,31 @@
         android:paddingBottom="5dp"
         android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>
 
-    <Button
-        android:id="@+id/wakeup_timer_deleteButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/wakeup_delete"
-        android:focusable="false"
-        android:onClick="deleteChild"/>
+        android:orientation="horizontal">
+
+        <Button
+            android:layout_weight="0"
+            android:id="@+id/wakeup_timer_deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/wakeup_delete"
+            android:focusable="false"
+            android:onClick="deleteChild"/>
+
+        <ToggleButton
+            android:layout_weight="1"
+            android:id="@+id/wakeup_timer_setAlarmButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textOn="@string/wakeup_AlarmSet"
+            android:textOff="@string/wakeup_AlarmNotSet"
+            android:focusable="false"
+            android:onClick="setNewAlarm"/>
+
+    </LinearLayout>
+
 
 </LinearLayout>
