@@ -13,15 +13,9 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
-
-/**
- * Created by Sunny on 06.01.2016.
- */
 public class AlarmManage extends AppCompatActivity {
 
     private AlarmManager  alarmManager;
-    private PendingIntent pendingIntent;
-
     private final Context context;
 
     AlarmManage(Context _context){
@@ -37,76 +31,65 @@ public class AlarmManage extends AppCompatActivity {
 
     private PendingIntent getPendingIntent(int _alarmId){
         //Create new PendingIntent
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, _alarmId, getIntent(_alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
-
-        return pendingIntent;
+        return PendingIntent.getBroadcast(context, _alarmId, getIntent(_alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private PendingIntent getOnTapPendingIntent(){
-
-        Intent intent = new Intent("WAKEUP_TIMER_ON_TAP_INTENT");
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_NO_CREATE);
-        return pendingIntent;
+    private PendingIntent getSnoozePendingIntent(int _alarmId){
+        //Create new PendingIntent
+        return PendingIntent.getBroadcast(context, _alarmId, getSnoozeIntent(_alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public boolean checkForPendingIntent(int _alarmId){
-
         //Check if Intent exists
-        boolean alarmUp = (PendingIntent.getBroadcast(context, _alarmId, getIntent(_alarmId), PendingIntent.FLAG_NO_CREATE) != null);
-        return alarmUp;
+        return (PendingIntent.getBroadcast(context, _alarmId, getIntent(_alarmId), PendingIntent.FLAG_NO_CREATE) != null);
     }
 
     private Intent getIntent(int _alarmId){
-        Intent intent = new Intent(context, AlarmReceiver.class);
-
         //sharedPrefereces
         String settingsName = AlarmConstants.WAKEUP_TIMER + _alarmId;
         SharedPreferences settings = context.getSharedPreferences(settingsName, Context.MODE_PRIVATE);
 
         Bundle bundle = new Bundle();
-        //Time
-        int[] timevalues = {
-                settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , 0),
-                settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, 0),
-                settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , 0)};
+        //Putting Value for each child
+        int[] time  = {
+                settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , AlarmConstants.ACTUAL_TIME_HOUR),
+                settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, AlarmConstants.ACTUAL_TIME_MINUTE),
+                settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE)};    // hour, minute, snooze
 
-        bundle.putIntArray( AlarmConstants.WAKEUP_TIME,timevalues);
+        bundle.putIntArray(AlarmConstants.WAKEUP_TIME, time);
 
-        //Days
-        int[] daysvalues = {
-                settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0)};
+        int[] days  = {
+                settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , AlarmConstants.ACTUAL_DAY_MONDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , AlarmConstants.ACTUAL_DAY_TUESDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, AlarmConstants.ACTUAL_DAY_WEDNESDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , AlarmConstants.ACTUAL_DAY_THURSDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , AlarmConstants.ACTUAL_DAY_FRIDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , AlarmConstants.ACTUAL_DAY_SATURDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , AlarmConstants.ACTUAL_DAY_SUNDAY)};  // Monday - Sunday
 
-        bundle.putIntArray( AlarmConstants.WAKEUP_DAYS,daysvalues);
+        bundle.putIntArray(AlarmConstants.WAKEUP_DAYS, days);
 
-        //music
-        int[] musicvalues = {
-                settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, 0),
-                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, 0)};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration Aktiv, Vibration Strength
+        int[] music = {
+                settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , AlarmConstants.ACTUAL_MUSIC_START),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , AlarmConstants.ACTUAL_MUSIC_VOLUME),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, AlarmConstants.ACTUAL_MUSIC_VIBRATION),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH)};      // StartTime, Volume, FadIn, FadeInTime
 
-        bundle.putIntArray(AlarmConstants.WAKEUP_MUSIC, musicvalues);
+        bundle.putIntArray(AlarmConstants.WAKEUP_MUSIC, music);
 
-        //light
-        int[] lightvalues = {
-                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR        , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , 0),
-                settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , 0)}; // UseScreen, ScreenBrightness, ScreenStrartTime, Color1, Color2, FadeColor, UseLed, LedStartTime
+        int[] light = {
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, AlarmConstants.ACTUAL_SCREEN_START),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1           , AlarmConstants.ACTUAL_SCREEN_COLOR1),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2           , AlarmConstants.ACTUAL_SCREEN_COLOR2),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR        , AlarmConstants.ACTUAL_SCREEN_COLOR_FADE),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , AlarmConstants.ACTUAL_LED),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , AlarmConstants.ACTUAL_LED_START)};// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
-        bundle.putIntArray(AlarmConstants.WAKEUP_LIGHT, lightvalues);
+        bundle.putIntArray(AlarmConstants.WAKEUP_LIGHT, light);
 
         //Uri to Music Song
         String musicURI = settings.getString(AlarmConstants.ALARM_MUSIC_SONGID, Settings.System.DEFAULT_ALARM_ALERT_URI.getPath());
@@ -116,9 +99,65 @@ public class AlarmManage extends AppCompatActivity {
         bundle.putInt(AlarmConstants.ALARM_ID, _alarmId);
 
         //Fill Intent
-        intent.putExtras(bundle);
+        return new Intent(context, AlarmReceiver.class).putExtras(bundle);
+    }
 
-        return intent;
+    private Intent getSnoozeIntent(int _alarmId){
+        //sharedPrefereces
+        String settingsName = AlarmConstants.WAKEUP_TIMER + _alarmId;
+        SharedPreferences settings = context.getSharedPreferences(settingsName, Context.MODE_PRIVATE);
+
+        Bundle bundle = new Bundle();
+        //Putting Value for each child
+        int[] time  = {
+                settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , AlarmConstants.ACTUAL_TIME_HOUR),
+                settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, AlarmConstants.ACTUAL_TIME_MINUTE),
+                settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE)};    // hour, minute, snooze
+
+        bundle.putIntArray(AlarmConstants.WAKEUP_TIME, time);
+
+        int[] days  = {
+                settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , AlarmConstants.ACTUAL_DAY_MONDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , AlarmConstants.ACTUAL_DAY_TUESDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, AlarmConstants.ACTUAL_DAY_WEDNESDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , AlarmConstants.ACTUAL_DAY_THURSDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , AlarmConstants.ACTUAL_DAY_FRIDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , AlarmConstants.ACTUAL_DAY_SATURDAY),
+                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , AlarmConstants.ACTUAL_DAY_SUNDAY)};  // Monday - Sunday
+
+        bundle.putIntArray(AlarmConstants.WAKEUP_DAYS, days);
+
+        int[] music = {
+                settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , AlarmConstants.ACTUAL_MUSIC_START),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , AlarmConstants.ACTUAL_MUSIC_VOLUME),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, AlarmConstants.ACTUAL_MUSIC_VIBRATION),
+                settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH)};      // StartTime, Volume, FadIn, FadeInTime
+
+        bundle.putIntArray(AlarmConstants.WAKEUP_MUSIC, music);
+
+        int[] light = {
+                0,
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS),
+                0,
+                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1           , AlarmConstants.ACTUAL_SCREEN_COLOR1),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2           , AlarmConstants.ACTUAL_SCREEN_COLOR2),
+                0,
+                0,
+                0};// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+
+        bundle.putIntArray(AlarmConstants.WAKEUP_LIGHT, light);
+
+        //Uri to Music Song
+        String musicURI = settings.getString(AlarmConstants.ALARM_MUSIC_SONGID, Settings.System.DEFAULT_ALARM_ALERT_URI.getPath());
+        bundle.putString(AlarmConstants.ALARM_MUSIC_SONGID, musicURI);
+
+        //Alarm ID
+        bundle.putInt(AlarmConstants.ALARM_ID, _alarmId);
+
+        //Fill Intent
+        return new Intent(context, AlarmReceiver.class).putExtras(bundle);
     }
 
     public void setNewAlarm(int _id, boolean snooze, long repeatMillis){
@@ -128,35 +167,38 @@ public class AlarmManage extends AppCompatActivity {
         SharedPreferences settings = context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
 
         //GetData
-        String name = settings.getString(AlarmConstants.ALARM_NAME, context.getString(R.string.wakeup_no_alarm));
-
         //Putting Value for each child
         int[] time  = {
-                settings.getInt(AlarmConstants.ALARM_TIME_HOUR, 00),
-                settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, 00),
+                settings.getInt(AlarmConstants.ALARM_TIME_HOUR, AlarmConstants.ACTUAL_TIME_HOUR),
+                settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, AlarmConstants.ACTUAL_TIME_MINUTE),
                 settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE, 10)};    // hour, minute, snooze
 
         Calendar calendar = Calendar.getInstance();
         long snoozeTime = 0;
 
+        createAlarmManager();
+        PendingIntent pendingIntent = getPendingIntent(_id);
+        alarmManager.cancel(pendingIntent);
+
         if(!snooze){
             calendar.set(Calendar.HOUR_OF_DAY, time[0]);
             calendar.set(Calendar.MINUTE, time[1]);
-
         }
-        else //Snooze
+        else{//Snooze
             snoozeTime = TimeUnit.MINUTES.toMillis(time[2]);
-
-        pendingIntent = getPendingIntent(_id);
-
-        createAlarmManager();
-        alarmManager.cancel(pendingIntent);
+            pendingIntent = getSnoozePendingIntent(_id);
+        }
 
         //Check for SDK Version and Use different AlarmManager Functions
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
 
             //Newer API Level provides a Symbol when Alarm is active
-            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis() + snoozeTime + repeatMillis, pendingIntent);
+            AlarmManager.AlarmClockInfo alarmClockInfo =
+                    new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis() +
+                                                    snoozeTime +
+                                                    repeatMillis,
+                                                    pendingIntent);
+
             alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
         }
         else
@@ -165,13 +207,10 @@ public class AlarmManage extends AppCompatActivity {
 
     public void snoozeAlarm(int _id){
         if(_id!= -1)
-            setNewAlarm(_id, true, 0); //TODO Only Musik
+            setNewAlarm(_id, true, 0);
     }
 
     public  void cancelAlarm(int _id){
-
-        pendingIntent = getPendingIntent(_id);
-
         //sharedPrefereces
         String settingName = AlarmConstants.WAKEUP_TIMER + _id;
         SharedPreferences settings = context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
@@ -215,6 +254,6 @@ public class AlarmManage extends AppCompatActivity {
         if(daysToNextAlarm > 0)
             setNewAlarm(_id, false, AlarmManager.INTERVAL_DAY * daysToNextAlarm);
         else
-            alarmManager.cancel(pendingIntent);
+            alarmManager.cancel(getPendingIntent(_id));
     }
 }

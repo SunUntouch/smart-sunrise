@@ -1,24 +1,17 @@
 <resources>
+    <!-- App Values -->
     <string name="app_name">Smart-Sunrise</string>
     <string name="action_settings">Settings</string>
-    <string name="edit_message">Enter a Message</string>
-    <string name="button_send">Send</string>
-    <string name="title_activity_display_message">MyMessage</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Alarm Values -->
     <string name="title_activity_alarm">Alarm</string>
-    <string name="permlab_flashlight">Flashlight</string>
-    <string name="permdesc_flashlight">Make use of the Flashlight</string>
 
-    <!-- Alarm Text -->
     <string name="wakeup_AlarmSet">Alarm is active</string>
     <string name="wakeup_AlarmNotSet">Alarm is inactive</string>
-
     <string name="wakeup_no_alarm">No Alarm Set</string>
 
+    <!-- Dialog Values -->
     <string name="wakeup_set_alarm_name">Set Alarm Name</string>
-
     <string name="wakeup_set_alarm_minutes">Set Minutes</string>
 
     <string name="wakeup_set_alarm_song_menu">Choose Alarm</string>
@@ -28,15 +21,19 @@
     <string name="wakeup_set_alarm_song_fadeIn">Set FadeIn Time</string>
     <string name="wakeup_set_alarm_song_vibration">Set Vibration Strength</string>
 
+    <string name="wakeup_set_alarm_color">Choose Color</string>
+
     <string name="wakeup_set_alarm_light_brightness">Set Screen Brightness</string>
     <string name="wakeup_set_alarm_light_minutes">Set Minutes</string>
 
-    <string name="wakeup_set_alarm_color">Choose Color</string>
-
     <string name="wakeup_set_alarm_LED_time">Set Minutes</string>
 
+    <!-- OK and Cancel Values -->
     <string name="wakeup_OK">OK</string>
     <string name="wakeup_Cancel">Cancel</string>
+
+    <string name="permlab_flashlight">Flashlight</string>
+    <string name="permdesc_flashlight">Make use of the Flashlight</string>
 
     <!-- Time Text -->
     <string name="wakeup_time">Time</string>

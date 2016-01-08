@@ -3,9 +3,6 @@ package com.zhun.sununtouch.smart_sunrise;
 import android.app.IntentService;
 import android.content.Intent;
 
-/**
- * Created by Sunny on 27.12.2015.
- */
 public class AlarmIntentService extends IntentService {
 
     public AlarmIntentService(){

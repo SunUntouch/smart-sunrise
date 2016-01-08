@@ -78,13 +78,13 @@ public class AlarmActivity extends AppCompatActivity {
 
         //Boolean Values
         //Screen
-        boolean useScreen      = (light[0] == 1) ? true : false;
-        boolean useLED         = (light[6] == 1) ? true : false;
-        boolean useColorFading = (light[5] == 1) ? true  : false;
+        boolean useScreen      = light[0] == 1;
+        boolean useLED         = light[6] == 1;
+        boolean useColorFading = light[5] == 1;
 
         //Music
-        boolean useFadeIn    = (music[2] == 1) ? true : false;
-        boolean useVibration = (music[4] == 1) ? true : false;
+        boolean useFadeIn    = music[2] == 1;
+        boolean useVibration = music[4] == 1;
 
         int minuteScreen = (useScreen) ? light[2] : 0;
         int minuteLED    = (useLED) ? light[7] : 0;
@@ -158,7 +158,11 @@ public class AlarmActivity extends AppCompatActivity {
         final TextView dateText = (TextView) findViewById(R.id.wakeup_wakescreen_date);
         String dayName = getDayName(calendar);
 
-        dateText.setText(dayName + ", " + currentDay + "." + currentMonth + "." + currentYear);
+        String message = dayName + ", " +
+                         Integer.toString(currentDay)   + "." +
+                         Integer.toString(currentMonth) + "." +
+                         Integer.toString(currentYear);
+        dateText.setText(message);
 
         int currentHour   = calendar.get(Calendar.HOUR_OF_DAY);
         int currentMinute = calendar.get(Calendar.MINUTE);
@@ -174,11 +178,12 @@ public class AlarmActivity extends AppCompatActivity {
                 Calendar calendarNew = Calendar.getInstance();
                 timeText.setText(String.format("%02d:%02d", calendarNew.get(Calendar.HOUR_OF_DAY), calendarNew.get(Calendar.MINUTE)));
 
+                String message = getDayName(calendarNew) + ", " +
+                                 Integer.toString(calendarNew.get(Calendar.DAY_OF_MONTH)) + "." +
+                                 Integer.toString(calendarNew.get(Calendar.MONTH) + 1)    + "." +
+                                 Integer.toString(calendarNew.get(Calendar.YEAR));
                 //Update Date
-                dateText.setText(getDayName(calendarNew) + ", " +
-                        calendarNew.get(Calendar.DAY_OF_MONTH) + "." +
-                        (calendarNew.get(Calendar.MONTH) + 1) + "." +
-                        calendarNew.get(Calendar.YEAR));
+                dateText.setText(message);
 
                 alarmHandler.postDelayed(this, 100); //1 second check for new Time
             }
@@ -321,7 +326,7 @@ public class AlarmActivity extends AppCompatActivity {
                 @Override
                 public void run() {
 
-                    float volume= 1 - (float)(Math.log(_musicVolume-_musicVolume)/Math.log(_musicVolume));
+                    float volume= 1 - (float)(Math.log(0)/Math.log(_musicVolume));
                     mediaPlayer.setVolume(volume, volume);
                     mediaPlayer.start();
                 }
@@ -446,7 +451,7 @@ public class AlarmActivity extends AppCompatActivity {
         m_Cam.setParameters(p);
 
         //Start LED
-        m_Cam.startPreview(); //TODO Listener to Release Cam, Change to not deprecated version
+        m_Cam.startPreview(); //TODO Change to not deprecated version
     }
     private void stopLED(){
 
