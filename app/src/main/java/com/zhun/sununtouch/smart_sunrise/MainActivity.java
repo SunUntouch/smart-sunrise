@@ -35,7 +35,6 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,7 +63,6 @@ public class MainActivity extends AppCompatActivity
 
     //Actual Alarm Values
     private int actualAlarm    =-1;
-    private int actualAlarmSet = 0;
 
     //Time
     private int actualHour     = AlarmConstants.ACTUAL_TIME_HOUR;
@@ -102,7 +100,6 @@ public class MainActivity extends AppCompatActivity
 
     //Last Clicked Button
     private int actualButtonID    = 0;
-    private int actualAlarmNameID = 0;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     /***********************************************************************************************
@@ -562,10 +559,7 @@ public class MainActivity extends AppCompatActivity
 
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 
-        boolean checked = activeAlarmToggle.isChecked();
-        actualAlarmSet = (checked) ? 1 : 0;
-
-        boolean alarmSet = activateAlarm(checked);
+        boolean alarmSet = activateAlarm(activeAlarmToggle.isChecked());
         activeAlarmToggle.setChecked(alarmSet);
 
         //save Settings
@@ -588,16 +582,17 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showNameSettingDialog(View v){
 
-        //save Text ID
-        actualAlarmNameID = v.getId();
-
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_name));
 
+        TextView currentName = (TextView) v;
         //EditText
         final EditText newName = new EditText(this);
+        newName.setText(currentName.getText());
         newName.setInputType(InputType.TYPE_CLASS_TEXT);
+
+        newName.setSelection(currentName.getText().length());
 
         //Set Builder
         builder.setView(newName);
@@ -619,14 +614,8 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
     private void onAlarmNameSet(String _newName){
-
-        //Set new Alarm name
-        TextView newNameView = (TextView) findViewById(actualAlarmNameID);
-        newNameView.setText(_newName);
-
         //save Settings
         saveListDataChild(_newName, actualAlarm);
-        prepareLisData();
     }
 
     /***********************************************************************************************
