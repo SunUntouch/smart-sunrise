@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="3"
         android:background="@android:color/transparent"
-        android:onClick="cancelAlarm"/>
+        android:onClick="onWakeUpClick"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,7 +35,7 @@
             android:text="Friday, 14.12.2016"
             android:textColor="#80000000"
             android:textAlignment="center"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:layout_width="match_parent"
             android:layout_height="40dp"/>
 
@@ -44,7 +44,7 @@
             android:text="00:00"
             android:textColor="#80000000"
             android:textAlignment="center"
-            android:textSize="50dp"
+            android:textSize="50sp"
             android:layout_width="match_parent"
             android:layout_height="60dp" />
         <View

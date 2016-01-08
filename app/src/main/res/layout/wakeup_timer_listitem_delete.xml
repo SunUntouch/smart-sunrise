@@ -3,16 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:id="@+id/wakeup_timer_layout_delete">
+    android:id="@+id/wakeup_timer_layout_delete"
+    android:background="@color/backgroundColor">
 
     <TextView
         android:id="@+id/wakeup_timer_delete_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="0dip"
+        android:textSize="0sp"
         android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>
+        android:paddingBottom="5dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -24,19 +24,27 @@
             android:id="@+id/wakeup_timer_deleteButton"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_margin="@dimen/button_margin"
             android:text="@string/wakeup_delete"
+            android:textColor="@color/buttonTextColorPrimary"
+            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:focusable="false"
-            android:onClick="deleteChild"/>
+            android:onClick="deleteChild"
+            android:background="@drawable/custom_button"/>
 
         <ToggleButton
             android:layout_weight="1"
             android:id="@+id/wakeup_timer_setAlarmButton"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_margin="@dimen/button_margin"
             android:textOn="@string/wakeup_AlarmSet"
             android:textOff="@string/wakeup_AlarmNotSet"
+            android:textColor="@color/buttonTextColorPrimary"
+            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:focusable="false"
-            android:onClick="setNewAlarm"/>
+            android:onClick="setNewAlarm"
+            android:background="@drawable/custom_toggle"/>
 
     </LinearLayout>
 

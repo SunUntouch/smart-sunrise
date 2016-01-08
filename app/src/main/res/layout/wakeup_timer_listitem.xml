@@ -2,13 +2,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/backgroundColor">
 
     <TextView
         android:id="@+id/wakeup_timer_listItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="17dip"
+        android:textSize="17sp"
+        android:textColor="@color/textColorPrimary"
+        android:textColorHighlight="@color/textColorSecondary"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>

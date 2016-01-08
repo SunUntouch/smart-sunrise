@@ -3,16 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:id="@+id/wakeup_timer_layout_light">
+    android:id="@+id/wakeup_timer_layout_light"
+    android:background="@color/backgroundColor">
 
     <TextView
         android:id="@+id/wakeup_timer_light_textview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="17dip"
+        android:gravity="center"
+        android:textSize="17sp"
+        android:textColor="@color/textColorPrimary"
+        android:textColorHighlight="@color/textColorSecondary"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>
+        android:background="@drawable/custom_textview"/>
     
     <GridLayout
         android:layout_width="match_parent"
@@ -23,38 +27,46 @@
         <ToggleButton
             android:id="@+id/wakeup_timer_light_buttonLight"
             android:textOff="Screen Light Off"
+            android:textColor="@color/buttonTextColorPrimary"
+            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="0"
             android:layout_columnSpan="3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="fill"
-            android:onClick="showScreenLightSettingDialog" />
+            android:layout_margin="@dimen/button_margin"
+            android:onClick="showScreenLightSettingDialog"
+            android:background="@drawable/custom_toggle"/>
 
         <TextView
             android:text="@string/wakeup_light_text_startTime"
+            android:textColor="@color/textColorPrimary"
+            android:textColorHighlight="@color/textColorSecondary"
             android:layout_column="0"
             android:layout_columnSpan="2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/wakeup_timer_light_buttonStart"
             android:text="0 Minutes"
+            android:textColor="@color/buttonTextColorPrimary"
+            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:layout_gravity="fill"
-            android:onClick="showScreenLightStartSettingDialog" />
+            android:layout_margin="@dimen/button_margin"
+            android:onClick="showScreenLightStartSettingDialog"
+            android:background="@drawable/custom_button"/>
 
         <Button
             android:id="@+id/wakeup_timer_light_buttonColor1"
             android:text="Choose Color"
             android:layout_column="0"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
+            android:layout_height="match_parent"
             android:layout_gravity="fill"
             android:onClick="showScreenColor1SettingDialog" />
 
@@ -63,20 +75,23 @@
             android:text="Choose Color"
             android:layout_column="1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
+            android:layout_height="match_parent"
             android:layout_gravity="fill"
-            android:onClick="showScreenColor1SettingDialog" />
+            android:onClick="showScreenColor1SettingDialog"
+            android:layout_margin="2dp"/>
 
         <ToggleButton
             android:id="@+id/wakeup_timer_light_buttonScreenFade"
             android:textOff="Off"
+            android:textColor="@color/buttonTextColorPrimary"
+            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_columnWeight="1"
+            android:layout_height="match_parent"
             android:layout_gravity="fill"
-            android:onClick="showScreenColorFadeSettingDialog" />
+            android:layout_margin="@dimen/button_margin"
+            android:onClick="showScreenColorFadeSettingDialog"
+            android:background="@drawable/custom_toggle"/>
 
         <View
             android:layout_width="match_parent"
@@ -88,29 +103,38 @@
         <ToggleButton
             android:id="@+id/wakeup_timer_light_buttonLED"
             android:textOff="LED Light Off"
+            android:textColor="@color/buttonTextColorPrimary"
+            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="0"
             android:layout_columnSpan="3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="fill"
-            android:onClick="showLEDLightSettingDialog" />
+            android:layout_margin="@dimen/button_margin"
+            android:onClick="showLEDLightSettingDialog"
+            android:background="@drawable/custom_toggle"/>
 
         <TextView
             android:text="@string/wakeup_light_text_startTime"
+            android:textColor="@color/textColorPrimary"
+            android:textColorHighlight="@color/textColorSecondary"
             android:layout_column="0"
             android:layout_columnSpan="2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/wakeup_timer_light_buttonLEDStart"
             android:text="0 Minutes"
+            android:textColor="@color/buttonTextColorPrimary"
+            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_height="match_parent"
             android:layout_gravity="fill"
-            android:onClick="showLEDLightStartSettingDialog" />
+            android:layout_margin="@dimen/button_margin"
+            android:onClick="showLEDLightStartSettingDialog"
+            android:background="@drawable/custom_button"/>
     </GridLayout>
 </LinearLayout>
