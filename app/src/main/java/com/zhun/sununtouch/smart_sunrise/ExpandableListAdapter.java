@@ -62,8 +62,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
                 Button setTimeButton = (Button) _convertView.findViewById(_viewID[1]);
 
-                String timeText = String.format("%02d",_childValues.get(AlarmConstants.ALARM_TIME_HOUR)) +
-                        ":" + String.format("%02d", _childValues.get(AlarmConstants.ALARM_TIME_MINUTES));
+                String timeText = String.format("%02d:%02d",_childValues.get(AlarmConstants.ALARM_TIME_HOUR), _childValues.get(AlarmConstants.ALARM_TIME_MINUTES));
                 setTimeButton.setText(timeText);
 
                 Button setSnoozeButton = (Button) _convertView.findViewById(_viewID[2]);
@@ -375,16 +374,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
         //TODO Set Time and Days in View
-        //Set Group Title
-        String headerTitle = (String) getGroup(groupPosition);
-
         if(convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, null);
         }
 
+        //Set Group Title
+        String headerTitle = (String) getGroup(groupPosition);
         TextView txtListHeader = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
-        txtListHeader.setTypeface(null, Typeface.BOLD);
+        //txtListHeader.setTypeface(null, Typeface.BOLD);
         txtListHeader.setText(headerTitle);
 
         if(isExpanded)
@@ -392,6 +390,40 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         else
             txtListHeader.setClickable(false);
 
+        LinkedHashMap<String, Integer> childTimeValues = (LinkedHashMap<String, Integer>)getChild(groupPosition, 1);  //hopefully this is the time child
+
+        String timeText = String.format("%02d:%02d", childTimeValues.get(AlarmConstants.ALARM_TIME_HOUR), childTimeValues.get(AlarmConstants.ALARM_TIME_MINUTES));
+        TextView txtListTime = (TextView) convertView.findViewById(R.id.wakeup_group_time);
+        txtListTime.setText(timeText);
+
+        LinkedHashMap<String, Integer> childDayValues  = (LinkedHashMap<String, Integer>)getChild(groupPosition, 2);  //hopefully this is the day child
+
+        boolean isMonday    = childDayValues.get(AlarmConstants.ALARM_DAY_MONDAY)    > 0;
+        boolean isTuesday   = childDayValues.get(AlarmConstants.ALARM_DAY_TUESDAY)   > 0;
+        boolean isWednesday = childDayValues.get(AlarmConstants.ALARM_DAY_WEDNESDAY) > 0;
+        boolean isThursday  = childDayValues.get(AlarmConstants.ALARM_DAY_THURSDAY)  > 0;
+        boolean isFriday    = childDayValues.get(AlarmConstants.ALARM_DAY_FRIDAY)    > 0;
+        boolean isSaturday  = childDayValues.get(AlarmConstants.ALARM_DAY_SATURDAY)  > 0;
+        boolean isSunday    = childDayValues.get(AlarmConstants.ALARM_DAY_SUNDAY)    > 0;
+
+        String monday     = (isMonday)    ? convertView.getContext().getString(R.string.wakeup_day_monday_short)    : "";
+        String tuesday    = (isTuesday)   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short)   : "";
+        String wednesday  = (isWednesday) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "";
+        String thursday   = (isThursday)  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short)  : "";
+        String friday     = (isFriday)    ? convertView.getContext().getString(R.string.wakeup_day_friday_short)    : "";
+        String saturday   = (isSaturday)  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short)  : "";
+        String sunday     = (isSunday)    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short)    : "";
+
+        String days = monday + " " +
+                tuesday + " " +
+                wednesday + " " +
+                thursday + " " +
+                friday + " " +
+                saturday + " " +
+                sunday;
+
+        TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
+        txtListDays.setText(days);
         return convertView;
     }
 

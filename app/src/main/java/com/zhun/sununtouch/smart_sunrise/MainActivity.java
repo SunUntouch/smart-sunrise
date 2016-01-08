@@ -156,13 +156,6 @@ public class MainActivity extends AppCompatActivity
 
                 //Add New Alarm
                 saveListDataChild(AlarmConstants.ALARM);
-                expListAdapter = new ExpandableListAdapter(
-                        expListView.getContext(),
-                        expListDataAlarm,
-                        expListDataMusicURI,
-                        expListDataHeader,
-                        expListDataChild);
-                expListView.setAdapter(expListAdapter);
             }
         });
     }
@@ -318,6 +311,9 @@ public class MainActivity extends AppCompatActivity
                 prepareListDataValues(name, musicURI, id, time, days, music, light);
             }
         }
+
+        //Change View
+        expListView.invalidateViews();
     }
 
     private void changeListData(String _name, int _id){
@@ -658,6 +654,7 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        expListView.invalidateViews();
     }
 
     /***********************************************************************************************
@@ -676,13 +673,6 @@ public class MainActivity extends AppCompatActivity
         //save times
         actualHour = hourOfDay;
         actualMin  = minute;
-
-        //Set Button Text
-        String timeText = String.format("%02d", hourOfDay) + ":" + String.format("%02d", minute);
-
-        Button bTime = (Button) findViewById(actualButtonID);
-        bTime.setText(timeText);
-
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
@@ -749,12 +739,6 @@ public class MainActivity extends AppCompatActivity
     private void onSnoozeMinutesSet(int _minutes){
         //Save Snooze Minutes
         actualSnooze = _minutes + 1;  //we Start with 1 minute
-
-        //Set Button Text
-        String timeText = this.getString(R.string.wakeup_time_snooze) + " " + actualSnooze + " " + this.getString(R.string.wakeup_time_minutes);
-
-        Button bSnooze = (Button) findViewById(actualButtonID);
-        bSnooze.setText(timeText);
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
@@ -891,11 +875,6 @@ public class MainActivity extends AppCompatActivity
 
                 //Get Values for Button
                 String newMusicURI = _Songs.get(which).getPath();
-                String newMusicText = newMusicURI.substring(newMusicURI.lastIndexOf('/') + 1);
-                newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
-
-                Button musicButton = (Button) findViewById(actualButtonID);
-                musicButton.setText(newMusicText);
 
                 //Get Song Lengh
                 MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
@@ -1037,12 +1016,6 @@ public class MainActivity extends AppCompatActivity
         //Set ActualVolume
         actualVolume = _volume;
 
-        //Find Button and set Text
-        String volumeText = _volume + "%";
-
-        Button bVolume = (Button) findViewById(actualButtonID);
-        bVolume.setText(volumeText);
-
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
@@ -1052,6 +1025,7 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showMusicStartSettingDialog(View v){
 
+        //TODO catch Error when Music not set first
         //Save ID From Button
         actualButtonID = v.getId();
 
@@ -1114,17 +1088,6 @@ public class MainActivity extends AppCompatActivity
 
         //Set ActualStart
         actualSongStart = _seconds;
-
-        //actualFadeInTime = (actualFadeInTime > actualSongLength - actualSongStart)? actualFadeInTime = 0 : actualFadeInTime;
-
-        //Find Button and set Text
-        String startTimeText = String.format(
-                "%02d:%02d",
-                TimeUnit.SECONDS.toMinutes(_seconds),
-                _seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(_seconds)));
-
-        Button bStartTime = (Button) findViewById(actualButtonID);
-        bStartTime.setText(startTimeText);
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
@@ -1217,23 +1180,6 @@ public class MainActivity extends AppCompatActivity
         actualFadeInTime = _seconds;
         actualFadeIn     = 1; //true
 
-        //Set Button Text
-        ToggleButton bFadeIn = (ToggleButton) findViewById(actualButtonID);
-
-        String fadeTimeText = String.format(
-                "%02d:%02d",
-                TimeUnit.SECONDS.toMinutes(_seconds),
-                _seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(_seconds)));
-
-        //Set Toggle Text
-        if(bFadeIn.isChecked())
-            bFadeIn.setText(fadeTimeText);
-        else
-            bFadeIn.setText(this.getString(R.string.wakeup_music_fadeOff));
-
-        bFadeIn.setTextOn(fadeTimeText);
-        bFadeIn.setTextOff(this.getString(R.string.wakeup_music_fadeOff));
-
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
@@ -1323,19 +1269,6 @@ public class MainActivity extends AppCompatActivity
         actualVibraStr = _strength;
         actualVibra    = 1; //true
 
-        //Set Button Text
-        String vibraOn =  actualVibraStr + "%";
-        String vibraOff = this.getString(R.string.wakeup_music_vibraOff);
-
-        ToggleButton bVibraStrength = (ToggleButton) findViewById(actualButtonID);
-        if(bVibraStrength.isChecked())
-            bVibraStrength.setText(vibraOn);
-        else
-            bVibraStrength.setText(vibraOff);
-
-        bVibraStrength.setTextOn(vibraOn);
-        bVibraStrength.setTextOff(vibraOff);
-
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
@@ -1424,19 +1357,6 @@ public class MainActivity extends AppCompatActivity
         actualScreenBrightness = _brigthness;
         actualScreen           = 1; //true
 
-        //Set Button Text
-        String screenOn =  this.getString(R.string.wakeup_light_screen_brightness) + " " + actualScreenBrightness + "%";
-        String screenOff = this.getString(R.string.wakeup_light_screen_brightness_off);
-
-        ToggleButton bScreenBrightness = (ToggleButton) findViewById(actualButtonID);
-        if(bScreenBrightness.isChecked())
-            bScreenBrightness.setText(screenOn);
-        else
-            bScreenBrightness.setText(screenOff);
-
-        bScreenBrightness.setTextOn(screenOn);
-        bScreenBrightness.setTextOff(screenOff);
-
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
@@ -1499,12 +1419,6 @@ public class MainActivity extends AppCompatActivity
     private void onScreenStartTimeSet(int _minutes){
         //Save ScreenStart Minutes
         actualScreenStartTime = _minutes + 1;  //we Start with 1 minute
-
-        //Set Button Text
-        String timeText = actualScreenStartTime + " " + this.getString(R.string.wakeup_time_minutes);
-
-        Button bStartTime = (Button) findViewById(actualButtonID);
-        bStartTime.setText(timeText);
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
@@ -1636,12 +1550,6 @@ public class MainActivity extends AppCompatActivity
     private void onLEDStartTimeSet(int _minutes){
         //Save LEDSTartTime Minutes
         actualLightLEDStartTime = _minutes + 1;  //we Start with 1 minute
-
-        //Set Button Text
-        String timeText = actualLightLEDStartTime + " " + this.getString(R.string.wakeup_time_minutes);
-
-        Button bStartTime = (Button) findViewById(actualButtonID);
-        bStartTime.setText(timeText);
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);

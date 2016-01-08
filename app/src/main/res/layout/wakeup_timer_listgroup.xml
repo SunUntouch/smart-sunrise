@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
+    android:orientation="horizontal"
     android:padding="8dp"
     android:background="#99acff">
 
@@ -11,48 +11,36 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-        android:textSize="25dp"
+        android:text="Alarm"
+        android:textSize="30sp"
         android:textColor="#000000"
-        android:onClick="showNameSettingDialog"/>
+        android:onClick="showNameSettingDialog"
+        android:layout_weight="3"
+        android:layout_gravity="center"
+        android:textStyle="bold"/>
 
-    <!--
-    <TextView
-        android:id="@+id/wakeup_timer_groupItem"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-        android:textSize="25dp"
-        android:textColor="#000000"
-        android:onClick="showNameSettingDialog"/>
-
-    -<LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:focusable="false">
 
         <TextView
-            android:id="@+id/wakeup_timer_groupItem_time"
+            android:id="@+id/wakeup_group_time"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-            android:textSize="20dp"
-            android:textColor="#f9f93d"/>
+            android:layout_height="match_parent"
+            android:text="00:00"
+            android:textSize="20sp"
+            android:layout_gravity="end"/>
 
         <TextView
-            android:id="@+id/wakeup_timer_groupItem_days"
+            android:id="@+id/wakeup_group_days"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-            android:textSize="20dp"
-            android:textColor="#f9f93d"/>
+            android:layout_height="match_parent"
+            android:text="Monday - Sunday"
+            android:textSize="15sp"
+            android:layout_gravity="end"/>
 
-    </LinearLayout>-
-
-    <EditText
-        android:id="@+id/wakeup_timer_groupItem"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
-        android:textSize="17dp"
-        android:textColor="#f9f93d"/>
-    -->
+    </LinearLayout>
 </LinearLayout>
