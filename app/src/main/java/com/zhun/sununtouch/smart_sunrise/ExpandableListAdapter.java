@@ -220,13 +220,17 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             case AlarmConstants.WAKEUP_DELETE:{
                 //Get TextChild from View
                 TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
-                txtListChild.setText(_childText);
+                //txtListChild.setText(_childText);
+                txtListChild.setVisibility(TextView.GONE);
 
                 Button deleteAlarm = (Button) _convertView.findViewById(R.id.wakeup_timer_deleteButton);
                 String deleteText = _convertView.getContext().getString(R.string.wakeup_delete);
                 deleteAlarm.setText(deleteText);
 
-                boolean checked = _childValues.get(AlarmConstants.ALARM_SET) == 1;
+                //Check for Alarm and Set Button to boolean value
+                AlarmManage newAlarm = new AlarmManage(_convertView.getContext());
+                boolean checked =newAlarm.checkForPendingIntent(_groupPosition);
+
                 ToggleButton setNewAlarm = (ToggleButton) _convertView.findViewById(R.id.wakeup_timer_setAlarmButton);
                 setNewAlarm.setChecked(checked);
             }
@@ -370,6 +374,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
+        //TODO Set Time and Days in View
         //Set Group Title
         String headerTitle = (String) getGroup(groupPosition);
 

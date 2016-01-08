@@ -16,7 +16,6 @@ public abstract class AlarmConstants {
     public final static String ALARM_ID                   = "Alarm_ID";
     public final static String ALARM_NAME                 = "Alarm_Name";
     public final static String ALARM_VALUE                = "Alarm_Value";
-    public static final String ALARM_SET                  = "Alarm_Set";
 
     //Alarm Time
     public final static String ALARM_TIME_MINUTES         = "Alarm_Minutes";

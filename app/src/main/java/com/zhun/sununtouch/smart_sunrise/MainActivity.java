@@ -121,7 +121,6 @@ public class MainActivity extends AppCompatActivity
 
         //prepare list data
         prepareLisData();
-        setAlarmStartView();
 
         expListAdapter = new ExpandableListAdapter(this, expListDataAlarm, expListDataMusicURI, expListDataHeader, expListDataChild);
 
@@ -171,7 +170,7 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * DATA VALUES
      **********************************************************************************************/
-    private void prepareListDataValues(String _alarmName,String _musicURI, int _id, int[] _time, int[] _days, int[] _music, int[] _light, int _alarmSet){
+    private void prepareListDataValues(String _alarmName,String _musicURI, int _id, int[] _time, int[] _days, int[] _music, int[] _light){
 
         //Load sharedPrefereces
         String settingName = AlarmConstants.ALARM + _id;
@@ -237,7 +236,6 @@ public class MainActivity extends AppCompatActivity
 
         //Delete
         alarmvalueDelete.clear();
-        alarmvalueDelete.put(AlarmConstants.ALARM_SET, _alarmSet);
         newAlarm.put(AlarmConstants.WAKEUP_DELETE, alarmvalueDelete);
 
         expListDataChild.put(expListDataAlarm.get(_id), newAlarm);
@@ -256,6 +254,10 @@ public class MainActivity extends AppCompatActivity
         int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
 
         if(amount == 0) {
+
+            noAlarmlayout.setVisibility(LinearLayout.VISIBLE);
+            expListView.setVisibility(ExpandableListView.GONE);
+
             //No Alarm
             //Putting Value for each child
             int[] time  = {0, 0, 0};         // hour, minute
@@ -263,9 +265,12 @@ public class MainActivity extends AppCompatActivity
             int[] music = {0,0,0,0,0,0};      // Song, StartTime, Volume, FadIn, FadeInTime, Vibration, Vibration Strength
             int[] light = {0,0,0,0,0,0,0,0};    // UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
-            prepareListDataValues(this.getString(R.string.wakeup_no_alarm), Settings.System.DEFAULT_ALARM_ALERT_URI.getPath(), 0, time, days, music, light, 0);
+            prepareListDataValues(this.getString(R.string.wakeup_no_alarm), Settings.System.DEFAULT_ALARM_ALERT_URI.getPath(), 0, time, days, music, light);
         }
         else {
+
+            noAlarmlayout.setVisibility(LinearLayout.GONE);
+            expListView.setVisibility(ExpandableListView.VISIBLE);
 
             for (int id = 0; id < amount; ++id) {
 
@@ -310,8 +315,7 @@ public class MainActivity extends AppCompatActivity
                         settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , AlarmConstants.ACTUAL_LED),
                         settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , AlarmConstants.ACTUAL_LED_START)};// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
-                int alarmSet = settings.getInt(AlarmConstants.ALARM_SET, 0);
-                prepareListDataValues(name, musicURI, id, time, days, music, light, alarmSet);
+                prepareListDataValues(name, musicURI, id, time, days, music, light);
             }
         }
     }
@@ -327,7 +331,6 @@ public class MainActivity extends AppCompatActivity
 
         //put StringSet back
         editor.putString(AlarmConstants.ALARM_NAME, _name);
-        editor.putInt(AlarmConstants.ALARM_SET    , actualAlarmSet);
 
         //Time
         editor.putInt(AlarmConstants.ALARM_TIME_MINUTES  , actualMin);
@@ -372,7 +375,6 @@ public class MainActivity extends AppCompatActivity
         int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
 
         saveListDataChild(_name, amount);
-        setAlarmStartView();
     }
     private void saveListDataChild(String _name, int _id){
 
@@ -403,6 +405,12 @@ public class MainActivity extends AppCompatActivity
 
         Button deleteButton = (Button) v;
 
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, getString(R.string.delete_warning), Toast.LENGTH_SHORT).show();
+            }
+        });
         deleteButton.setOnLongClickListener(new View.OnLongClickListener() {
 
             public boolean onLongClick(View v) {
@@ -423,31 +431,37 @@ public class MainActivity extends AppCompatActivity
         int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
 
         if(amount > 0) {
-            for (int id = _id; id < amount - 1; ++id) {
-                SharedPreferences.Editor editorNew = getSharedPreferenceEditor(AlarmConstants.WAKEUP_TIMER, id);
-                SharedPreferences settingsOld      = getSharedPreference(AlarmConstants.WAKEUP_TIMER, ++id);
-                Map<String, ?> settingOld = settingsOld.getAll();
 
-                for (Map.Entry<String, ?> value : settingOld.entrySet()) {
-                    if (value.getValue().getClass().equals(Boolean.class))
-                        editorNew.putBoolean(value.getKey(), (Boolean) value.getValue());
-                    else if (value.getValue().getClass().equals(Float.class))
-                        editorNew.putFloat(value.getKey(), (Float) value.getValue());
-                    else if (value.getValue().getClass().equals(Integer.class))
-                        editorNew.putInt(value.getKey(), (Integer) value.getValue());
-                    else if (value.getValue().getClass().equals(Long.class))
-                        editorNew.putLong(value.getKey(), (Long) value.getValue());
-                    else if (value.getValue().getClass().equals(String.class))
-                        editorNew.putString(value.getKey(), (String) value.getValue());
+            for (int id = _id; id < amount; ++id) {
+
+                if(id < amount -1){
+                    SharedPreferences.Editor editorNew = getSharedPreferenceEditor(AlarmConstants.WAKEUP_TIMER, id);
+                    SharedPreferences settingsOld      = getSharedPreference(AlarmConstants.WAKEUP_TIMER, id + 1);
+                    Map<String, ?> settingOld = settingsOld.getAll();
+
+                    for (Map.Entry<String, ?> value : settingOld.entrySet()) {
+                        if (value.getValue().getClass().equals(Boolean.class))
+                            editorNew.putBoolean(value.getKey(), (Boolean) value.getValue());
+                        else if (value.getValue().getClass().equals(Float.class))
+                            editorNew.putFloat(value.getKey(), (Float) value.getValue());
+                        else if (value.getValue().getClass().equals(Integer.class))
+                            editorNew.putInt(value.getKey(), (Integer) value.getValue());
+                        else if (value.getValue().getClass().equals(Long.class))
+                            editorNew.putLong(value.getKey(), (Long) value.getValue());
+                        else if (value.getValue().getClass().equals(String.class))
+                            editorNew.putString(value.getKey(), (String) value.getValue());
+                    }
+                    editorNew.apply();
                 }
             }
-            SharedPreferences.Editor editor = getSharedPreferenceEditor(AlarmConstants.WAKEUP_TIMER, amount);
+            int newAmount = --amount;
+            SharedPreferences.Editor editor = getSharedPreferenceEditor(AlarmConstants.WAKEUP_TIMER, newAmount);
 
             editor.clear();
             editor.apply();
 
             SharedPreferences.Editor editorInf = information.edit();
-            editorInf.putInt(AlarmConstants.ALARM_VALUE, --amount);
+            editorInf.putInt(AlarmConstants.ALARM_VALUE, newAmount);
             editorInf.apply();
 
             //prepare new List Data
@@ -460,11 +474,6 @@ public class MainActivity extends AppCompatActivity
         actualAlarm = _alarmID;
         //save Settings
         SharedPreferences settings = getSharedPreference(AlarmConstants.WAKEUP_TIMER, actualAlarm);
-
-        //AlarmManage alarmManager = new AlarmManage(this);
-        //boolean checked = alarmManager.checkForPendingIntent(actualAlarm);
-        //actualAlarmSet = (checked) ? 1 : 0;
-        actualAlarmSet = settings.getInt(AlarmConstants.ALARM_SET, 0);
 
         //Putting Value for each child
         Calendar calendar = Calendar.getInstance();
@@ -504,18 +513,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    private void setAlarmStartView(){
-
-        SharedPreferences information = getSharedPreference(AlarmConstants.WAKEUP_TIMER_INFO);
-        int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
-        if(amount == 0){
-            noAlarmlayout.setVisibility(LinearLayout.VISIBLE);
-            expListView.setVisibility(ExpandableListView.GONE);
-        }else{
-            noAlarmlayout.setVisibility(LinearLayout.GONE);
-            expListView.setVisibility(ExpandableListView.VISIBLE);
-        }
-    }
 
     private SharedPreferences getSharedPreference(String _settingName){
         return getApplicationContext().getSharedPreferences(_settingName, Context.MODE_PRIVATE);
@@ -527,7 +524,6 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences.Editor getSharedPreferenceEditor(String _settingsName){
         return getSharedPreference(_settingsName).edit();
     }
-
     private SharedPreferences.Editor getSharedPreferenceEditor(String _settingsName, int _actualAlarm){
         return getSharedPreference(_settingsName, _actualAlarm).edit();
     }
@@ -564,7 +560,6 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * Set New Alarm
      **********************************************************************************************/
-
     public void setNewAlarm(View v){
 
         actualButtonID = v.getId();
@@ -572,22 +567,24 @@ public class MainActivity extends AppCompatActivity
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 
         boolean checked = activeAlarmToggle.isChecked();
-
         actualAlarmSet = (checked) ? 1 : 0;
-        activateAlarm(checked);
+
+        boolean alarmSet = activateAlarm(checked);
+        activeAlarmToggle.setChecked(alarmSet);
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
-
-    private void activateAlarm(boolean active){
+    private boolean activateAlarm(boolean active){
 
         AlarmManage newAlarm = new AlarmManage(getApplicationContext());
 
         if(active)
             newAlarm.setNewAlarm(actualAlarm, false, 0);
         else
-            newAlarm.cancelAlarm(actualAlarm);
+            newAlarm.cancelAlarmwithButton(actualAlarm);
+
+        return newAlarm.checkForPendingIntent(actualAlarm);
     }
 
     /***********************************************************************************************
@@ -625,7 +622,6 @@ public class MainActivity extends AppCompatActivity
 
         builder.show();
     }
-
     private void onAlarmNameSet(String _newName){
 
         //Set new Alarm name
@@ -676,7 +672,6 @@ public class MainActivity extends AppCompatActivity
         DialogFragment newFragment = new SettingTimeFragment();
         newFragment.show(getFragmentManager(), "timePicker");
     }
-
     public void onTimeSet(TimePicker view, int hourOfDay, int minute){
         //save times
         actualHour = hourOfDay;
@@ -751,7 +746,6 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         builder.show();
     }
-
     private void onSnoozeMinutesSet(int _minutes){
         //Save Snooze Minutes
         actualSnooze = _minutes + 1;  //we Start with 1 minute
@@ -765,6 +759,7 @@ public class MainActivity extends AppCompatActivity
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
+
     /***********************************************************************************************
      * MUSIC SET DIALOG
      **********************************************************************************************/
@@ -790,7 +785,6 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         builder.show();
     }
-    
     private void onMusicSet(int _modeID){
         //Get All Song Values from the Android Media Content URI
         //Default for Uri is the internal Memory, because it is everytime available
@@ -865,7 +859,6 @@ public class MainActivity extends AppCompatActivity
         else
             Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
     }
-
     private void chooseAlarmSongDialog(final ArrayList<SongInformation> _Songs){
 
         //Create new Builder
@@ -952,7 +945,6 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         alertDialog.show();
     }
-
     private void prepareMusic(Uri _SongUri) throws IOException{
 
         //Check for MediaPlayer
@@ -966,7 +958,6 @@ public class MainActivity extends AppCompatActivity
         mediaPlayer.setDataSource(getApplicationContext(), _SongUri);
         mediaPlayer.prepare();
     }
-
     private void stopMusic(){
 
         //Check for Mediaplayer
@@ -1041,7 +1032,6 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         builder.show();
     }
-
     private void onMusicVolumeSet(int _volume){
 
         //Set ActualVolume
@@ -1120,7 +1110,6 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         builder.show();
     }
-
     private void onMusicStartSet(int _seconds){
 
         //Set ActualStart
@@ -1223,7 +1212,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
     private void onFadeInTimeSet(int _seconds){
         //Save Snooze Minutes
         actualFadeInTime = _seconds;
@@ -1330,7 +1318,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
     private void onVibrationStrengthSet(int _strength){
         //Save Vibration Values
         actualVibraStr = _strength;
@@ -1432,7 +1419,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-
     private void onScreenBrightnessSet(int _brigthness){
 
         actualScreenBrightness = _brigthness;
@@ -1454,7 +1440,6 @@ public class MainActivity extends AppCompatActivity
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
-
     public void showScreenLightStartSettingDialog(View v){
 
         //Save ID From Button
@@ -1511,7 +1496,6 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         builder.show();
     }
-
     private void onScreenStartTimeSet(int _minutes){
         //Save ScreenStart Minutes
         actualScreenStartTime = _minutes + 1;  //we Start with 1 minute
@@ -1544,7 +1528,6 @@ public class MainActivity extends AppCompatActivity
         colorPicker.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_color));
         colorPicker.show();
     }
-
     private void onColorSet(Button _buttonView, int _color){
 
         final String color1 = this.getString(R.string.wakeup_light_screen_color1);
@@ -1594,7 +1577,6 @@ public class MainActivity extends AppCompatActivity
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
     }
-
     public void showLEDLightStartSettingDialog(View v){
 
         //Save ID From Button
@@ -1651,7 +1633,6 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         builder.show();
     }
-
     private void onLEDStartTimeSet(int _minutes){
         //Save LEDSTartTime Minutes
         actualLightLEDStartTime = _minutes + 1;  //we Start with 1 minute
@@ -1669,6 +1650,7 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * OPTIONSMENU
      **********************************************************************************************/
+    // TODO OptionsMenü: Set Different Colors for All Elements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

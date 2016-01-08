@@ -253,7 +253,15 @@ public class AlarmManage extends AppCompatActivity {
         //If there are Days between next Alarm multiply else Cancel Alarm
         if(daysToNextAlarm > 0)
             setNewAlarm(_id, false, AlarmManager.INTERVAL_DAY * daysToNextAlarm);
-        else
+        else{
             alarmManager.cancel(getPendingIntent(_id));
+            getPendingIntent(_id).cancel();
+        }
+    }
+
+    public void cancelAlarmwithButton(int _id){
+        createAlarmManager();
+        alarmManager.cancel(getPendingIntent(_id));
+        getPendingIntent(_id).cancel();
     }
 }
