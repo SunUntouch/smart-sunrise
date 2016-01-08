@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity
     //ExpendableList
     ExpandableListAdapter expListAdapter;
     ExpandableListView    expListView;
+    LinearLayout          noAlarmlayout;
 
     List<String>          expListDataHeader;
     List<String>          expListDataAlarm;
@@ -113,11 +114,15 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         //Expendable Listview///////////////////////////////////////////////////////////////////////
+
         //get the listView
         expListView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendbleList);
+        noAlarmlayout = (LinearLayout) findViewById(R.id.wakeup_timer_no_Alarm_set_View);
 
         //prepare list data
         prepareLisData();
+        setAlarmStartView();
+
         expListAdapter = new ExpandableListAdapter(this, expListDataAlarm, expListDataMusicURI, expListDataHeader, expListDataChild);
 
         //setting list adapter
@@ -367,6 +372,7 @@ public class MainActivity extends AppCompatActivity
         int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
 
         saveListDataChild(_name, amount);
+        setAlarmStartView();
     }
     private void saveListDataChild(String _name, int _id){
 
@@ -498,6 +504,19 @@ public class MainActivity extends AppCompatActivity
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    private void setAlarmStartView(){
+
+        SharedPreferences information = getSharedPreference(AlarmConstants.WAKEUP_TIMER_INFO);
+        int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
+        if(amount == 0){
+            noAlarmlayout.setVisibility(LinearLayout.VISIBLE);
+            expListView.setVisibility(ExpandableListView.GONE);
+        }else{
+            noAlarmlayout.setVisibility(LinearLayout.GONE);
+            expListView.setVisibility(ExpandableListView.VISIBLE);
+        }
+    }
+
     private SharedPreferences getSharedPreference(String _settingName){
         return getApplicationContext().getSharedPreferences(_settingName, Context.MODE_PRIVATE);
     }
@@ -1076,7 +1095,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         //LinearLayout
-        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, actualSongLength, 1, actualSongStart);
+        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, actualSongLength - 1, 1, actualSongStart);
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -1172,9 +1191,8 @@ public class MainActivity extends AppCompatActivity
                         //textView.setVisibility(TextView.GONE);
                     }
                 });
-
             //LinearLayout
-            LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, actualSongLength, 1, actualFadeInTime); //TODO Length - current Startime > 0
+            LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, actualSongLength, 1, actualFadeInTime);
 
             //Create new Builder
             final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());

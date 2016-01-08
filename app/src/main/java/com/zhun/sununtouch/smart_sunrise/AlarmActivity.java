@@ -3,13 +3,14 @@ package com.zhun.sununtouch.smart_sunrise;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
@@ -27,14 +28,11 @@ import java.util.concurrent.TimeUnit;
 public class AlarmActivity extends AppCompatActivity {
 
     //Private camera Values
-    private CameraCaptureSession   mSession;
-    private CaptureRequest.Builder mBuilder;
-    private CameraDevice           mCameraDevice;
-
     private android.hardware.Camera m_Cam;
     private MediaPlayer mediaPlayer;
     private Vibrator m_Vibrator;
 
+    //API Level 23
     private int actualAlarm = -1;
     private Handler alarmHandler;
 
@@ -113,7 +111,7 @@ public class AlarmActivity extends AppCompatActivity {
 
         //MUSIC VIBRATION///////////////////////////////////////////////////////////////////////////
         if(useVibration)
-            doVibrate(minutesMax, light[6]);
+            doVibrate(minutesMax, music[5]);
     }
 
     private String getDayName(Calendar _calendar){
@@ -293,7 +291,7 @@ public class AlarmActivity extends AppCompatActivity {
         final int maxVolumeAndroid = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolumeAndroid, 0);
 
-        mediaPlayer.seekTo( (int) TimeUnit.SECONDS.toMillis(_startSeconds));
+        mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(_startSeconds));
         if(_FadeIn){
 
             currentVolume = 0;
@@ -369,28 +367,26 @@ public class AlarmActivity extends AppCompatActivity {
         Runnable vibrationRunnable = new Runnable() {
             @Override
             public void run() {
-                setVibrationStart(); //TODO Set Valuable Vibration Strength
+                setVibrationStart(_vibrationStrength, 1000);
             }
         };
 
         //Get Time Value till Vibration Starts
         alarmHandler.postDelayed(vibrationRunnable, TimeUnit.MINUTES.toMillis(minutes));
     }
-
     private void setVibrationStart(){
         long[] pattern = { 0, 100, 200, 300, 400 };
         setVibrationStart(pattern, 0);
     }
     private void setVibrationStart(int _intensity, long _duration){
-        long[] pattern = generateVibratorpatter(_intensity, _duration);
+        long[] pattern = generateVibratorPattern(_intensity, _duration);
         setVibrationStart(pattern, 0);
     }
     private void setVibrationStart(long[] _pattern, int _repeat){
         m_Vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         m_Vibrator.vibrate(_pattern, _repeat);
     }
-
-    private long[] generateVibratorpatter(int _intensity, long duration){
+    private long[] generateVibratorPattern(int _intensity, long duration){
 
         float intensity =  ((float) _intensity) / 100.0f;
 
@@ -408,9 +404,7 @@ public class AlarmActivity extends AppCompatActivity {
         }
 
         return pattern;
-
     }
-
     private void setVibrationStop(){
 
         //Cancel and Release Vibrator
@@ -442,16 +436,38 @@ public class AlarmActivity extends AppCompatActivity {
     }
     private void startLED(){
 
-        //Start new Cam
-        m_Cam = android.hardware.Camera.open();
+        if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)){
 
-        //Load Parameters and Set Parameters
-        android.hardware.Camera.Parameters p = m_Cam.getParameters();
-        p.setFlashMode(android.hardware.Camera.Parameters.FLASH_MODE_TORCH);
-        m_Cam.setParameters(p);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){  //TODO Test with new Version when available
+                CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
 
-        //Start LED
-        m_Cam.startPreview(); //TODO Change to not deprecated version
+                try {
+                    String[] cameraIds = cameraManager.getCameraIdList();
+
+                    for(String cameraID : cameraIds){
+
+                        CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
+                        if(cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)){
+                            cameraManager.setTorchMode(cameraID, true);
+                        }
+                    }
+                } catch (Exception e){
+                    //TODO Catch Exception
+                }
+            }
+            else{
+                //Start new Cam
+                m_Cam = android.hardware.Camera.open();
+
+                //Load Parameters and Set Parameters
+                android.hardware.Camera.Parameters p = m_Cam.getParameters();
+                p.setFlashMode(android.hardware.Camera.Parameters.FLASH_MODE_TORCH);
+                m_Cam.setParameters(p);
+
+                //Start LED
+                m_Cam.startPreview();
+            }
+        }
     }
     private void stopLED(){
 

@@ -18,13 +18,34 @@
         android:layout_weight="7"
         android:orientation="vertical" >
 
+        <LinearLayout
+            android:id="@+id/wakeup_timer_no_Alarm_set_View"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/wakeup_no_alarm"
+                android:textStyle="bold"
+                android:textSize="50dp"
+                android:alpha="0.7"/>
+
+        </LinearLayout>
+
         <ExpandableListView
             android:id="@+id/wakeup_timer_expendbleList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:groupIndicator="@android:drawable/arrow_down_float"
             android:dividerHeight="2dp"
-            android:divider="@color/colorPrimary"/>
+            android:divider="@color/colorPrimary"
+            android:visibility="gone"/>
+
+
     </LinearLayout>
 
     <View
