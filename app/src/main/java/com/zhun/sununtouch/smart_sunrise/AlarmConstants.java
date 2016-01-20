@@ -79,7 +79,7 @@ public abstract class AlarmConstants {
     //Music
     public final static String ACTUAL_MUSIC_SONG_URI = Settings.System.DEFAULT_ALARM_ALERT_URI.getPath();
     public final static int ACTUAL_MUSIC_START              = 0;
-    public final static int ACTUAL_MUSIC_LENGTH             = 0;
+    public final static int ACTUAL_MUSIC_LENGTH             = 1;
     public final static int ACTUAL_MUSIC_VOLUME             = 100;
     public final static int ACTUAL_MUSIC_FADE_IN            = 0;
     public final static int ACTUAL_MUSIC_FADE_IN_TIME       = 0;

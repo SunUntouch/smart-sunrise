@@ -138,14 +138,15 @@ public class AlarmManage extends AppCompatActivity {
         bundle.putIntArray(AlarmConstants.WAKEUP_MUSIC, music);
 
         int[] light = {
-                0,
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN),
                 settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS),
                 0,
                 settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1           , AlarmConstants.ACTUAL_SCREEN_COLOR1),
                 settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2           , AlarmConstants.ACTUAL_SCREEN_COLOR2),
-                0,
-                0,
+                settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR        , AlarmConstants.ACTUAL_SCREEN_COLOR_FADE),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , AlarmConstants.ACTUAL_LED),
                 0};// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+
 
         bundle.putIntArray(AlarmConstants.WAKEUP_LIGHT, light);
 
@@ -160,9 +161,9 @@ public class AlarmManage extends AppCompatActivity {
         return new Intent(context, AlarmReceiver.class).putExtras(bundle);
     }
 
-    public void setNewAlarm(int _id, boolean snooze, long repeatMillis){
+    public void setNewAlarm(int _id, boolean snooze){
 
-        //sharedPrefereces
+        //sharedPreferences
         String settingName = AlarmConstants.WAKEUP_TIMER + _id;
         SharedPreferences settings = context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
 
@@ -173,44 +174,67 @@ public class AlarmManage extends AppCompatActivity {
                 settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, AlarmConstants.ACTUAL_TIME_MINUTE),
                 settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE, 10)};    // hour, minute, snooze
 
-        Calendar calendar = Calendar.getInstance();
-        long snoozeTime = 0;
-
+        //create Alarm
         createAlarmManager();
         PendingIntent pendingIntent = getPendingIntent(_id);
         alarmManager.cancel(pendingIntent);
 
+        Calendar calendar = Calendar.getInstance();
+        //Get Days to next Alarm
+        long alarmTime;
         if(!snooze){
             calendar.set(Calendar.HOUR_OF_DAY, time[0]);
             calendar.set(Calendar.MINUTE, time[1]);
+
+            alarmTime = calendar.getTimeInMillis();
+            long systemTime = System.currentTimeMillis();
+            long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm(settings) * 24); //24 Hours are One Day for TimeUnit
+            alarmTime = (alarmTime < systemTime) ? alarmTime +  timeToNextDay : alarmTime;
         }
         else{//Snooze
-            snoozeTime = TimeUnit.MINUTES.toMillis(time[2]);
             pendingIntent = getSnoozePendingIntent(_id);
+            alarmTime = calendar.getTimeInMillis() + TimeUnit.MINUTES.toMillis(time[2]); //+ Snooze
         }
 
         //Check for SDK Version and Use different AlarmManager Functions
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-
             //Newer API Level provides a Symbol when Alarm is active
-            AlarmManager.AlarmClockInfo alarmClockInfo =
-                    new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis() +
-                                                    snoozeTime +
-                                                    repeatMillis,
-                                                    pendingIntent);
-
+            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(alarmTime, pendingIntent);
             alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
         }
         else
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() + snoozeTime + repeatMillis, pendingIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
     }
 
     public void snoozeAlarm(int _id){
         if(_id!= -1)
-            setNewAlarm(_id, true, 0);
+            setNewAlarm(_id, true);
     }
 
     public  void cancelAlarm(int _id){
+        //get Days till Next Alarm
+        int daysToNextAlarm = getDaysToNextAlarm(_id);
+        createAlarmManager();
+
+        //If there are Days between next Alarm multiply else Cancel Alarm
+        if(daysToNextAlarm > 0)
+            setNewAlarm(_id, false);
+        else{
+            alarmManager.cancel(getPendingIntent(_id));
+            getPendingIntent(_id).cancel();
+        }
+    }
+
+    public void cancelAlarmwithButton(int _id){
+        createAlarmManager();
+        if(checkForPendingIntent(_id)){
+            alarmManager.cancel(getPendingIntent(_id));
+            getPendingIntent(_id).cancel();
+        }
+    }
+
+    private int getDaysToNextAlarm(int _id){
+
         //sharedPrefereces
         String settingName = AlarmConstants.WAKEUP_TIMER + _id;
         SharedPreferences settings = context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
@@ -233,35 +257,61 @@ public class AlarmManage extends AppCompatActivity {
         int daysToNextAlarm = 0;
 
         if(days[0] == 1 || days[1] == 1 || days[2] == 1 || days[3] == 1 || days[4] == 1 || days[5] == 1 || days[6] == 1)
-        for(int day = 0; day < 7; ++day){
+            for(int day = 0; day < 7; ++day){
 
-            //Get Current Day
-            int nextDay = currentDay + day ;
-            //If Sunday is Arrived switch to Monday index
-            nextDay = (nextDay > 6) ? nextDay - 7 : nextDay;
+                //Get Current Day
+                int nextDay = currentDay + day ;
+                //If Sunday is Arrived switch to Monday index
+                nextDay = (nextDay > 6) ? nextDay - 7 : nextDay;
 
-            //If Next Day don't has a Alarm add 1 to daysNextAlarm else break loop
-            if(days[nextDay] == 0)
-                ++daysToNextAlarm;
-            else{
-                ++daysToNextAlarm;
-                break;
+                //If Next Day don't has a Alarm add 1 to daysNextAlarm else break loop
+                if(days[nextDay] == 0)
+                    ++daysToNextAlarm;
+                else{
+                    ++daysToNextAlarm;
+                    break;
+                }
             }
-        }
 
-        createAlarmManager();
-        //If there are Days between next Alarm multiply else Cancel Alarm
-        if(daysToNextAlarm > 0)
-            setNewAlarm(_id, false, AlarmManager.INTERVAL_DAY * daysToNextAlarm);
-        else{
-            alarmManager.cancel(getPendingIntent(_id));
-            getPendingIntent(_id).cancel();
-        }
+        return daysToNextAlarm;
     }
 
-    public void cancelAlarmwithButton(int _id){
-        createAlarmManager();
-        alarmManager.cancel(getPendingIntent(_id));
-        getPendingIntent(_id).cancel();
+    private int getDaysToNextAlarm(SharedPreferences settings){
+
+        //Load Days for Repeat
+        int[] days  = {
+                settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0)};
+
+        //Load Calendar Instance and get Actual Day of the Week
+        Calendar calendar = Calendar.getInstance();
+        int currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+        //get Days till Next Alarm
+        int daysToNextAlarm = 0;
+
+        if(days[0] == 1 || days[1] == 1 || days[2] == 1 || days[3] == 1 || days[4] == 1 || days[5] == 1 || days[6] == 1)
+            for(int day = 0; day < 7; ++day){
+
+                //Get Current Day
+                int nextDay = currentDay + day ;
+                //If Sunday is Arrived switch to Monday index
+                nextDay = (nextDay > 6) ? nextDay - 7 : nextDay;
+
+                //If Next Day don't has a Alarm add 1 to daysNextAlarm else break loop
+                if(days[nextDay] == 0)
+                    ++daysToNextAlarm;
+                else{
+                    ++daysToNextAlarm;
+                    break;
+                }
+            }
+
+        return daysToNextAlarm;
     }
 }

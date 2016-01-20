@@ -373,7 +373,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-        //TODO Set Time and Days in View
         if(convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, null);
@@ -406,21 +405,23 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         boolean isSaturday  = childDayValues.get(AlarmConstants.ALARM_DAY_SATURDAY)  > 0;
         boolean isSunday    = childDayValues.get(AlarmConstants.ALARM_DAY_SUNDAY)    > 0;
 
-        String monday     = (isMonday)    ? convertView.getContext().getString(R.string.wakeup_day_monday_short)    : "";
-        String tuesday    = (isTuesday)   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short)   : "";
+        String monday     = (isMonday)    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "";
+        String tuesday    = (isTuesday)   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "";
         String wednesday  = (isWednesday) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "";
-        String thursday   = (isThursday)  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short)  : "";
-        String friday     = (isFriday)    ? convertView.getContext().getString(R.string.wakeup_day_friday_short)    : "";
-        String saturday   = (isSaturday)  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short)  : "";
-        String sunday     = (isSunday)    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short)    : "";
+        String thursday   = (isThursday)  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "";
+        String friday     = (isFriday)    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "";
+        String saturday   = (isSaturday)  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "";
+        String sunday     = (isSunday)    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : "";
 
-        String days = monday + " " +
-                tuesday + " " +
-                wednesday + " " +
-                thursday + " " +
-                friday + " " +
-                saturday + " " +
-                sunday;
+
+        String days = String.format("%s %s %s %s %s %s %s",
+                                    monday,
+                                    tuesday,
+                                    wednesday,
+                                    thursday,
+                                    friday,
+                                    saturday,
+                                    sunday);
 
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
         txtListDays.setText(days);

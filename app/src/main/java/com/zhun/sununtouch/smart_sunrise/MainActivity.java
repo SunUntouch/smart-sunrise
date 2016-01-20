@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity
     //Music
     private String actualSongURI = AlarmConstants.ACTUAL_MUSIC_SONG_URI;
     private int actualSongStart  = AlarmConstants.ACTUAL_MUSIC_START;
-    private int actualSongLength = AlarmConstants.ACTUAL_MUSIC_LENGTH;
+    private int actualSongLength = -1;
     private int actualVolume     = AlarmConstants.ACTUAL_MUSIC_VOLUME;
     private int actualFadeIn     = AlarmConstants.ACTUAL_MUSIC_FADE_IN;
     private int actualFadeInTime = AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME;
@@ -570,7 +570,7 @@ public class MainActivity extends AppCompatActivity
         AlarmManage newAlarm = new AlarmManage(getApplicationContext());
 
         if(active)
-            newAlarm.setNewAlarm(actualAlarm, false, 0);
+            newAlarm.setNewAlarm(actualAlarm, false);
         else
             newAlarm.cancelAlarmwithButton(actualAlarm);
 
@@ -644,6 +644,8 @@ public class MainActivity extends AppCompatActivity
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
         expListView.invalidateViews();
+
+
     }
 
     /***********************************************************************************************
@@ -862,12 +864,9 @@ public class MainActivity extends AppCompatActivity
                 //Get Values from Choosen Song
                 actualSongURI = _Songs.get(which).getPath();
 
-                //Get Values for Button
-                String newMusicURI = _Songs.get(which).getPath();
-
                 //Get Song Lengh
                 MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-                metaRetriever.setDataSource(newMusicURI);
+                metaRetriever.setDataSource(actualSongURI);
                 String durationStr = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
                 long duration = Long.parseLong(durationStr);
                 actualSongLength = (int) (duration / 1000);
@@ -1014,7 +1013,6 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showMusicStartSettingDialog(View v){
 
-        //TODO catch Error when Music not set first
         //Save ID From Button
         actualButtonID = v.getId();
 
@@ -1048,7 +1046,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         //LinearLayout
-        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, actualSongLength - 1, 1, actualSongStart);
+        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, actualSongLength, 1, actualSongStart);
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -1294,7 +1292,7 @@ public class MainActivity extends AppCompatActivity
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         //Set Position of Text
                         int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
-                        String message = Integer.toString(++progress)+ "%";
+                        String message = Integer.toString(progress + 1)+ "%";
                         textView.setText(message);
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                     }
@@ -1309,7 +1307,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 });
                 //LinearLayout
-                LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 99, 1, --actualScreenBrightness); //We must -1 because we dont want to have zero brightness
+                LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 99, 1, actualScreenBrightness - 1); //We must -1 because we dont want to have zero brightness
 
                 //Create new Builder
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -1365,7 +1363,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Set Position of Text
                 int val = (progress * (seekBar.getWidth() - 6 * seekBar.getThumbOffset())) / seekBar.getMax();
-                String message = Integer.toString(++progress) + "min";
+                String message = Integer.toString(progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
@@ -1380,7 +1378,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         //LinearLayout
-        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 99, 1, actualScreenStartTime - 1);
+        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 100, 1, actualScreenStartTime);
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -1407,7 +1405,7 @@ public class MainActivity extends AppCompatActivity
     }
     private void onScreenStartTimeSet(int _minutes){
         //Save ScreenStart Minutes
-        actualScreenStartTime = _minutes + 1;  //we Start with 1 minute
+        actualScreenStartTime = _minutes;  //we Start with 1 minute
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
@@ -1496,7 +1494,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Set Position of Text
                 int val = (progress * (seekBar.getWidth() - 6 * seekBar.getThumbOffset())) / seekBar.getMax();
-                String message = Integer.toString(++progress) + "min";
+                String message = Integer.toString(progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
@@ -1511,7 +1509,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         //LinearLayout
-        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 99, 1, actualLightLEDStartTime - 1);
+        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 100, 1, actualLightLEDStartTime - 1);
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -1538,7 +1536,7 @@ public class MainActivity extends AppCompatActivity
     }
     private void onLEDStartTimeSet(int _minutes){
         //Save LEDSTartTime Minutes
-        actualLightLEDStartTime = _minutes + 1;  //we Start with 1 minute
+        actualLightLEDStartTime = _minutes;
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
