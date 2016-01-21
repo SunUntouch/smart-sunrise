@@ -11,6 +11,7 @@ smart-sunrise Todos
 - set Light
 	- Display
 		- color
+		- image
 		- fading
 	- LED
 - set message/name

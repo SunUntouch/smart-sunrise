@@ -11,6 +11,8 @@ import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.Calendar;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmManage extends AppCompatActivity {
@@ -188,7 +190,12 @@ public class AlarmManage extends AppCompatActivity {
 
             alarmTime = calendar.getTimeInMillis();
             long systemTime = System.currentTimeMillis();
-            long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm(settings) * 24); //24 Hours are One Day for TimeUnit
+            long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm(settings));
+
+            //we don't want to fire the alarm if it is in the past on this day so we add 1 day 
+            timeToNextDay = (timeToNextDay == 0) ? + TimeUnit.DAYS.toMillis(1) : timeToNextDay;
+
+            //Check if AlarmTime is smaller then the actual time, if so then set it for timeToNextDay
             alarmTime = (alarmTime < systemTime) ? alarmTime +  timeToNextDay : alarmTime;
         }
         else{//Snooze
@@ -239,78 +246,45 @@ public class AlarmManage extends AppCompatActivity {
         String settingName = AlarmConstants.WAKEUP_TIMER + _id;
         SharedPreferences settings = context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
 
-        //Load Days for Repeat
-        int[] days  = {
-                settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0)};
-
-        //Load Calendar Instance and get Actual Day of the Week
-        Calendar calendar = Calendar.getInstance();
-        int currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
-
-        //get Days till Next Alarm
-        int daysToNextAlarm = 0;
-
-        if(days[0] == 1 || days[1] == 1 || days[2] == 1 || days[3] == 1 || days[4] == 1 || days[5] == 1 || days[6] == 1)
-            for(int day = 0; day < 7; ++day){
-
-                //Get Current Day
-                int nextDay = currentDay + day ;
-                //If Sunday is Arrived switch to Monday index
-                nextDay = (nextDay > 6) ? nextDay - 7 : nextDay;
-
-                //If Next Day don't has a Alarm add 1 to daysNextAlarm else break loop
-                if(days[nextDay] == 0)
-                    ++daysToNextAlarm;
-                else{
-                    ++daysToNextAlarm;
-                    break;
-                }
-            }
-
-        return daysToNextAlarm;
+        return getDaysToNextAlarm(settings);
     }
 
     private int getDaysToNextAlarm(SharedPreferences settings){
 
         //Load Days for Repeat
         int[] days  = {
+                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0),
                 settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , 0),
                 settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , 0),
                 settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, 0),
                 settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , 0),
                 settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0),
-                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0)};
+                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0)};
 
         //Load Calendar Instance and get Actual Day of the Week
         Calendar calendar = Calendar.getInstance();
-        int currentDay = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+        int currentDay    = calendar.get(Calendar.DAY_OF_WEEK) - 1;
+
+        currentDay = (currentDay > 5) ? 0 : ++currentDay;
 
         //get Days till Next Alarm
         int daysToNextAlarm = 0;
-
         if(days[0] == 1 || days[1] == 1 || days[2] == 1 || days[3] == 1 || days[4] == 1 || days[5] == 1 || days[6] == 1)
-            for(int day = 0; day < 7; ++day){
+            if(days[currentDay] != 1){
+                while(days[currentDay] != 1){
 
-                //Get Current Day
-                int nextDay = currentDay + day ;
-                //If Sunday is Arrived switch to Monday index
-                nextDay = (nextDay > 6) ? nextDay - 7 : nextDay;
+                    //Set CurrentDay to correct day
+                    if(days[currentDay] == 0)
+                        ++daysToNextAlarm;
 
-                //If Next Day don't has a Alarm add 1 to daysNextAlarm else break loop
-                if(days[nextDay] == 0)
-                    ++daysToNextAlarm;
-                else{
-                    ++daysToNextAlarm;
-                    break;
+                    //If Sunday is Arrived switch to Monday index
+                    currentDay = (currentDay > 5) ? 0 : ++currentDay;
                 }
+                ++daysToNextAlarm;
             }
+
+            else
+                ++daysToNextAlarm;
 
         return daysToNextAlarm;
     }
