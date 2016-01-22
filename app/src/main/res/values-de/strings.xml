@@ -85,5 +85,30 @@
     <string name="wakeup_music_no_sd_card">Kein Externer Speicher auf dem Gerät</string>
     <string name="wakeup_music_no_fadeIn">Startzeit zu spät, keine Zeit für FadeIn übrig</string>
 
+    <!-- Toast Text -->
+    <string name="toast_positive_alarm">Alarm ist aktiv.\Zeit: %s</string>
+    <string name="toast_negative_alarm">Alarm ist inaktiv.</string>
+    <string name="toast_AlarmName_positive">Neuer Name lautet \"%s\"</string>
+    <string name="toast_AlarmSet_negative">Neuer Name lautet \"%s\".\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmTime_positive">Musik startet bei %s</string>
+    <string name="toast_AlarmTime_negative">Musik startet bei %s.\r\nAlarm ist inaktiv.</string>
+    <string name="toast_AlarmSnooze_positive">Schlummer auf %d Minuten.</string>
+    <string name="toast_AlarmSnooze_negative">Schlummer auf %d Minuten.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmMusic_positive">Musik auf %s gesetzt.</string>
+    <string name="toast_AlarmMusic_negative">Musik auf %s gesetzt.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmVolume_positive">Lautstärke ist %d.</string>
+    <string name="toast_AlarmVolume_negative">Lautstärke ist %d.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmSongStart_positive">Musik startet bei %d Sekunden.</string>
+    <string name="toast_AlarmSongStart_negative">Musik startet bei %d Sekunden.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmScreenStart_positive">Bildschirm leuchtet %d Minuten vor dem Alarm.</string>
+    <string name="toast_AlarmScreenStart_negative">Bildschirm leuchtet %d Minuten vor dem Alarm.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmLEDStart_positive">LED leuchtet %d Minuten vor dem Alarm.</string>
+    <string name="toast_AlarmLEDStart_negative">LED leuchtet %d Minuten vor dem Alarm.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmFadeIn_positive">Musik blendet %d Sekunden ein.</string>
+    <string name="toast_AlarmFadeIn_negative">Musik blendet %d Sekunden ein.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmVibrationStrength_positive">Vibrationstärke auf %d gesetzt.</string>
+    <string name="toast_AlarmVibrationStrength_negative">Vibrationstärke auf %d gesetzt.\r\nAlarm ist inaktiv</string>
+    <string name="toast_AlarmScreenBrightness_positive">Helligkeit auf %d gesetzt.</string>
+    <string name="toast_AlarmScreenBrightness_negative">Helligkeit auf %d gesetzt.\r\nAlarm ist inaktiv</string>
 
 </resources>

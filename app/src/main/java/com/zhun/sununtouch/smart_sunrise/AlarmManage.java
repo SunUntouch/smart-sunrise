@@ -176,6 +176,17 @@ public class AlarmManage extends AppCompatActivity {
                 settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, AlarmConstants.ACTUAL_TIME_MINUTE),
                 settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE, 10)};    // hour, minute, snooze
 
+        int[] light = {
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, AlarmConstants.ACTUAL_SCREEN_START),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1           , AlarmConstants.ACTUAL_SCREEN_COLOR1),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2           , AlarmConstants.ACTUAL_SCREEN_COLOR2),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR        , AlarmConstants.ACTUAL_SCREEN_COLOR_FADE),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_USELED           , AlarmConstants.ACTUAL_LED),
+                settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , AlarmConstants.ACTUAL_LED_START)};
+
+
         //create Alarm
         createAlarmManager();
         PendingIntent pendingIntent = getPendingIntent(_id);
@@ -188,15 +199,15 @@ public class AlarmManage extends AppCompatActivity {
             calendar.set(Calendar.HOUR_OF_DAY, time[0]);
             calendar.set(Calendar.MINUTE, time[1]);
 
-            alarmTime = calendar.getTimeInMillis();
+            long lightStart = TimeUnit.MINUTES.toMillis(getTimeBeforeMusic(light));
             long systemTime = System.currentTimeMillis();
             long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm(settings));
 
-            //we don't want to fire the alarm if it is in the past on this day so we add 1 day 
-            timeToNextDay = (timeToNextDay == 0) ? + TimeUnit.DAYS.toMillis(1) : timeToNextDay;
+            //Add all necessary values to alarm time 
+            alarmTime = calendar.getTimeInMillis() + timeToNextDay - lightStart;
 
-            //Check if AlarmTime is smaller then the actual time, if so then set it for timeToNextDay
-            alarmTime = (alarmTime < systemTime) ? alarmTime +  timeToNextDay : alarmTime;
+            //Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
+            alarmTime = (alarmTime < systemTime) ? alarmTime + TimeUnit.DAYS.toMillis(1) : alarmTime;
         }
         else{//Snooze
             pendingIntent = getSnoozePendingIntent(_id);
@@ -219,11 +230,11 @@ public class AlarmManage extends AppCompatActivity {
     }
 
     public  void cancelAlarm(int _id){
-        //get Days till Next Alarm
-        int daysToNextAlarm = getDaysToNextAlarm(_id);
+
         createAlarmManager();
 
-        //If there are Days between next Alarm multiply else Cancel Alarm
+        //get Days till Next Alarm
+        int daysToNextAlarm = getDaysToNextAlarm(_id);
         if(daysToNextAlarm > 0)
             setNewAlarm(_id, false);
         else{
@@ -238,6 +249,33 @@ public class AlarmManage extends AppCompatActivity {
             alarmManager.cancel(getPendingIntent(_id));
             getPendingIntent(_id).cancel();
         }
+    }
+
+    private boolean isAlarmRepeat(int _id){
+
+        //sharedPrefereces
+        String settingName = AlarmConstants.WAKEUP_TIMER + _id;
+        SharedPreferences settings = context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
+
+        return isAlarmRepeat(settings);
+    }
+
+    private boolean isAlarmRepeat(SharedPreferences settings){
+
+        //Load Days for Repeat
+        int[] days  = {
+                settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , 0),
+                settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , 0)};
+
+        if(days[0] == 1 || days[1] == 1 || days[2] == 1 || days[3] == 1 || days[4] == 1 || days[5] == 1 || days[6] == 1)
+            return true;
+        else
+            return false;
     }
 
     private int getDaysToNextAlarm(int _id){
@@ -282,10 +320,27 @@ public class AlarmManage extends AppCompatActivity {
                 }
                 ++daysToNextAlarm;
             }
-
-            else
-                ++daysToNextAlarm;
+        else
+            ++daysToNextAlarm;
 
         return daysToNextAlarm;
+    }
+
+    public long getTimeAlarmStarts(int _hours, int _minutes){
+        return TimeUnit.HOURS.toMinutes(_hours) + _minutes ;
+    }
+
+    public int getTimeBeforeMusic(int[] light){
+
+        //Screen
+        boolean useScreen      = light[0] == 1;
+        boolean useLED         = light[6] == 1;
+
+        int minuteScreen = (useScreen) ? light[2] : 0;
+        int minuteLED    = (useLED) ? light[7] : 0;
+
+        int minutesMax   = (minuteScreen >= minuteLED) ? minuteScreen : minuteLED;
+
+        return minutesMax;
     }
 }

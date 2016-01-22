@@ -95,4 +95,29 @@
     <string name="wakeup_music_no_fadeIn">Start Time to long, No Time left for FadeIn</string>
     <string name="delete_warning">Hold Button to delete Alarm</string>
 
+    <string name="toast_positive_alarm">Alarm is active.\nTime: %s</string>
+    <string name="toast_negative_alarm">Alarm is inactive.</string>
+    <string name="toast_AlarmName_positive">New Name set to \"%s\"</string>
+    <string name="toast_AlarmSet_negative">New Name is \"%s\".\r\nAlarm is inactive</string>
+    <string name="toast_AlarmTime_positive">Music starts at %s</string>
+    <string name="toast_AlarmTime_negative">Music Starts at %s.\r\nAlarm is inactive.</string>
+    <string name="toast_AlarmSnooze_positive">Set Snooze to %d minutes.</string>
+    <string name="toast_AlarmSnooze_negative">Set Snooze to %d minutes.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmMusic_positive">Music set to %s.</string>
+    <string name="toast_AlarmMusic_negative">Music set to %s.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmVolume_positive">Volume set to %d.</string>
+    <string name="toast_AlarmVolume_negative">Volume set to %d.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmSongStart_positive">Music starts at %d seconds.</string>
+    <string name="toast_AlarmSongStart_negative">Music starts at %d seconds.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmScreenStart_positive">Screen shine %d minutes before Alarm.</string>
+    <string name="toast_AlarmScreenStart_negative">Screen shine %d minutes before Alarm.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmLEDStart_positive">LED shines %d minutes before Alarm.</string>
+    <string name="toast_AlarmLEDStart_negative">LED shines %d minutes before Alarm.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmFadeIn_positive">Music fades %d seconds in.</string>
+    <string name="toast_AlarmFadeIn_negative">Music fades %d seconds in.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmVibrationStrength_positive">Vibration strength set to %d.</string>
+    <string name="toast_AlarmVibrationStrength_negative">Vibration strength set to %d.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmScreenBrightness_positive">Brightness set to %d.</string>
+    <string name="toast_AlarmScreenBrightness_negative">Brightness set to %d.\r\nAlarm is inactive</string>
+
 </resources>

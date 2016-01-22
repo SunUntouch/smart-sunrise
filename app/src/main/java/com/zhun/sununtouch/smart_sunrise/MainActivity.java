@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity
     //Actual Alarm Values
     private int actualAlarm    =-1;
 
+    //Actual Alarm Set
+    private boolean alarmSet   = AlarmConstants.ALARM_IS_SET;
     //Time
     private int actualHour     = AlarmConstants.ACTUAL_TIME_HOUR;
     private int actualMin      = AlarmConstants.ACTUAL_TIME_MINUTE;
@@ -240,7 +242,7 @@ public class MainActivity extends AppCompatActivity
         expListDataMusicURI= new ArrayList<>();
         expListDataChild  = new LinkedHashMap<>();
 
-        SharedPreferences information = getSharedPreference(AlarmConstants.WAKEUP_TIMER_INFO);
+        SharedPreferences information = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
         int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
 
         if(amount == 0) {
@@ -265,7 +267,7 @@ public class MainActivity extends AppCompatActivity
             for (int id = 0; id < amount; ++id) {
 
                 //sharedPrefereces
-                SharedPreferences settings = getSharedPreference(AlarmConstants.WAKEUP_TIMER, id);
+                SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, id);
 
                 //GetData
                 String name = settings.getString(AlarmConstants.ALARM_NAME, this.getString(R.string.wakeup_no_alarm));
@@ -315,7 +317,7 @@ public class MainActivity extends AppCompatActivity
 
     private void changeListData(String _name, int _id){
         //Load sharedPrefereces
-        SharedPreferences.Editor editor = getSharedPreferenceEditor(AlarmConstants.WAKEUP_TIMER, _id);
+        SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreferenceEditor(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, _id);
 
         String alarmName = AlarmConstants.ALARM + _id;
 
@@ -324,6 +326,9 @@ public class MainActivity extends AppCompatActivity
 
         //put StringSet back
         editor.putString(AlarmConstants.ALARM_NAME, _name);
+
+        //Alarm is Set
+        editor.putBoolean(AlarmConstants.ALARM_TIME_SET, alarmSet);
 
         //Time
         editor.putInt(AlarmConstants.ALARM_TIME_MINUTES  , actualMin);
@@ -364,14 +369,14 @@ public class MainActivity extends AppCompatActivity
     }
     private void saveListDataChild(String _name){
 
-        SharedPreferences information = getSharedPreference(AlarmConstants.WAKEUP_TIMER_INFO);
+        SharedPreferences information = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
         int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
 
         saveListDataChild(_name, amount);
     }
     private void saveListDataChild(String _name, int _id){
 
-        SharedPreferences information   = getSharedPreference(AlarmConstants.WAKEUP_TIMER_INFO);
+        SharedPreferences information   = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
         int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
 
         //changelistData
@@ -428,8 +433,8 @@ public class MainActivity extends AppCompatActivity
             for (int id = _id; id < amount; ++id) {
 
                 if(id < amount -1){
-                    SharedPreferences.Editor editorNew = getSharedPreferenceEditor(AlarmConstants.WAKEUP_TIMER, id);
-                    SharedPreferences settingsOld      = getSharedPreference(AlarmConstants.WAKEUP_TIMER, id + 1);
+                    SharedPreferences.Editor editorNew = AlarmSharedPreferences.getSharedPreferenceEditor(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, id);
+                    SharedPreferences settingsOld      = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, id + 1);
                     Map<String, ?> settingOld = settingsOld.getAll();
 
                     for (Map.Entry<String, ?> value : settingOld.entrySet()) {
@@ -448,7 +453,7 @@ public class MainActivity extends AppCompatActivity
                 }
             }
             int newAmount = --amount;
-            SharedPreferences.Editor editor = getSharedPreferenceEditor(AlarmConstants.WAKEUP_TIMER, newAmount);
+            SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreferenceEditor(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, newAmount);
 
             editor.clear();
             editor.apply();
@@ -466,10 +471,13 @@ public class MainActivity extends AppCompatActivity
 
         actualAlarm = _alarmID;
         //save Settings
-        SharedPreferences settings = getSharedPreference(AlarmConstants.WAKEUP_TIMER, actualAlarm);
+        SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, actualAlarm);
 
         //Putting Value for each child
         Calendar calendar = Calendar.getInstance();
+
+        //AlarmSet
+        alarmSet     = settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false);
         //Time
         actualHour   = settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , calendar.get(Calendar.HOUR_OF_DAY));
         actualMin    = settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, calendar.get(Calendar.MINUTE));
@@ -507,27 +515,13 @@ public class MainActivity extends AppCompatActivity
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private SharedPreferences getSharedPreference(String _settingName){
-        return getApplicationContext().getSharedPreferences(_settingName, Context.MODE_PRIVATE);
-    }
-    private SharedPreferences getSharedPreference(String _settingName, int _actualAlarm){
-        return getApplicationContext().getSharedPreferences(_settingName + Integer.toString(_actualAlarm), Context.MODE_PRIVATE);
-    }
-
-    private SharedPreferences.Editor getSharedPreferenceEditor(String _settingsName){
-        return getSharedPreference(_settingsName).edit();
-    }
-    private SharedPreferences.Editor getSharedPreferenceEditor(String _settingsName, int _actualAlarm){
-        return getSharedPreference(_settingsName, _actualAlarm).edit();
-    }
-
     private void saveSettings(String _settingName, int _actualAlarm, String _alarmName){
         //save Settings
         saveSettings(_settingName, _actualAlarm, _alarmName, _alarmName);
     }
     private void saveSettings(String _settingName, int _actualAlarm, String _alarmIdentifier, String _alarmName){
         //save Settings
-        SharedPreferences settings = getSharedPreference(_settingName, _actualAlarm);
+        SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), _settingName, _actualAlarm);
         saveListDataChild(settings.getString(_alarmIdentifier, _alarmName), _actualAlarm);
         prepareLisData();
     }
@@ -550,6 +544,7 @@ public class MainActivity extends AppCompatActivity
 
         return linearLayout;
     }
+
     /***********************************************************************************************
      * Set New Alarm
      **********************************************************************************************/
@@ -559,11 +554,15 @@ public class MainActivity extends AppCompatActivity
 
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 
-        boolean alarmSet = activateAlarm(activeAlarmToggle.isChecked());
+        alarmSet = activateAlarm(activeAlarmToggle.isChecked());
         activeAlarmToggle.setChecked(alarmSet);
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //show Toast
+        String alarmText = String.format(getString(R.string.toast_positive_alarm), String.format("%02d:%02d", actualHour, actualMin));
+        AlarmToast.showToastShort(getApplicationContext(), alarmSet, alarmText, getString(R.string.toast_negative_alarm));
     }
     private boolean activateAlarm(boolean active){
 
@@ -616,6 +615,14 @@ public class MainActivity extends AppCompatActivity
     private void onAlarmNameSet(String _newName){
         //save Settings
         saveListDataChild(_newName, actualAlarm);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmName_positive), _newName);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmSet_negative), _newName);
+        //showToast(alarmSet, positiveMessage,negativeMessage);
     }
 
     /***********************************************************************************************
@@ -645,7 +652,8 @@ public class MainActivity extends AppCompatActivity
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
         expListView.invalidateViews();
 
-
+        //reactivate Alarm
+        activateAlarm(alarmSet);
     }
 
     /***********************************************************************************************
@@ -666,6 +674,14 @@ public class MainActivity extends AppCompatActivity
         actualMin  = minute;
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmTime_positive), String.format("%02d:%02d",actualHour, actualMin));
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmTime_negative), String.format("%02d:%02d",actualHour, actualMin));
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************
@@ -733,6 +749,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmSnooze_positive), actualSnooze);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmSnooze_negative), actualSnooze);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************
@@ -874,6 +898,14 @@ public class MainActivity extends AppCompatActivity
                 //save Settings
                 saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
 
+                //reactivate Alarm
+                activateAlarm(alarmSet);
+
+                //Show Toast
+                //String positiveMessage = String.format(getString(R.string.toast_AlarmMusic_positive), _Songs.get(which).getTitle());
+                //String negativeMessage = String.format(getString(R.string.toast_AlarmMusic_negative), _Songs.get(which).getTitle());
+                //showToast(alarmSet, positiveMessage, negativeMessage);
+
                 dialog.dismiss();
             }
         });
@@ -1006,6 +1038,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmVolume_positive), actualVolume);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmVolume_negative), actualVolume);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************
@@ -1078,6 +1118,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmSongStart_positive), actualSongStart);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmSongStart_negative), actualSongStart);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************
@@ -1169,6 +1217,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmFadeIn_positive), actualFadeInTime);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmFadeIn_negative), actualFadeInTime);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************
@@ -1258,6 +1314,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmVibrationStrength_positive), actualVibraStr);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmVibrationStrength_negative), actualVibraStr);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************
@@ -1346,6 +1410,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmScreenBrightness_positive), actualScreenBrightness);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmScreenBrightness_negative), actualScreenBrightness);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
     public void showScreenLightStartSettingDialog(View v){
 
@@ -1409,6 +1481,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmScreenStart_positive), actualScreenStartTime);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmScreenStart_negative), actualScreenStartTime);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************
@@ -1442,6 +1522,9 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
     }
 
     /***********************************************************************************************
@@ -1460,6 +1543,9 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
     }
 
     /***********************************************************************************************
@@ -1477,6 +1563,9 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
     }
     public void showLEDLightStartSettingDialog(View v){
 
@@ -1509,7 +1598,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
         //LinearLayout
-        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 100, 1, actualLightLEDStartTime - 1);
+        LinearLayout linearLayout = createAlertLinearLayout(v, textView, seekBar, 100, 1, actualLightLEDStartTime);
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -1540,6 +1629,14 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings
         saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+
+        //reactivate Alarm
+        activateAlarm(alarmSet);
+
+        //Show Toast
+        //String positiveMessage = String.format(getString(R.string.toast_AlarmLEDStart_positive), actualLightLEDStartTime);
+        //String negativeMessage = String.format(getString(R.string.toast_AlarmLEDStart_negative), actualLightLEDStartTime);
+        //showToast(alarmSet, positiveMessage, negativeMessage);
     }
 
     /***********************************************************************************************

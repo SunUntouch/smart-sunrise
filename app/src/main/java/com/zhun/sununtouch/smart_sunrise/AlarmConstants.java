@@ -17,6 +17,8 @@ public abstract class AlarmConstants {
     public final static String ALARM_NAME                 = "Alarm_Name";
     public final static String ALARM_VALUE                = "Alarm_Value";
 
+    public final static String ALARM_TIME_SET             = "Alarm_isSet";
+
     //Alarm Time
     public final static String ALARM_TIME_MINUTES         = "Alarm_Minutes";
     public final static String ALARM_TIME_HOUR            = "Alarm_Hour";
@@ -62,6 +64,9 @@ public abstract class AlarmConstants {
 
     //StartValues
     static Calendar calendar = Calendar.getInstance();
+
+    //AlarmSet
+    public final static boolean ALARM_IS_SET   = false;
     //Time
     public final static int ACTUAL_TIME_HOUR   = calendar.get(Calendar.HOUR_OF_DAY);
     public final static int ACTUAL_TIME_MINUTE = calendar.get(Calendar.MINUTE);
