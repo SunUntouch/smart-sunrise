@@ -14,6 +14,8 @@ import android.widget.ToggleButton;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
@@ -21,24 +23,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private final static String[] WAKEUP_CHILDS  = {AlarmConstants.WAKEUP_DELETE, AlarmConstants.WAKEUP_TIME, AlarmConstants.WAKEUP_DAYS, AlarmConstants.WAKEUP_MUSIC, AlarmConstants.WAKEUP_LIGHT};
 
     private Context      context;
-    private List<String> wakeup_header;
-    private List<String> wakeup_alarm;
-    private List <String>  wakeup_musicURIs;
-    private LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> wakeup_child;
+    private LinkedHashMap<Integer, AlarmConfiguration> configuration = new LinkedHashMap<>();
 
-    public ExpandableListAdapter(Context _context, List<String> _wakeup_alarm, List<String> _wake_up_musicURIs, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child){
-        this.context         = _context;
-        this.wakeup_header   = _wakeup_header;
-        this.wakeup_alarm    = _wakeup_alarm;
-        this.wakeup_child    = _wakeup_child;
-        this.wakeup_musicURIs = _wake_up_musicURIs;
+    public ExpandableListAdapter(Context _context, LinkedHashMap<Integer, AlarmConfiguration> config){
+        this.context       = _context;
+        this.configuration = config;
     }
 
-    public void notifyDataSetChanged(List<String> _wakeup_alarm, List<String> _wake_up_musicURIs, List<String> _wakeup_header, LinkedHashMap<String, LinkedHashMap<String, LinkedHashMap<String, Integer>>> _wakeup_child) {
-        this.wakeup_header   = _wakeup_header;
-        this.wakeup_alarm    = _wakeup_alarm;
-        this.wakeup_child    = _wakeup_child;
-        this.wakeup_musicURIs = _wake_up_musicURIs;
+    public void notifyDataSetChanged(LinkedHashMap<Integer, AlarmConfiguration> config) {
+        this.configuration = config;
     }
 
     @Override
@@ -46,7 +39,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         super.registerDataSetObserver(observer);
     }
 
-    private View inflateLayout( int _groupPosition, int _layoutID, String _childText, LinkedHashMap<String, Integer> _childValues, int[] _viewID){
+    private View inflateLayout( int _groupPosition, int _layoutID, String _childText, Vector<Integer> _viewID, AlarmConfiguration config){
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -57,168 +50,166 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             case AlarmConstants.WAKEUP_TIME:{
 
                 //Get TextChild from View
-                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID.elementAt(0));
                 txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_time));
 
-                Button setTimeButton = (Button) _convertView.findViewById(_viewID[1]);
+                Button setTimeButton = (Button) _convertView.findViewById(_viewID.elementAt(1));
 
-                String timeText = String.format("%02d:%02d",_childValues.get(AlarmConstants.ALARM_TIME_HOUR), _childValues.get(AlarmConstants.ALARM_TIME_MINUTES));
+                String timeText = String.format("%02d:%02d".toLowerCase(),config.getHour(), config.getMinute());
                 setTimeButton.setText(timeText);
 
-                Button setSnoozeButton = (Button) _convertView.findViewById(_viewID[2]);
-                String snoozeText      = _convertView.getContext().getString(R.string.wakeup_time_snooze) + " " + _childValues.get(AlarmConstants.ALARM_TIME_SNOOZE) + " " + _convertView.getContext().getString(R.string.wakeup_time_minutes);
+                Button setSnoozeButton = (Button) _convertView.findViewById(_viewID.elementAt(2));
+                String snoozeText = _convertView.getContext().getString(R.string.wakeup_time_snooze) + " " +
+                                config.getSnooze() + " " +
+                                _convertView.getContext().getString(R.string.wakeup_time_minutes);
+
                 setSnoozeButton.setText(snoozeText);
             }
             break;
             case AlarmConstants.WAKEUP_DAYS:{
 
                 //Get TextChild from View
-                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID.elementAt(0));
                 txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_day));
 
-                ToggleButton setMonday = (ToggleButton) _convertView.findViewById(_viewID[1]);
-                setMonday.setChecked(_childValues.get(AlarmConstants.ALARM_DAY_MONDAY) > 0);
+                ToggleButton setMonday    = (ToggleButton) _convertView.findViewById(_viewID.elementAt(1));
+                ToggleButton setTuesday   = (ToggleButton) _convertView.findViewById(_viewID.elementAt(2));
+                ToggleButton setWednesday = (ToggleButton) _convertView.findViewById(_viewID.elementAt(3));
+                ToggleButton setThursday  = (ToggleButton) _convertView.findViewById(_viewID.elementAt(4));
+                ToggleButton setFriday    = (ToggleButton) _convertView.findViewById(_viewID.elementAt(5));
+                ToggleButton setSaturday  = (ToggleButton) _convertView.findViewById(_viewID.elementAt(6));
+                ToggleButton setSunday    = (ToggleButton) _convertView.findViewById(_viewID.elementAt(7));
 
-                ToggleButton setTuesday = (ToggleButton) _convertView.findViewById(_viewID[2]);
-                setTuesday.setChecked(_childValues.get(AlarmConstants.ALARM_DAY_TUESDAY) > 0);
-
-                ToggleButton setWednesday = (ToggleButton) _convertView.findViewById(_viewID[3]);
-                setWednesday.setChecked(_childValues.get(AlarmConstants.ALARM_DAY_WEDNESDAY) > 0);
-
-                ToggleButton setThursday = (ToggleButton) _convertView.findViewById(_viewID[4]);
-                setThursday.setChecked(_childValues.get(AlarmConstants.ALARM_DAY_THURSDAY) > 0);
-
-                ToggleButton setFriday = (ToggleButton) _convertView.findViewById(_viewID[5]);
-                setFriday.setChecked(_childValues.get(AlarmConstants.ALARM_DAY_FRIDAY) > 0);
-
-                ToggleButton setSaturday = (ToggleButton) _convertView.findViewById(_viewID[6]);
-                setSaturday.setChecked(_childValues.get(AlarmConstants.ALARM_DAY_SATURDAY) > 0);
-
-                ToggleButton setSunday = (ToggleButton) _convertView.findViewById(_viewID[7]);
-                setSunday.setChecked(_childValues.get(AlarmConstants.ALARM_DAY_SUNDAY) > 0);
+                setMonday   .setChecked(config.isMonday(true));
+                setTuesday  .setChecked(config.isTuesday(true));
+                setWednesday.setChecked(config.isWednesday(true));
+                setThursday .setChecked(config.isThursday(true));
+                setFriday   .setChecked(config.isFriday(true));
+                setSaturday .setChecked(config.isSaturday(true));
+                setSunday   .setChecked(config.isSunday(true));
             }
             break;
             case AlarmConstants.WAKEUP_MUSIC:{
 
                 //Get TextChild from View
-                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID.elementAt(0));
                 txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_music));
 
                 //Choosing Music Button
-                String newMusicURI  = wakeup_musicURIs.get(_groupPosition);
+                String newMusicURI  = config.getSongURI();
                 String newMusicText = newMusicURI.substring(newMusicURI.lastIndexOf('/') + 1);
                 if(newMusicText.indexOf('.') != -1)
                     newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
 
-                Button setMusicButton = (Button) _convertView.findViewById(_viewID[1]);
+                Button setMusicButton = (Button) _convertView.findViewById(_viewID.elementAt(1));
                 setMusicButton.setText(newMusicText);
 
                 //Set Volume Button
-                Button setMusicVolumeButton = (Button) _convertView.findViewById(_viewID[2]);
-                String musicVolumeText = _childValues.get(AlarmConstants.ALARM_MUSIC_VOLUME) + "%";
+                Button setMusicVolumeButton = (Button) _convertView.findViewById(_viewID.elementAt(2));
+                String musicVolumeText = config.getVolume() + "%";
                 setMusicVolumeButton.setText(musicVolumeText);
 
                 //Set Start Time Button
-                Button setMusicStartTime = (Button) _convertView.findViewById(_viewID[3]);
-                int seconds = _childValues.get(AlarmConstants.ALARM_MUSIC_SONGSTART);
+                Button setMusicStartTime = (Button) _convertView.findViewById(_viewID.elementAt(3));
+                int seconds = config.getSongStart();
                 String startTimeText = String.format(
-                        "%02d:%02d",
+                        "%02d:%02d".toLowerCase(),
                         TimeUnit.SECONDS.toMinutes(seconds),
                         seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds)));
                 setMusicStartTime.setText(startTimeText);
 
                 //Set FadeIn ToggleButton
-                ToggleButton setFadeIn = (ToggleButton) _convertView.findViewById(_viewID[4]);
-                int fadeSeconds  = _childValues.get(AlarmConstants.ALARM_MUSIC_FADEINTIME);
+                ToggleButton setFadeIn = (ToggleButton) _convertView.findViewById(_viewID.elementAt(4));
+                int fadeSeconds  = config.getFadeIn();
                 String fadeTimeText = String.format(
-                        "%02d:%02d",
+                        "%02d:%02d".toLowerCase(),
                         TimeUnit.SECONDS.toMinutes(fadeSeconds),
                         fadeSeconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(fadeSeconds)));
 
                 setFadeIn.setTextOn(fadeTimeText);
                 setFadeIn.setTextOff(_convertView.getContext().getString(R.string.wakeup_music_fadeOff));
 
-                boolean fadeChecked = _childValues.get(AlarmConstants.ALARM_MUSIC_FADEIN) == 1;
+                boolean fadeChecked = config.getFadeIn() == 1;
                 setFadeIn.setChecked(fadeChecked);
 
                 //Set Vibration ToggleButton
-                ToggleButton setVibrationButton = (ToggleButton) _convertView.findViewById(_viewID[5]);
-                String vibrationTextOn       = _childValues.get(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE) + "%";
+                ToggleButton setVibrationButton = (ToggleButton) _convertView.findViewById(_viewID.elementAt(5));
+                String vibrationTextOn       = config.getVibrationStrength() + "%";
                 String vibrationTextOff      = _convertView.getContext().getString(R.string.wakeup_music_vibraOff);
 
                 setVibrationButton.setTextOn(vibrationTextOn);
                 setVibrationButton.setTextOff(vibrationTextOff);
 
-                boolean vibraChecked = _childValues.get(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV) == 1;
+                boolean vibraChecked = config.getVibration() == 1;
                 setVibrationButton.setChecked(vibraChecked);
             }
             break;
             case AlarmConstants.WAKEUP_LIGHT:{
 
                 //Get TextChild from View
-                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID.elementAt(0));
                 txtListChild.setText(_convertView.getContext().getString(R.string.wakeup_light));
 
                 //Toggle Screen light
-                ToggleButton setLightButton = (ToggleButton) _convertView.findViewById(_viewID[1]);
+                ToggleButton setLightButton = (ToggleButton) _convertView.findViewById(_viewID.elementAt(1));
                 String screenOn =  _convertView.getContext().getString(R.string.wakeup_light_screen_brightness) + " " +
-                        _childValues.get(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS) + "%";
+                        config.getScreenBrightness() + "%";
                 String screenOff = _convertView.getContext().getString(R.string.wakeup_light_screen_brightness_off);
 
                 setLightButton.setTextOn(screenOn);
                 setLightButton.setTextOff(screenOff);
 
-                boolean screenChecked = _childValues.get(AlarmConstants.ALARM_LIGHT_SCREEN) == 1;
+                boolean screenChecked = config.getScreen() == 1;
                 setLightButton.setChecked(screenChecked);
 
                 //Set Start Time Button
-                Button setStartTime = (Button) _convertView.findViewById(_viewID[2]);
-                String startTimeText= _childValues.get(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME) + " " +
+                Button setStartTime = (Button) _convertView.findViewById(_viewID.elementAt(2));
+                String startTimeText= config.getScreenStartTime() + " " +
                         _convertView.getContext().getString(R.string.wakeup_time_minutes);
                 setStartTime.setText(startTimeText);
 
                 //First Color
-                Button setColorButton1 = (Button) _convertView.findViewById(_viewID[3]);
+                Button setColorButton1 = (Button) _convertView.findViewById(_viewID.elementAt(3));
                 String colorText      = _convertView.getContext().getString(R.string.wakeup_light_screen_color1);
                 setColorButton1.setText(colorText);
-                setColorButton1.getBackground().setColorFilter(_childValues.get(AlarmConstants.ALARM_LIGHT_COLOR1), PorterDuff.Mode.MULTIPLY);
+                setColorButton1.getBackground().setColorFilter(config.getLightColor1(), PorterDuff.Mode.MULTIPLY);
 
                 //Second Color
-                Button setColorButton2 = (Button) _convertView.findViewById(_viewID[4]);
+                Button setColorButton2 = (Button) _convertView.findViewById(_viewID.elementAt(4));
                 String colorText2      = _convertView.getContext().getString(R.string.wakeup_light_screen_color2);
                 setColorButton2.setText(colorText2);
-                setColorButton2.getBackground().setColorFilter(_childValues.get(AlarmConstants.ALARM_LIGHT_COLOR2), PorterDuff.Mode.MULTIPLY);
+                setColorButton2.getBackground().setColorFilter(config.getLightColor2(), PorterDuff.Mode.MULTIPLY);
 
                 //Toggle Fading
-                ToggleButton setFade = (ToggleButton) _convertView.findViewById(_viewID[5]);
+                ToggleButton setFade = (ToggleButton) _convertView.findViewById(_viewID.elementAt(5));
                 String colorFadeTextOn = _convertView.getContext().getString(R.string.wakeup_light_screen_fadingOn);
                 String colorFadeTextOff = _convertView.getContext().getString(R.string.wakeup_light_screen_fadingOff);
                 setFade.setTextOn(colorFadeTextOn);
                 setFade.setTextOff(colorFadeTextOff);
 
-                boolean FadeChecked = _childValues.get(AlarmConstants.ALARM_LIGHT_FADECOLOR) == 1;
+                boolean FadeChecked = config.getLightFade() == 1;
                 setFade.setChecked(FadeChecked);
 
                 //Toggle LED
-                ToggleButton setLEDButton = (ToggleButton) _convertView.findViewById(_viewID[6]);
+                ToggleButton setLEDButton = (ToggleButton) _convertView.findViewById(_viewID.elementAt(6));
                 String timeTextOn = _convertView.getContext().getString(R.string.wakeup_light_screen_LEDOn);
                 String timeTextOff = _convertView.getContext().getString(R.string.wakeup_light_screen_LEDOff);
                 setLEDButton.setTextOn(timeTextOn);
                 setLEDButton.setTextOff(timeTextOff);
 
-                boolean LEDChecked = _childValues.get(AlarmConstants.ALARM_LIGHT_USELED) == 1;
+                boolean LEDChecked = config.getLED() == 1;
                 setLEDButton.setChecked(LEDChecked);
 
                 //Set LED Start Time
-                Button setLEDStartTime = (Button) _convertView.findViewById(_viewID[7]);
-                String startTimeLEDText= _childValues.get(AlarmConstants.ALARM_LIGHT_LED_START_TIME) + " " +
+                Button setLEDStartTime = (Button) _convertView.findViewById(_viewID.elementAt(7));
+                String startTimeLEDText= config.getLEDStartTime() + " " +
                         _convertView.getContext().getString(R.string.wakeup_time_minutes);
                 setLEDStartTime.setText(startTimeLEDText);
             }
             break;
             case AlarmConstants.WAKEUP_DELETE:{
                 //Get TextChild from View
-                TextView txtListChild = (TextView) _convertView.findViewById(_viewID[0]);
+                TextView txtListChild = (TextView) _convertView.findViewById(_viewID.elementAt(0));
                 //txtListChild.setText(_childText);
                 txtListChild.setVisibility(TextView.GONE);
 
@@ -241,7 +232,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     //Childs/////////////////////////////////////////////////////////////////////////////////////////
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return  this.wakeup_child.get(wakeup_alarm.get(groupPosition)).get(WAKEUP_CHILDS[childPosition]);
+        return  this.configuration.get(groupPosition);
     }
 
     @Override
@@ -255,92 +246,91 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
        //TextView alarmName = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
         //alarmName.setClickable(true);
 
-        final LinkedHashMap<String, Integer> childValues = (LinkedHashMap<String, Integer>)getChild(groupPosition, childPosition);
-
         String choosenChild = WAKEUP_CHILDS[childPosition];
+        AlarmConfiguration config = (AlarmConfiguration)getGroup(groupPosition);
 
                 switch (choosenChild){
                     case AlarmConstants.WAKEUP_DAYS: {
-                        int[] wakeupDay_ID = {
-                                R.id.wakeup_timer_days_textview,
-                                R.id.wakeup_monday,
-                                R.id.wakeup_tuesday,
-                                R.id.wakeup_wednesday,
-                                R.id.wakeup_thursday,
-                                R.id.wakeup_friday,
-                                R.id.wakeup_saturday,
-                                R.id.wakeup_sunday };
+                        Vector<Integer> wakeupDay_ID = new Vector<>(8);
+                        wakeupDay_ID.addElement(R.id.wakeup_timer_days_textview);
+                        wakeupDay_ID.addElement(R.id.wakeup_monday);
+                        wakeupDay_ID.addElement(R.id.wakeup_tuesday);
+                        wakeupDay_ID.addElement(R.id.wakeup_wednesday);
+                        wakeupDay_ID.addElement(R.id.wakeup_thursday);
+                        wakeupDay_ID.addElement(R.id.wakeup_friday);
+                        wakeupDay_ID.addElement(R.id.wakeup_saturday);
+                        wakeupDay_ID.addElement(R.id.wakeup_sunday);
 
                         convertView = inflateLayout(
                                 groupPosition,
                                 R.layout.wakeup_timer_listitem_days,
                                 choosenChild,
-                                childValues,
-                                wakeupDay_ID);
+                                wakeupDay_ID,
+                                config);
                     }
                     break;
                     case AlarmConstants.WAKEUP_TIME: {
-                        int[] wakeupTime_ID = {
-                                R.id.wakeup_timer_time_textview,
-                                R.id.wakeup_timer_time_buttonTime,
-                                R.id.wakeup_timer_time_buttonSnooze };
+                        Vector<Integer> wakeupTime_ID = new Vector<>(3);
+                        wakeupTime_ID.addElement(R.id.wakeup_timer_time_textview);
+                        wakeupTime_ID.addElement(R.id.wakeup_timer_time_buttonTime);
+                        wakeupTime_ID.addElement(R.id.wakeup_timer_time_buttonSnooze);
 
                         convertView = inflateLayout(
                                 groupPosition,
                                 R.layout.wakeup_timer_listitem_time,
                                 choosenChild,
-                                childValues,
-                                wakeupTime_ID);
+                                wakeupTime_ID,
+                                config);
                     }
                     break;
                     case AlarmConstants.WAKEUP_MUSIC: {
-                        int[] wakeup_Music_ID = {
-                                R.id.wakeup_timer_music_textview,
-                                R.id.wakeup_timer_music_buttonMusic,
-                                R.id.wakeup_timer_music_buttonMusicVolume,
-                                R.id.wakeup_timer_music_SongStart,
-                                R.id.wakeup_timer_music_toggleFadeIn,
-                                R.id.wakeup_timer_music_toggleVibration };
+                        Vector<Integer> wakeup_Music_ID = new Vector<>(8);
+                        wakeup_Music_ID.addElement(R.id.wakeup_timer_music_textview);
+                        wakeup_Music_ID.addElement(R.id.wakeup_timer_music_buttonMusic);
+                        wakeup_Music_ID.addElement(R.id.wakeup_timer_music_buttonMusicVolume);
+                        wakeup_Music_ID.addElement(R.id.wakeup_timer_music_SongStart);
+                        wakeup_Music_ID.addElement(R.id.wakeup_timer_music_toggleFadeIn);
+                        wakeup_Music_ID.addElement(R.id.wakeup_timer_music_toggleVibration);
 
                         convertView = inflateLayout(
                                 groupPosition,
                                 R.layout.wakeup_timer_listitem_music,
                                 choosenChild,
-                                childValues,
-                                wakeup_Music_ID);
+                                wakeup_Music_ID,
+                                config);
                     }
                     break;
                     case AlarmConstants.WAKEUP_LIGHT: {
-                        int[] wakeup_Light_ID = {
-                                R.id.wakeup_timer_light_textview,
-                                R.id.wakeup_timer_light_buttonLight,
-                                R.id.wakeup_timer_light_buttonStart,
-                                R.id.wakeup_timer_light_buttonColor1,
-                                R.id.wakeup_timer_light_buttonColor2,
-                                R.id.wakeup_timer_light_buttonScreenFade,
-                                R.id.wakeup_timer_light_buttonLED,
-                                R.id.wakeup_timer_light_buttonLEDStart};
+                        Vector<Integer> wakeup_Light_ID = new Vector<>(8);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_textview);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_buttonLight);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_buttonStart);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_buttonColor1);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_buttonColor2);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_buttonScreenFade);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_buttonLED);
+                        wakeup_Light_ID.addElement(R.id.wakeup_timer_light_buttonLEDStart);
 
                         convertView = inflateLayout(
                                 groupPosition,
                                 R.layout.wakeup_timer_listitem_light,
                                 choosenChild,
-                                childValues,
-                                wakeup_Light_ID);
+                                wakeup_Light_ID,
+                                config);
                     }
                     break;
                     case AlarmConstants.WAKEUP_DELETE: {
-                        int[] wakeup_Delete_ID = {
-                                R.id.wakeup_timer_delete_textview,
-                                R.id.wakeup_timer_deleteButton,
-                                R.id.wakeup_timer_setAlarmButton };
+                        Vector<Integer> wakeup_Delete_ID = new Vector<>(3);
+                        wakeup_Delete_ID.addElement(R.id.wakeup_timer_delete_textview);
+                        wakeup_Delete_ID.addElement(R.id.wakeup_timer_deleteButton);
+                        wakeup_Delete_ID.addElement(R.id.wakeup_timer_setAlarmButton);
 
                         convertView = inflateLayout(
                                 groupPosition,
                                 R.layout.wakeup_timer_listitem_delete,
                                 choosenChild,
-                                childValues,
-                                wakeup_Delete_ID);
+                                wakeup_Delete_ID,
+                                config);
                     }
                     default:
                         break;
@@ -356,22 +346,24 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this.wakeup_child.get(wakeup_alarm.get(groupPosition)).size();
+        return this.configuration.size(); //TODO thats not right, we need a size of childrens... but for now we never use this... so...
     }
 
     //Groups/////////////////////////////////////////////////////////////////////////
     @Override
     public Object getGroup(int groupPosition) {
-        return this.wakeup_header.get(groupPosition);
+        return this.configuration.get(groupPosition);
     }
 
     @Override
     public int getGroupCount() {
-        return this.wakeup_header.size();
+        return this.configuration.size();
     }
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
+
+        AlarmConfiguration config = (AlarmConfiguration) getGroup(groupPosition);
 
         if(convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -379,49 +371,31 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
 
         //Set Group Title
-        String headerTitle = (String) getGroup(groupPosition);
         TextView txtListHeader = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
+
         //txtListHeader.setTypeface(null, Typeface.BOLD);
-        txtListHeader.setText(headerTitle);
+        txtListHeader.setText(config.getAlarmName());
 
         if(isExpanded)
             txtListHeader.setClickable(true);
         else
             txtListHeader.setClickable(false);
 
-        LinkedHashMap<String, Integer> childTimeValues = (LinkedHashMap<String, Integer>)getChild(groupPosition, 1);  //hopefully this is the time child
+        //time Text
+        String timeText = String.format("%02d:%02d".toLowerCase(),config.getHour(), config.getMinute());
 
-        String timeText = String.format("%02d:%02d", childTimeValues.get(AlarmConstants.ALARM_TIME_HOUR), childTimeValues.get(AlarmConstants.ALARM_TIME_MINUTES));
         TextView txtListTime = (TextView) convertView.findViewById(R.id.wakeup_group_time);
         txtListTime.setText(timeText);
 
-        LinkedHashMap<String, Integer> childDayValues  = (LinkedHashMap<String, Integer>)getChild(groupPosition, 2);  //hopefully this is the day child
-
-        boolean isMonday    = childDayValues.get(AlarmConstants.ALARM_DAY_MONDAY)    > 0;
-        boolean isTuesday   = childDayValues.get(AlarmConstants.ALARM_DAY_TUESDAY)   > 0;
-        boolean isWednesday = childDayValues.get(AlarmConstants.ALARM_DAY_WEDNESDAY) > 0;
-        boolean isThursday  = childDayValues.get(AlarmConstants.ALARM_DAY_THURSDAY)  > 0;
-        boolean isFriday    = childDayValues.get(AlarmConstants.ALARM_DAY_FRIDAY)    > 0;
-        boolean isSaturday  = childDayValues.get(AlarmConstants.ALARM_DAY_SATURDAY)  > 0;
-        boolean isSunday    = childDayValues.get(AlarmConstants.ALARM_DAY_SUNDAY)    > 0;
-
-        String monday     = (isMonday)    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "";
-        String tuesday    = (isTuesday)   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "";
-        String wednesday  = (isWednesday) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "";
-        String thursday   = (isThursday)  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "";
-        String friday     = (isFriday)    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "";
-        String saturday   = (isSaturday)  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "";
-        String sunday     = (isSunday)    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : "";
-
-
+        //Day Text
         String days = String.format("%s %s %s %s %s %s %s",
-                                    monday,
-                                    tuesday,
-                                    wednesday,
-                                    thursday,
-                                    friday,
-                                    saturday,
-                                    sunday);
+                (config.isMonday(true))    ? convertView.getContext().getString(R.string.wakeup_day_monday_short)    : "",
+                (config.isTuesday(true))   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short)   : "",
+                (config.isWednesday(true)) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
+                (config.isThursday(true))  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short)  : "",
+                (config.isFriday(true))    ? convertView.getContext().getString(R.string.wakeup_day_friday_short)    : "",
+                (config.isSaturday(true))  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short)  : "",
+                (config.isSunday(true))    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short)    : "");
 
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
         txtListDays.setText(days);

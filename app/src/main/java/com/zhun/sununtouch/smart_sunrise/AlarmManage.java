@@ -203,7 +203,7 @@ public class AlarmManage extends AppCompatActivity {
             long systemTime = System.currentTimeMillis();
             long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm(settings));
 
-            //Add all necessary values to alarm time 
+            //Add all necessary values to alarm time
             alarmTime = calendar.getTimeInMillis() + timeToNextDay - lightStart;
 
             //Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future

@@ -83,7 +83,7 @@ public class AlarmActivity extends AppCompatActivity {
         boolean useVibration = music[4] == 1;
 
         int minuteScreen = (useScreen) ? light[2] : 0;
-        int minuteLED    = (useLED) ? light[7] : 0;
+        int minuteLED    = (useLED)    ? light[7] : 0;
 
         int minutesMax   = (minuteScreen >= minuteLED) ? minuteScreen : minuteLED;
 
