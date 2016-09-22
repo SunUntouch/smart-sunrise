@@ -47,6 +47,20 @@ public class AlarmConfiguration {
     private int actualLightLED         = AlarmConstants.ACTUAL_LED;
     private int actualLightLEDStartTime= AlarmConstants.ACTUAL_LED_START;
 
+    //Enums
+    public enum childItem{
+        WAKEUP_DELETE,
+        WAKEUP_TIME,
+        WAKEUP_DAYS,
+        WAKEUP_MUSIC,
+        WAKEUP_LIGHT
+    }
+
+    private final int childItems = childItem.values().length;
+
+    public int getChildItemSize(){
+        return childItems;
+    }
     //Name
     private String actualAlarmname = AlarmConstants.ALARM;
 

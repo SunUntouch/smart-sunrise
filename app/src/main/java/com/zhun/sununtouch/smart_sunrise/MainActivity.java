@@ -252,7 +252,7 @@ public class MainActivity extends AppCompatActivity
         else if(_id < amount)
             saveConfigurationData(_name, _id);
         else
-            saveConfigurationData(_name, ++amount);
+            saveConfigurationData(_name, amount++);
 
         //Add AlarmValue
         SharedPreferences.Editor editor = information.edit();
