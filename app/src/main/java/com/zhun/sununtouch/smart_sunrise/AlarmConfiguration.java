@@ -213,12 +213,16 @@ public class AlarmConfiguration {
     }
 
     //Music
+    public String getSongName(){
+        return actualSongURI.substring(actualSongURI.lastIndexOf('/') + 1);
+    }
     public String getSongURI(){
         return actualSongURI;
     }
     public void setSongURI(String uri){
         actualSongURI = uri;
     }
+
 
     public Vector<Integer> getSongTimes(){
         Vector<Integer> time = new Vector<>(2);

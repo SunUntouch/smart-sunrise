@@ -11,8 +11,6 @@ import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.Calendar;
-import java.util.List;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmManage extends AppCompatActivity {

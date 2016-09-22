@@ -1,7 +1,6 @@
 package com.zhun.sununtouch.smart_sunrise;
 
 import android.content.Context;
-import android.view.Gravity;
 import android.widget.Toast;
 
 /**

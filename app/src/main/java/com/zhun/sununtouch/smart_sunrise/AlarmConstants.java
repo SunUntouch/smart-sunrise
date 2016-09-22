@@ -100,10 +100,4 @@ public abstract class AlarmConstants {
     public final static int ACTUAL_SCREEN_COLOR_FADE = 1;
     public final static int ACTUAL_LED               = 0;
     public final static int ACTUAL_LED_START         = 10;
-
-    //Alarm Types
-    public final static int TYPE_TIME  = 0;
-    public final static int TYPE_MUSIC = 1;
-    public final static int TYPE_DAYS  = 2;
-    public final static int TYPE_LIGHT = 3;
 }
