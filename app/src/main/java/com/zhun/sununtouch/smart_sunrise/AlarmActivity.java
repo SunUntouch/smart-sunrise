@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AlarmActivity extends AppCompatActivity {
 
+    private AlarmConfiguration config;
     //Private camera Values
     private android.hardware.Camera m_Cam;
     private MediaPlayer mediaPlayer;
@@ -47,7 +48,7 @@ public class AlarmActivity extends AppCompatActivity {
         super.onStop();
 
         if(!snoozed){
-            AlarmManage newAlarm = new AlarmManage(this);
+            AlarmManage newAlarm = new AlarmManage(this, getConfig());
             newAlarm.cancelAlarm(actualAlarm);
         }
 
@@ -61,56 +62,31 @@ public class AlarmActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm);
-
         alarmHandler = new Handler();
 
-        Bundle intentExtras = getIntent().getExtras();
-        int[] music = intentExtras.getIntArray(AlarmConstants.WAKEUP_MUSIC);// StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
-        int[] light = intentExtras.getIntArray(AlarmConstants.WAKEUP_LIGHT);// UseScreen, ScreenBrightness, ScreenStrartTime, Color1, Color2, FadeColor, UseLed, LedStartTime
-
-        String musicURI = intentExtras.getString(AlarmConstants.ALARM_MUSIC_SONGID);
-
-        actualAlarm = intentExtras.getInt(AlarmConstants.ALARM_ID);
+        //Load Values
+        actualAlarm = getIntent().getExtras().getInt(AlarmConstants.ALARM_ID);
+        config = new AlarmConfiguration(getApplicationContext(), actualAlarm);
 
         //Boolean Values
-        //Screen
-        boolean useScreen      = light[0] == 1;
-        boolean useLED         = light[6] == 1;
-        boolean useColorFading = light[5] == 1;
-
-        //Music
-        boolean useFadeIn    = music[2] == 1;
-        boolean useVibration = music[4] == 1;
-
-        int minuteScreen = (useScreen) ? light[2] : 0;
-        int minuteLED    = (useLED)    ? light[7] : 0;
+        int minuteScreen = (getConfig().useScreen())? getConfig().getScreenStartTime() : 0;
+        int minuteLED    = (getConfig().useLED())   ? getConfig().getLEDStartTime()    : 0;
 
         int minutesMax   = (minuteScreen >= minuteLED) ? minuteScreen : minuteLED;
 
-        int minuteScreenStart = minutesMax - minuteScreen;
-        int minutesLEDSTart   = minutesMax - minuteLED;
-
         //SCREEN VIEWS//////////////////////////////////////////////////////////////////////////////
         doViews();
+        doPlayMusic(minutesMax);
+        if(getConfig().useVibration())
+            doVibrate(minutesMax);
 
-        //MUSIC FADE IN/////////////////////////////////////////////////////////////////////////////
-        doPlayMusic(music[0], useFadeIn, music[1], minutesMax, music[3], musicURI );
+        if(getConfig().useScreen())
+        {
+            doBrightness (minutesMax - minuteScreen);
+            doColorFading(minutesMax - minuteScreen, minuteScreen);
 
-        //SCREEN BRIGHTNESS/////////////////////////////////////////////////////////////////////////
-        if(useScreen)
-            doBrightness(minuteScreenStart, light[2], light[1]);
-
-        //SCREEN COLOR FADING///////////////////////////////////////////////////////////////////////
-        if(useScreen)
-            doColorFading(useColorFading, minuteScreenStart, minuteScreen, light[3], light[4]);
-
-        //LED///////////////////////////////////////////////////////////////////////////////////////
-        if(useLED)
-            doLED(minutesLEDSTart);
-
-        //MUSIC VIBRATION///////////////////////////////////////////////////////////////////////////
-        if(useVibration)
-            doVibrate(minutesMax, music[5]);
+            doLED(minutesMax - minuteLED);
+        }
     }
 
     private String getDayName(Calendar _calendar){
@@ -141,6 +117,10 @@ public class AlarmActivity extends AppCompatActivity {
         return dayName;
     }
 
+    private AlarmConfiguration getConfig(){
+        return config;
+    }
+
     /***********************************************************************************************
      * CONSTRUCT VIEWS
      **********************************************************************************************/
@@ -153,13 +133,11 @@ public class AlarmActivity extends AppCompatActivity {
         int currentYear  = calendar.get(Calendar.YEAR);
 
         final TextView dateText = (TextView) findViewById(R.id.wakeup_wakescreen_date);
-        String dayName = getDayName(calendar);
-
-        String message = dayName + ", " +
-                         Integer.toString(currentDay)   + "." +
-                         Integer.toString(currentMonth) + "." +
-                         Integer.toString(currentYear);
-        dateText.setText(message);
+        dateText.setText(
+                getDayName(calendar) + ", " +
+                Integer.toString(currentDay)   + "." +
+                Integer.toString(currentMonth) + "." +
+                Integer.toString(currentYear));
 
         int currentHour   = calendar.get(Calendar.HOUR_OF_DAY);
         int currentMinute = calendar.get(Calendar.MINUTE);
@@ -174,13 +152,12 @@ public class AlarmActivity extends AppCompatActivity {
                 //Update Time
                 Calendar calendarNew = Calendar.getInstance();
                 timeText.setText(String.format("%02d:%02d", calendarNew.get(Calendar.HOUR_OF_DAY), calendarNew.get(Calendar.MINUTE)));
-
-                String message = getDayName(calendarNew) + ", " +
-                                 Integer.toString(calendarNew.get(Calendar.DAY_OF_MONTH)) + "." +
-                                 Integer.toString(calendarNew.get(Calendar.MONTH) + 1)    + "." +
-                                 Integer.toString(calendarNew.get(Calendar.YEAR));
                 //Update Date
-                dateText.setText(message);
+                dateText.setText(
+                        getDayName(calendarNew) + ", " +
+                        Integer.toString(calendarNew.get(Calendar.DAY_OF_MONTH)) + "." +
+                        Integer.toString(calendarNew.get(Calendar.MONTH) + 1)    + "." +
+                        Integer.toString(calendarNew.get(Calendar.YEAR)));
 
                 alarmHandler.postDelayed(this, 100); //1 second check for new Time
             }
@@ -191,44 +168,46 @@ public class AlarmActivity extends AppCompatActivity {
     /***********************************************************************************************
      * COLOR FADING
      **********************************************************************************************/
-    private void doColorFading(final boolean _colorFading, int minutes, final int _minutesScreen, final int _color1, final int _color2){
-
-        //Open LinearLayout to Change Color
-        final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.wakeup_wakescreen_layout);
-        linearLayout.setBackgroundColor(Color.BLACK);
+    private void doColorFading( int minutes, final int minutesScreen){
 
         if(minutes > 0){
             Runnable initialColorFadeRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    changeColors(_colorFading, _minutesScreen, _color1, _color2, linearLayout);
+                    changeColors(getConfig().getLightFade() == 1, minutesScreen);
 
                 }
             };
             alarmHandler.postDelayed(initialColorFadeRunnable, TimeUnit.MINUTES.toMillis(minutes));
         }
         else
-            changeColors(_colorFading, _minutesScreen, _color1, _color2, linearLayout);
+            changeColors(getConfig().getLightFade() == 1, minutesScreen);
+
     }
-    private void changeColors(boolean _colorFading, int _minutesScreen, final int _color1, final int _color2, final LinearLayout _linearLayout){
+    private void changeColors(boolean _colorFading, int _minutesScreen){
+
+        //Open LinearLayout to Change Color
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.wakeup_wakescreen_layout);
+        linearLayout.setBackgroundColor(Color.BLACK);
+
         //duration for StartScreen Till WakeUp
-        final long duration = TimeUnit.MINUTES.toMillis(_minutesScreen ) / 4;
+        long duration = TimeUnit.MINUTES.toMillis(_minutesScreen ) / 4;
 
         //ObjectAnimator
-        ObjectAnimator colorFade1 = ObjectAnimator.ofObject(_linearLayout,"backgroundColor", new ArgbEvaluator(), Color.BLACK, _color1);
+        ObjectAnimator colorFade1 = ObjectAnimator.ofObject(linearLayout,"backgroundColor", new ArgbEvaluator(), Color.BLACK, getConfig().getLightColor1());
         colorFade1.setDuration(duration);
         colorFade1.start();
 
         //Check if Fading is true
         if(_colorFading){
 
+            //Change Color a Second Time
+            final ObjectAnimator colorFade2 = ObjectAnimator.ofObject(linearLayout,"backgroundColor", new ArgbEvaluator(), getConfig().getLightColor1(), getConfig().getLightColor2());
+            colorFade2.setDuration(duration * 3);
             //Second ColorHandler
             Runnable colorRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    //Change Color a Second Time
-                    ObjectAnimator colorFade2 = ObjectAnimator.ofObject(_linearLayout,"backgroundColor", new ArgbEvaluator(), _color1, _color2);
-                    colorFade2.setDuration(duration * 3);
                     colorFade2.start();
                 }
             };
@@ -242,19 +221,19 @@ public class AlarmActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
     }
-    private void doBrightness(int minutes, final int _screenStartTime, final int _screenBrightness ){
+    private void doBrightness(int minuteScreenStart){
 
-        if(minutes > 0){
+        if(minuteScreenStart > 0){
             Runnable screenTimerRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    setBrightness(_screenStartTime, _screenBrightness);
+                    setBrightness(getConfig().getScreenStartTime(), getConfig().getScreenBrightness());
                 }
             };
-            alarmHandler.postDelayed(screenTimerRunnable, TimeUnit.MINUTES.toMillis(minutes));
+            alarmHandler.postDelayed(screenTimerRunnable, TimeUnit.MINUTES.toMillis(minuteScreenStart));
         }
         else
-            setBrightness(_screenStartTime, _screenBrightness);
+            setBrightness(getConfig().getScreenStartTime(), getConfig().getScreenBrightness());
     }
     private void setBrightness(int _screenStartTime, int _screenBrightness){
 
@@ -301,9 +280,9 @@ public class AlarmActivity extends AppCompatActivity {
      * MUSIC
      **********************************************************************************************/
     private int currentVolume;
-    private void doPlayMusic(int _startSeconds, boolean _FadeIn, final int _musicVolume, int minutes, final int _fadingSeconds, final String _musicURI){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
+    private void doPlayMusic(int minutes){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
 
-        try { prepareMusic(_musicURI); }
+        try { prepareMusic(getConfig().getSongURI()); }
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
 
         final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
@@ -312,8 +291,8 @@ public class AlarmActivity extends AppCompatActivity {
         final int maxVolumeAndroid = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolumeAndroid, 0);
 
-        mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(_startSeconds));
-        if(_FadeIn){
+        mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(getConfig().getSongStart()));
+        if(getConfig().useFadeIn()){
 
             currentVolume = 0;
             mediaPlayer.setVolume(currentVolume, currentVolume);
@@ -324,13 +303,14 @@ public class AlarmActivity extends AppCompatActivity {
                     if(!mediaPlayer.isPlaying())
                         mediaPlayer.start();
 
-                    if( currentVolume <= _musicVolume){
+                    int musicVolume = config.getVolume();
+                    if( currentVolume <= musicVolume){
                         //Get Time For Fading and Sequenze to 15 Steps
-                        long millis =  TimeUnit.SECONDS.toMillis(_fadingSeconds);
+                        long millis =  TimeUnit.SECONDS.toMillis(getConfig().getFadeInTime());
                         long millis_steps = millis / 100;
 
                         //Set AudioManager
-                        float volume= 1 - (float)(Math.log(_musicVolume-currentVolume)/Math.log(_musicVolume));
+                        float volume= 1 - (float)(Math.log(musicVolume-currentVolume)/Math.log(musicVolume));
                         mediaPlayer.setVolume(volume, volume);
                         currentVolume +=1;
                         alarmHandler.postDelayed(this, millis_steps);
@@ -345,7 +325,8 @@ public class AlarmActivity extends AppCompatActivity {
                     @Override
                     public void run() {
 
-                        float volume= 1 - (float)(Math.log(0)/Math.log(_musicVolume));
+                        int musicVolume = config.getVolume();
+                        float volume= 1 - (float)(Math.log(0)/Math.log(musicVolume));
                         mediaPlayer.setVolume(volume, volume);
                         mediaPlayer.start();
                     }
@@ -353,7 +334,8 @@ public class AlarmActivity extends AppCompatActivity {
                 alarmHandler.postDelayed(musicPlayRunnable, TimeUnit.MINUTES.toMillis(minutes));
             }
             else{
-                float volume= 1 - (float)(Math.log(0)/Math.log(_musicVolume));
+                int musicVolume = config.getVolume();
+                float volume= 1 - (float)(Math.log(0)/Math.log(musicVolume));
                 mediaPlayer.setVolume(volume, volume);
                 mediaPlayer.start();
             }
@@ -390,14 +372,14 @@ public class AlarmActivity extends AppCompatActivity {
     /***********************************************************************************************
      * VIBRATION
      **********************************************************************************************/
-    private void doVibrate(int minutes, final int _vibrationStrength){
+    private void doVibrate(int minutes){
 
         if(minutes > 0){
             //Set new Handler
             Runnable vibrationRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    setVibrationStart(_vibrationStrength, 1000);
+                    setVibrationStart(getConfig().getVibrationStrength(), 1000);
                 }
             };
 
@@ -405,7 +387,7 @@ public class AlarmActivity extends AppCompatActivity {
             alarmHandler.postDelayed(vibrationRunnable, TimeUnit.MINUTES.toMillis(minutes));
         }
         else
-            setVibrationStart(_vibrationStrength, 1000);
+            setVibrationStart(getConfig().getVibrationStrength(), 1000);
     }
     private void setVibrationStart(){
         long[] pattern = { 0, 100, 200, 300, 400 };
@@ -520,7 +502,7 @@ public class AlarmActivity extends AppCompatActivity {
 
     public void onSnoozeClick(View v){
 
-        AlarmManage newAlarm = new AlarmManage(this);
+        AlarmManage newAlarm = new AlarmManage(this, config);
         snoozed = true;
         newAlarm.snoozeAlarm(actualAlarm);
         this.finish();

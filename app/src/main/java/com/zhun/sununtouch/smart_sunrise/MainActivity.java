@@ -73,16 +73,14 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Expendable Listview///////////////////////////////////////////////////////////////////////
-        //get the listView
-        AlarmGroupView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendbleList);
-        AlarmNoLayout = (LinearLayout) findViewById(R.id.wakeup_timer_no_Alarm_set_View);
+        //No Alarm Layout///////////////////////////////////////////////////////////////////////////
+        AlarmNoLayout  = (LinearLayout) findViewById(R.id.wakeup_timer_no_Alarm_set_View);
 
-        //Configuration/////////////////////////////////////////////////////////////////////////////
-        prepareConfiguration();
+        // New Configuration and List View//////////////////////////////////////////////////////////
         AlarmViewAdapter = new ExpandableListAdapter(this, alarmConfigurations);
+        AlarmGroupView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendbleList);
+        prepareConfiguration();
 
-        //setting list adapter
         AlarmGroupView.setAdapter(AlarmViewAdapter);
         AlarmGroupView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             int previousGroup = -1;
@@ -102,27 +100,22 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Floating ActionButton/////////////////////////////////////////////////////////////////////
+        //Add New Alarm
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                //Add New Alarm
                 saveListDataChild(AlarmConstants.ALARM);
             }
         });
     }
-
     /***********************************************************************************************
      * DATA VALUES
      **********************************************************************************************/
     private void prepareConfiguration(){
 
-        //Get Shared Preferences
-        SharedPreferences information = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
-        int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
-
-        if(amount == 0)
+        //Check if we have a Alarm
+        if(getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0) == 0)
         {
             AlarmNoLayout.setVisibility(LinearLayout.VISIBLE);
             AlarmGroupView.setVisibility(ExpandableListView.GONE);
@@ -130,40 +123,30 @@ public class MainActivity extends AppCompatActivity
         else
         {
             loadConfig();
-
-            //We have a Alarm
             AlarmNoLayout.setVisibility(LinearLayout.GONE);
             AlarmGroupView.setVisibility(ExpandableListView.VISIBLE);
         }
-
-        //Change View
         AlarmGroupView.invalidateViews();
     }
 
-    private void saveListDataChild(String _name){
-
+    private void saveListDataChild(String name){
         //Get Shared Preferences
-        SharedPreferences information = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
-
-        int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
-        saveListDataChild(_name, amount);
+        saveListDataChild(name, getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0)); //Load Amount from Config
     }
-    private void saveListDataChild(String _name, int _id){
-
+    private void saveListDataChild(String name, int id){
         //Get Shared Preferences
-        SharedPreferences information   = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
-        int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
+        int amount = getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0);
 
         //changelistData
         if(amount == 0)
-            saveConfigurationData(_name, amount++);
-        else if(_id < amount)
-            saveConfigurationData(_name, _id);
+            saveConfigurationData(name, amount++);
+        else if(id < amount)
+            saveConfigurationData(name, id);
         else
-            saveConfigurationData(_name, amount++);
+            saveConfigurationData(name, amount++);
 
         //Add AlarmValue
-        SharedPreferences.Editor editor = information.edit();
+        SharedPreferences.Editor editor = getPreferenceInfoEditor();
         editor.putInt(AlarmConstants.ALARM_VALUE, amount);
         editor.apply();
 
@@ -172,7 +155,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     public  void deleteChild(View v){
-
         //Delete Child
         Button deleteButton = (Button) v;
         deleteButton.setOnClickListener(new View.OnClickListener() {
@@ -200,19 +182,16 @@ public class MainActivity extends AppCompatActivity
         //Collapse Group
         AlarmGroupView.collapseGroup(ID);
 
-        //Load SharedPreferences
-        SharedPreferences information = getApplicationContext().getSharedPreferences(AlarmConstants.WAKEUP_TIMER_INFO, Context.MODE_PRIVATE);
-
         //Copy Data to fill AlarmCount Gap
-        int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
+        int amount = getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0);
         if( amount > 0)
         {
             for (int id = ID; id < amount; ++id)
             {
                 if(id < amount -1)
                 {
-                    SharedPreferences.Editor editorNew = AlarmSharedPreferences.getSharedPreferenceEditor(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, id);
-                    SharedPreferences settingsOld      = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, id + 1);
+                    SharedPreferences.Editor editorNew = getPreferenceSettingsEditor(id);
+                    SharedPreferences settingsOld      = getPreferenceSettings(id + 1);
                     Map<String, ?> settingOld = settingsOld.getAll();
 
                     for (Map.Entry<String, ?> value : settingOld.entrySet()) {
@@ -233,12 +212,12 @@ public class MainActivity extends AppCompatActivity
 
             //Set New Amount
             int newAmount = --amount;
-            SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreferenceEditor(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, newAmount);
+            SharedPreferences.Editor editor = getPreferenceSettingsEditor(newAmount);
             editor.clear();
             editor.apply();
 
             //Set new Amount Information
-            SharedPreferences.Editor editorInf = information.edit();
+            SharedPreferences.Editor editorInf = getPreferenceInfoEditor();
             editorInf.putInt(AlarmConstants.ALARM_VALUE, newAmount);
             editorInf.apply();
 
@@ -247,30 +226,30 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void saveConfigurationData(String _name, int _id){
+    private void saveConfigurationData(String name, int id){
 
         AlarmConfiguration config = new AlarmConfiguration();
 
-        if(!alarmConfigurations.containsKey(_id))
+        if(!alarmConfigurations.containsKey(id))
         {
             //put Alarm in map
-            alarmConfigurations.put(_id, config);
+            alarmConfigurations.put(id, config);
 
             //activate view
             AlarmNoLayout.setVisibility(LinearLayout.VISIBLE);
             AlarmGroupView.setVisibility(ExpandableListView.GONE);
         }
         else
-            config = alarmConfigurations.get(_id);
+            config = alarmConfigurations.get(id);
 
         //Load sharedPreferences
-        SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreferenceEditor(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, _id);
+        SharedPreferences.Editor editor = getPreferenceSettingsEditor(id);
 
         //Check if Alarm Exists
-        String alarmName = AlarmConstants.ALARM + _id;
+        String alarmName = AlarmConstants.ALARM + id;
 
         //put StringSet back
-        editor.putString(AlarmConstants.ALARM_NAME, _name);
+        editor.putString(AlarmConstants.ALARM_NAME, name);
 
         //Alarm is Set
         editor.putBoolean(AlarmConstants.ALARM_TIME_SET, config.isAlarmSet());
@@ -313,23 +292,17 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
     }
     private void addConfig(AlarmConfiguration config){
-        //Get Shared Preferences
-        SharedPreferences information = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
-
-        int amount = information.getInt(AlarmConstants.ALARM_VALUE, 0);
-        addConfig(config, amount);
+        addConfig(config, getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0));
     }
     private void addConfig(AlarmConfiguration config, int id){
         alarmConfigurations.put(id, config);
     }
     private void loadConfig(){
 
-        //Get Shared Preferences
-        SharedPreferences information = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER_INFO);
-        for(int ID = 0; ID < information.getInt(AlarmConstants.ALARM_VALUE, 0); ++ID)
+        for(int ID = 0; ID < getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0); ++ID)
         {
             //save Settings
-            SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, ID);
+            SharedPreferences settings = getPreferenceSettings(ID);
             AlarmConfiguration newAlarm = new AlarmConfiguration();
 
             //ID, Name, AlarmSet
@@ -380,74 +353,78 @@ public class MainActivity extends AppCompatActivity
         if(AlarmViewAdapter != null)
             AlarmViewAdapter.notifyDataSetChanged(alarmConfigurations);
     }
-    private void loadValuesNew(int _alarmID){
+    private void loadValuesNew(int ID){
 
-        debug_assertion(!alarmConfigurations.containsKey(_alarmID));
+        debug_assertion(!alarmConfigurations.containsKey(ID));
 
         //Set actual Alarm
-        actualAlarm = _alarmID;
+        actualAlarm = ID;
 
         //save Settings
-        SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, actualAlarm);
+        SharedPreferences settings = getPreferenceSettings(ID);
 
         //ID, name, AlarmSet
-        alarmConfigurations.get(_alarmID).setAlarmID(_alarmID);
-        alarmConfigurations.get(_alarmID).setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(_alarmID)));
-        alarmConfigurations.get(_alarmID).setAlarm(settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false));
+        alarmConfigurations.get(ID).setAlarmID(ID);
+        alarmConfigurations.get(ID).setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(ID)));
+        alarmConfigurations.get(ID).setAlarm(settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false));
 
         //Days
-        alarmConfigurations.get(_alarmID).setMonday   (settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , AlarmConstants.ACTUAL_DAY_MONDAY));
-        alarmConfigurations.get(_alarmID).setTuesday  (settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , AlarmConstants.ACTUAL_DAY_TUESDAY));
-        alarmConfigurations.get(_alarmID).setWednesday(settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, AlarmConstants.ACTUAL_DAY_WEDNESDAY));
-        alarmConfigurations.get(_alarmID).setThursday (settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , AlarmConstants.ACTUAL_DAY_THURSDAY));
-        alarmConfigurations.get(_alarmID).setFriday   (settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , AlarmConstants.ACTUAL_DAY_FRIDAY));
-        alarmConfigurations.get(_alarmID).setSaturday (settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , AlarmConstants.ACTUAL_DAY_SATURDAY));
-        alarmConfigurations.get(_alarmID).setSunday   (settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , AlarmConstants.ACTUAL_DAY_SUNDAY)); // Monday - Sunday
+        alarmConfigurations.get(ID).setMonday   (settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , AlarmConstants.ACTUAL_DAY_MONDAY));
+        alarmConfigurations.get(ID).setTuesday  (settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , AlarmConstants.ACTUAL_DAY_TUESDAY));
+        alarmConfigurations.get(ID).setWednesday(settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, AlarmConstants.ACTUAL_DAY_WEDNESDAY));
+        alarmConfigurations.get(ID).setThursday (settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , AlarmConstants.ACTUAL_DAY_THURSDAY));
+        alarmConfigurations.get(ID).setFriday   (settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , AlarmConstants.ACTUAL_DAY_FRIDAY));
+        alarmConfigurations.get(ID).setSaturday (settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , AlarmConstants.ACTUAL_DAY_SATURDAY));
+        alarmConfigurations.get(ID).setSunday   (settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , AlarmConstants.ACTUAL_DAY_SUNDAY)); // Monday - Sunday
 
         //Load Music
-        alarmConfigurations.get(_alarmID).setSongURI          (settings.getString(AlarmConstants.ALARM_MUSIC_SONGID      , AlarmConstants.ACTUAL_MUSIC_SONG_URI));
-        alarmConfigurations.get(_alarmID).setSongStart        (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , AlarmConstants.ACTUAL_MUSIC_START));
-        alarmConfigurations.get(_alarmID).setSongLength       (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGLENGTH     , AlarmConstants.ACTUAL_MUSIC_LENGTH));
-        alarmConfigurations.get(_alarmID).setVolume           (settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , AlarmConstants.ACTUAL_MUSIC_VOLUME));
-        alarmConfigurations.get(_alarmID).setFadeIn           (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN));
-        alarmConfigurations.get(_alarmID).setFadeInTime       (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME));
-        alarmConfigurations.get(_alarmID).setVibration        (settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, AlarmConstants.ACTUAL_MUSIC_VIBRATION));
-        alarmConfigurations.get(_alarmID).setVibrationStrength(settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH));// Song, StartTime, Volume, FadIn, FadeInTime
+        alarmConfigurations.get(ID).setSongURI          (settings.getString(AlarmConstants.ALARM_MUSIC_SONGID      , AlarmConstants.ACTUAL_MUSIC_SONG_URI));
+        alarmConfigurations.get(ID).setSongStart        (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , AlarmConstants.ACTUAL_MUSIC_START));
+        alarmConfigurations.get(ID).setSongLength       (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGLENGTH     , AlarmConstants.ACTUAL_MUSIC_LENGTH));
+        alarmConfigurations.get(ID).setVolume           (settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , AlarmConstants.ACTUAL_MUSIC_VOLUME));
+        alarmConfigurations.get(ID).setFadeIn           (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN));
+        alarmConfigurations.get(ID).setFadeInTime       (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME));
+        alarmConfigurations.get(ID).setVibration        (settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, AlarmConstants.ACTUAL_MUSIC_VIBRATION));
+        alarmConfigurations.get(ID).setVibrationStrength(settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH));// Song, StartTime, Volume, FadIn, FadeInTime
 
         //Load Light
-        alarmConfigurations.get(_alarmID).setScreen          (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN));
-        alarmConfigurations.get(_alarmID).setScreenBrightness(settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS));
-        alarmConfigurations.get(_alarmID).setScreenStartTime (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, AlarmConstants.ACTUAL_SCREEN_START));
+        alarmConfigurations.get(ID).setScreen          (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN));
+        alarmConfigurations.get(ID).setScreenBrightness(settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS));
+        alarmConfigurations.get(ID).setScreenStartTime (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, AlarmConstants.ACTUAL_SCREEN_START));
 
-        alarmConfigurations.get(_alarmID).setLightColor1(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1   , AlarmConstants.ACTUAL_SCREEN_COLOR1));
-        alarmConfigurations.get(_alarmID).setLightColor2(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2   , AlarmConstants.ACTUAL_SCREEN_COLOR2));
-        alarmConfigurations.get(_alarmID).setLightFade  (settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR, AlarmConstants.ACTUAL_SCREEN_COLOR_FADE));
+        alarmConfigurations.get(ID).setLightColor1(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1   , AlarmConstants.ACTUAL_SCREEN_COLOR1));
+        alarmConfigurations.get(ID).setLightColor2(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2   , AlarmConstants.ACTUAL_SCREEN_COLOR2));
+        alarmConfigurations.get(ID).setLightFade  (settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR, AlarmConstants.ACTUAL_SCREEN_COLOR_FADE));
 
-        alarmConfigurations.get(_alarmID).setLED         (settings.getInt(AlarmConstants.ALARM_LIGHT_USELED        , AlarmConstants.ACTUAL_LED));
-        alarmConfigurations.get(_alarmID).setLEDStartTime(settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME, AlarmConstants.ACTUAL_LED_START));// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+        alarmConfigurations.get(ID).setLED         (settings.getInt(AlarmConstants.ALARM_LIGHT_USELED        , AlarmConstants.ACTUAL_LED));
+        alarmConfigurations.get(ID).setLEDStartTime(settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME, AlarmConstants.ACTUAL_LED_START));// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
 
         //Time
         Calendar calendar = Calendar.getInstance();
-        alarmConfigurations.get(_alarmID).setHour  (settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , calendar.get(Calendar.HOUR_OF_DAY)));
-        alarmConfigurations.get(_alarmID).setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, calendar.get(Calendar.MINUTE)));
-        alarmConfigurations.get(_alarmID).setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE));    // hour, minute, snooze
+        alarmConfigurations.get(ID).setHour  (settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , calendar.get(Calendar.HOUR_OF_DAY)));
+        alarmConfigurations.get(ID).setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, calendar.get(Calendar.MINUTE)));
+        alarmConfigurations.get(ID).setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE));    // hour, minute, snooze
 
         if(AlarmViewAdapter != null)
             AlarmViewAdapter.notifyDataSetChanged(alarmConfigurations);
     }
 
+    private AlarmConfiguration getConfig(int ID){
+        return alarmConfigurations.get(ID);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private void saveSettings(String _settingName, int _actualAlarm, String _alarmName){
-        saveSettings(_settingName, _actualAlarm, _alarmName, _alarmName);
+    private void saveSettings(int actualAlarm, String alarmName){
+        saveSettings(actualAlarm, alarmName, alarmName);
     }
-    private void saveSettings(String _settingName, int _actualAlarm, String _alarmIdentifier, String _alarmName){
+    private void saveSettings(int ID, String alarmName, String alarmIdentifier){
         //save Settings
-        SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(getApplicationContext(), _settingName, _actualAlarm);
-        saveListDataChild(settings.getString(_alarmIdentifier, _alarmName), _actualAlarm);
+        SharedPreferences settings = getPreferenceSettings(ID);
+        saveListDataChild(settings.getString(alarmName, alarmIdentifier), ID);
     }
 
-    private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int _max, int _increment, int _progress){
+    private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int max, int increment, int progress){
 
         //LinearLayout
         LinearLayout linearLayout = new LinearLayout(v.getContext());
@@ -458,12 +435,24 @@ public class MainActivity extends AppCompatActivity
         linearLayout.addView(textView);
 
         //Seek Bar
-        seekBar.setMax(_max);
-        seekBar.setKeyProgressIncrement(_increment);
-        seekBar.setProgress(_progress);
+        seekBar.setMax(max);
+        seekBar.setKeyProgressIncrement(increment);
+        seekBar.setProgress(progress);
         linearLayout.addView(seekBar);
-
         return linearLayout;
+    }
+
+    private SharedPreferences.Editor getPreferenceSettingsEditor(int id){
+        return AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, id).edit();
+    }
+    private SharedPreferences getPreferenceSettings(int id){
+        return AlarmSharedPreferences.getSharedPreference(getApplicationContext(), AlarmConstants.WAKEUP_TIMER, id);
+    }
+    private SharedPreferences.Editor getPreferenceInfoEditor(){
+        return AlarmSharedPreferences.getSharedPreference(getApplicationContext()).edit();
+    }
+    private SharedPreferences getPreferenceInfo(){
+        return AlarmSharedPreferences.getSharedPreference(getApplicationContext());
     }
 
     private void debug_assertion(boolean check){
@@ -488,12 +477,12 @@ public class MainActivity extends AppCompatActivity
         alarmConfigurations.get(actualAlarm).setAlarm(toggle);
 
         //save Settings
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
 
         //show Toast
         String alarmText = String.format(getString(
                 R.string.toast_positive_alarm),
-                String.format("%02d:%02d".toUpperCase(Locale.US),
+                String.format("%02d:%02d",
                         alarmConfigurations.get(actualAlarm).getHour(),
                         alarmConfigurations.get(actualAlarm).getMinute()));
 
@@ -502,7 +491,7 @@ public class MainActivity extends AppCompatActivity
     private boolean activateAlarm(boolean active){
 
         //Get new Alarm Manager
-        AlarmManage newAlarm = new AlarmManage(getApplicationContext());
+        AlarmManage newAlarm = new AlarmManage(getApplicationContext(), getConfig(actualAlarm) );
 
         //Set Alarm
         if(active)
@@ -550,15 +539,15 @@ public class MainActivity extends AppCompatActivity
 
         //Set Visible Keyboard to AlarmAlertDialog and show Dialog
         AlertDialog AlarmNameAlert = builder.create();
-        AlarmNameAlert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        AlarmNameAlert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE); //TODO
         AlarmNameAlert.show();
     }
-    private void onAlarmNameSet(String _newName){
+    private void onAlarmNameSet(String name){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //save Settings
-        saveListDataChild(_newName, actualAlarm);
+        saveListDataChild(name, actualAlarm);
 
         //reactivate Alarm
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
@@ -590,7 +579,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         //save Settings
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         AlarmGroupView.invalidateViews();
 
         //reactivate Alarm
@@ -617,7 +606,7 @@ public class MainActivity extends AppCompatActivity
         alarmConfigurations.get(actualAlarm).setHour(hourOfDay);
         alarmConfigurations.get(actualAlarm).setMinute(minute);
         //save Settings
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
 
         //reactivate Alarm
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
@@ -682,15 +671,15 @@ public class MainActivity extends AppCompatActivity
         //Show Builder
         builder.show();
     }
-    private void onSnoozeMinutesSet(int _minutes){
+    private void onSnoozeMinutesSet(int minutes){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //Save Snooze Minutes
-        alarmConfigurations.get(actualAlarm).setSnooze(_minutes + 1); //we Start with 1 minute
+        alarmConfigurations.get(actualAlarm).setSnooze(minutes + 1); //we Start with 1 minute
 
         //save Settings
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
 
         //reactivate Alarm
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
@@ -773,7 +762,7 @@ public class MainActivity extends AppCompatActivity
         else
             Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
     }
-    private void chooseAlarmSongDialog(final ArrayList<SongInformation> _Songs){
+    private void chooseAlarmSongDialog(final ArrayList<SongInformation> songs){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -783,10 +772,10 @@ public class MainActivity extends AppCompatActivity
 
         //Get SongNames from SongInformationArray
         ArrayList<String> songNameArrayList = new ArrayList<>();
-        for(SongInformation songs : _Songs)
+        for(SongInformation song : songs)
         {
             //Get Name with Extension and remove it
-            String nameWithoutExtension  = songs.getTitle();
+            String nameWithoutExtension  = song.getTitle();
             if(nameWithoutExtension != null)
             {
                 if(nameWithoutExtension.contains("."))
@@ -800,10 +789,10 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int which) {
 
                 //Get Song Lengh
-                saveSongLength(_Songs.get(which).getPath());
+                saveSongLength(songs.get(which).getPath());
 
                 //save Settings reactivate Alarm
-                saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+                saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
                 activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
                 dialog.dismiss();
             }
@@ -822,7 +811,7 @@ public class MainActivity extends AppCompatActivity
                         stopMusic(false);
                         try
                         {
-                            prepareMusic(Uri.parse(_Songs.get(position).getPath()));
+                            prepareMusic(Uri.parse(songs.get(position).getPath()));
                         } catch (IOException e) {
                             Log.e("Exception: ", e.getMessage());
                         }
@@ -841,7 +830,7 @@ public class MainActivity extends AppCompatActivity
         });
         alertDialog.show();
     }
-    private void prepareMusic(Uri _SongUri) throws IOException{
+    private void prepareMusic(Uri uri) throws IOException{
 
         //Check for MediaPlayer
         if(mediaPlayer == null)
@@ -851,7 +840,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set MediaPlayer Values
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mediaPlayer.setDataSource(getApplicationContext(), _SongUri);
+        mediaPlayer.setDataSource(getApplicationContext(), uri);
         mediaPlayer.prepare();
     }
     private void stopMusic(boolean release){
@@ -872,18 +861,18 @@ public class MainActivity extends AppCompatActivity
         mediaPlayer = null;
     }
 
-    private void saveSongLength(String _uri){
+    private void saveSongLength(String uri){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
-        //Get Song Lengh
+        //Get Song Length
         MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
-        metaRetriever.setDataSource(_uri);
+        metaRetriever.setDataSource(uri);
 
         //Get Values from chosen Song
         String durationStr = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
         alarmConfigurations.get(actualAlarm).setSongLength((int) (Long.parseLong(durationStr) / 1000));
-        alarmConfigurations.get(actualAlarm).setSongURI(_uri);
+        alarmConfigurations.get(actualAlarm).setSongURI(uri);
     }
     /***********************************************************************************************
      * MUSIC VOLUME DIALOG
@@ -941,15 +930,15 @@ public class MainActivity extends AppCompatActivity
         });
         builder.show();
     }
-    private void onMusicVolumeSet(int _volume){
+    private void onMusicVolumeSet(int volume){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //Set ActualVolume
-        alarmConfigurations.get(actualAlarm).setVolume(_volume);
+        alarmConfigurations.get(actualAlarm).setVolume(volume);
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -977,7 +966,7 @@ public class MainActivity extends AppCompatActivity
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                 textView.setText(
                         String.format(
-                            "%02d:%02d".toUpperCase(Locale.US),
+                            "%02d:%02d",
                             TimeUnit.SECONDS.toMinutes(progress),
                             progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
             }
@@ -1013,15 +1002,15 @@ public class MainActivity extends AppCompatActivity
         });
         builder.show();
     }
-    private void onMusicStartSet(int _seconds){
+    private void onMusicStartSet(int seconds){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //Set ActualStart
-        alarmConfigurations.get(actualAlarm).setSongStart(_seconds);
+        alarmConfigurations.get(actualAlarm).setSongStart(seconds);
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -1062,7 +1051,7 @@ public class MainActivity extends AppCompatActivity
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                         textView.setText(
                                 String.format(
-                                    "%02d:%02d".toUpperCase(Locale.US),
+                                    "%02d:%02d",
                                     TimeUnit.SECONDS.toMinutes(progress),
                                     progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
                     }
@@ -1113,16 +1102,16 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-    private void onFadeInTimeSet(int _seconds){
+    private void onFadeInTimeSet(int seconds){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //Save Snooze Minutes
-        alarmConfigurations.get(actualAlarm).setFadeInTime(_seconds);
+        alarmConfigurations.get(actualAlarm).setFadeInTime(seconds);
         alarmConfigurations.get(actualAlarm).setFadeIn(1); //true
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -1202,16 +1191,16 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-    private void onVibrationStrengthSet(int _strength){
+    private void onVibrationStrengthSet(int strength){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //Save Vibration Values
-        alarmConfigurations.get(actualAlarm).setVibrationStrength(_strength);
+        alarmConfigurations.get(actualAlarm).setVibrationStrength(strength);
         alarmConfigurations.get(actualAlarm).setVibration(1); //true
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -1291,15 +1280,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
-    private void onScreenBrightnessSet(int _brightness){
+    private void onScreenBrightnessSet(int brightness){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
-        alarmConfigurations.get(actualAlarm).setScreenBrightness(_brightness);
+        alarmConfigurations.get(actualAlarm).setScreenBrightness(brightness);
         alarmConfigurations.get(actualAlarm).setScreen(1); //true
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -1358,15 +1347,15 @@ public class MainActivity extends AppCompatActivity
         });
         builder.show();
     }
-    private void onScreenStartTimeSet(int _minutes){
+    private void onScreenStartTimeSet(int minutes){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //Save ScreenStart Minutes
-        alarmConfigurations.get(actualAlarm).setScreenStartTime(_minutes);  //we Start with 1 minute
+        alarmConfigurations.get(actualAlarm).setScreenStartTime(minutes);  //we Start with 1 minute
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -1388,22 +1377,22 @@ public class MainActivity extends AppCompatActivity
         colorPicker.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_color));
         colorPicker.show();
     }
-    private void onColorSet(Button _buttonView, int _color){
+    private void onColorSet(Button bView, int color){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         final String color1 = this.getString(R.string.wakeup_light_screen_color1);
         final String color2 = this.getString(R.string.wakeup_light_screen_color2);
 
-        if(color1.equals(_buttonView.getText().toString()))
-            alarmConfigurations.get(actualAlarm).setLightColor1(_color);
-        else if(color2.equals(_buttonView.getText().toString()))
-            alarmConfigurations.get(actualAlarm).setLightColor2(_color);
+        if(color1.equals(bView.getText().toString()))
+            alarmConfigurations.get(actualAlarm).setLightColor1(color);
+        else if(color2.equals(bView.getText().toString()))
+            alarmConfigurations.get(actualAlarm).setLightColor2(color);
         else
             debug_assertion(true);
 
         //save Settings
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
 
         //reactivate Alarm
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
@@ -1426,7 +1415,7 @@ public class MainActivity extends AppCompatActivity
         actualButtonID = v.getId();
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -1447,7 +1436,7 @@ public class MainActivity extends AppCompatActivity
         actualButtonID = v.getId();
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
     public  void showLEDLightStartSettingDialog(View v){
@@ -1505,15 +1494,15 @@ public class MainActivity extends AppCompatActivity
         });
         builder.show();
     }
-    private void onLEDStartTimeSet(int _minutes){
+    private void onLEDStartTimeSet(int minutes){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
         //Save LEDSTartTime Minutes
-        alarmConfigurations.get(actualAlarm).setLEDStartTime(_minutes);
+        alarmConfigurations.get(actualAlarm).setLEDStartTime(minutes);
 
         //save Settings reactivate Alarm
-        saveSettings(AlarmConstants.WAKEUP_TIMER, actualAlarm, AlarmConstants.ALARM_NAME);
+        saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 

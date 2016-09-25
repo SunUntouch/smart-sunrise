@@ -59,8 +59,6 @@ public abstract class AlarmConstants {
     public final static String WAKEUP_TIME    = "Time";
     public final static String WAKEUP_MUSIC   = "Music";
     public final static String WAKEUP_LIGHT   = "Light";
-    public final static String WAKEUP_DELETE  = "Delete";
-
 
     //StartValues
     static Calendar calendar = Calendar.getInstance();

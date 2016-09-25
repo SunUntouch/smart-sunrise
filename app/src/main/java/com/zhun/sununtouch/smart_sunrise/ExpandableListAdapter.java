@@ -15,10 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private final static String[] WAKEUP_CHILDS  = {AlarmConstants.WAKEUP_DELETE, AlarmConstants.WAKEUP_TIME, AlarmConstants.WAKEUP_DAYS, AlarmConstants.WAKEUP_MUSIC, AlarmConstants.WAKEUP_LIGHT};
-
-    private Context      context;
-    private LinkedHashMap<Integer, AlarmConfiguration> configuration = new LinkedHashMap<>();
+    private Context context;
+    private LinkedHashMap<Integer, AlarmConfiguration> configuration;
 
     public ExpandableListAdapter(Context context, LinkedHashMap<Integer, AlarmConfiguration> config){
         this.context       = context;
@@ -29,7 +27,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.configuration = config;
     }
 
-    private View createTimeView(AlarmConfiguration config){
+    private AlarmConfiguration getConfig(int ID){
+        return configuration.get(ID);
+    }
+
+    private View createTimeView(int ID){
+
+        AlarmConfiguration config = getConfig(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -49,7 +53,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         return view;
     }
-    private View createDayView(AlarmConfiguration config){
+    private View createDayView(int ID){
+
+        AlarmConfiguration config = getConfig(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -77,7 +83,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         return view;
     }
-    private View createMusicView(AlarmConfiguration config){
+    private View createMusicView(int ID){
+
+        AlarmConfiguration config = getConfig(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -127,7 +135,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         return view;
     }
-    private View createLightView(AlarmConfiguration config){
+    private View createLightView(int ID){
+
+        AlarmConfiguration config = getConfig(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -175,7 +185,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         return view;
     }
-    private View createDeleteView(int _groupPosition){
+    private View createDeleteView(int ID){
+
+        AlarmConfiguration config = getConfig(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -189,9 +201,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         deleteAlarm.setText(view.getContext().getString(R.string.wakeup_delete));
 
         //Check for Alarm and Set Button to boolean value
-        AlarmManage newAlarm = new AlarmManage(view.getContext());
+        AlarmManage newAlarm = new AlarmManage(view.getContext(), config);
         ToggleButton setNewAlarm = (ToggleButton) view.findViewById(R.id.wakeup_timer_setAlarmButton);
-        setNewAlarm.setChecked(newAlarm.checkForPendingIntent(_groupPosition));
+        setNewAlarm.setChecked(newAlarm.checkForPendingIntent(ID));
 
         return view;
     }
@@ -212,10 +224,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         switch ((AlarmConfiguration.childItem) getChild(groupPosition, childPosition))
         {
-            case WAKEUP_TIME  : return createTimeView  (configuration.get(groupPosition));
-            case WAKEUP_DAYS  : return createDayView   (configuration.get(groupPosition));
-            case WAKEUP_MUSIC : return createMusicView (configuration.get(groupPosition));
-            case WAKEUP_LIGHT : return createLightView (configuration.get(groupPosition));
+            case WAKEUP_TIME  : return createTimeView  (groupPosition);
+            case WAKEUP_DAYS  : return createDayView   (groupPosition);
+            case WAKEUP_MUSIC : return createMusicView (groupPosition);
+            case WAKEUP_LIGHT : return createLightView (groupPosition);
             case WAKEUP_DELETE: return createDeleteView(groupPosition);
             default: return null;
         }
@@ -228,7 +240,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this.configuration.get(groupPosition).getChildItemSize();
+        return this.getConfig(groupPosition).getChildItemSize();
     }
 
     //Groups/////////////////////////////////////////////////////////////////////////
@@ -250,7 +262,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, null);
         }
 
-        AlarmConfiguration config = (AlarmConfiguration) configuration.get(groupPosition);
+        AlarmConfiguration config = getConfig(groupPosition);
 
         //Set Group Title
         TextView txtListHeader = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
