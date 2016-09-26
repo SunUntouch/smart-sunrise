@@ -6,6 +6,7 @@ import android.app.TimePickerDialog;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
@@ -14,7 +15,10 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
@@ -42,6 +46,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
+
 public class MainActivity extends AppCompatActivity
                     implements TimePickerDialog.OnTimeSetListener{
     //ExpendableList
@@ -60,6 +66,8 @@ public class MainActivity extends AppCompatActivity
 
     //Media Player
     private MediaPlayer mediaPlayer;
+
+    private boolean MusicPermission = false;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     /***********************************************************************************************
@@ -107,6 +115,30 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case 0:
+            {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    MusicPermission = true;
+                    searchMusic(1); //External Mode
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    MusicPermission = false;
+                    Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+            default: return;
+        }
+    }
+
     /***********************************************************************************************
      * DATA VALUES
      **********************************************************************************************/
@@ -719,55 +751,18 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
     private void onMusicSet(int modeID){
-        //Get All Song Values from the Android Media Content URI
-        //Default for Uri is the internal Memory, because it is every time available
-        //If the User Chooses the second entry switch to external Files
-        Uri allSongUri = (modeID == 1)? MediaStore.Audio.Media.EXTERNAL_CONTENT_URI : MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
 
-        //Set Values for the Resolver
-        String[] STAR = { "*" };
-
-        //Check if SD Card is Present
-        boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
-        if(isSDPresent || modeID == 0)
-        {
-            //Resolve ContentURI
-            ContentResolver musicResolver = AlarmGroupView.getContext().getContentResolver();
-            Cursor cursor = musicResolver.query(allSongUri, STAR, null, null, null);
-
-            //Search Cursor for Values
-            if(cursor != null)
-            {
-                //ArrayList for Music Entries
-                ArrayList<SongInformation> songList = new ArrayList<>();
-                if(cursor.moveToFirst())
-                {
-                    do{
-                        int song_id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
-                        String song_name   = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
-                        String fullPath    = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                        String album_name  = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                        String artist_name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                        songList.add(new SongInformation(song_id,  song_name, artist_name, album_name, fullPath));
-
-                        //int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
-                        //int album_id   = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
-                        //int artist_id  = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
-                        //int isAlarm    = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_ALARM));
-                        //int isRingtone = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
-                    }
-                    while(cursor.moveToNext());
-
-                    //Choose an Alarm
-                    chooseAlarmSongDialog(songList);
-                    cursor.close();
-                }
-            }
-            else
-                Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
-        }
+        if(modeID == 0)
+            searchMusic(modeID);
         else
-            Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
+        {
+            //Check if SD Card is Present
+            boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
+            if(isSDPresent )
+                checkMusicPermission();
+            else
+                Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
+        }
     }
     private void chooseAlarmSongDialog(final ArrayList<SongInformation> songs){
 
@@ -881,6 +876,66 @@ public class MainActivity extends AppCompatActivity
         alarmConfigurations.get(actualAlarm).setSongLength((int) (Long.parseLong(durationStr) / 1000));
         alarmConfigurations.get(actualAlarm).setSongURI(uri);
     }
+
+    private void searchMusic(int modeID){
+        //Get All Song Values from the Android Media Content URI
+        //Default for Uri is the internal Memory, because it is every time available
+        //If the User Chooses the second entry switch to external Files
+        Uri allSongUri = (modeID == 1)? MediaStore.Audio.Media.EXTERNAL_CONTENT_URI : MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
+
+        //Set Values for the Resolver
+        String[] STAR = { "*" };
+
+        //Resolve ContentURI
+        ContentResolver musicResolver = AlarmGroupView.getContext().getContentResolver();
+        Cursor cursor = musicResolver.query(allSongUri, STAR, null, null, null);
+
+        //Search Cursor for Values
+        if(cursor != null)
+        {
+            //ArrayList for Music Entries
+            ArrayList<SongInformation> songList = new ArrayList<>();
+            if(cursor.moveToFirst())
+            {
+                do{
+                    int song_id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+                    String song_name   = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+                    String fullPath    = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                    String album_name  = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                    String artist_name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                    songList.add(new SongInformation(song_id,  song_name, artist_name, album_name, fullPath));
+
+                    //int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
+                    //int album_id   = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
+                    //int artist_id  = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
+                    //int isAlarm    = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_ALARM));
+                    //int isRingtone = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
+                }
+                while(cursor.moveToNext());
+
+                //Choose an Alarm
+                chooseAlarmSongDialog(songList);
+                cursor.close();
+            }
+        }
+        else
+            Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
+    }
+    private void checkMusicPermission(){
+
+        //TODO Make it with ALARM_MUSIC_PERMISSION or so and a id value
+        if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+        {
+
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE))
+            {
+                //we will jump to the Handler if the user accepts or declines th permission and start there our Dialog
+            }
+            else
+                ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, 0);
+        }
+    }
+
     /***********************************************************************************************
      * MUSIC VOLUME DIALOG
      **********************************************************************************************/
