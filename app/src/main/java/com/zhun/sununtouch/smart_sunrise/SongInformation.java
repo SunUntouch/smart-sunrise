@@ -11,13 +11,13 @@ public class SongInformation {
     private String path;
     //private int year;
 
-    public SongInformation(long songID, String songTitle, String songArtist, String _album, String _path){
+    public SongInformation(long songID, String songTitle, String songArtist, String songAlbum, String songPath){
 
         this.id     = songID;
         this.title  = songTitle;
         this.artist = songArtist;
-        this.album  = _album;
-        this.path    = _path;
+        this.album  = songAlbum;
+        this.path   = songPath;
     }
 
     public long getID(){

@@ -2,7 +2,6 @@ package com.zhun.sununtouch.smart_sunrise;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import java.util.Calendar;
 import java.util.Vector;

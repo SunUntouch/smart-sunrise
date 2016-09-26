@@ -9,8 +9,6 @@ import android.preference.PreferenceManager;
  */
 public class AlarmSharedPreferences {
 
-    private static final String PREF_FILE_NAME = "SmartSun_Alarm_Prefs";
-
     public static SharedPreferences getSharedPreference(Context context, String _settingName){
         return context.getSharedPreferences(_settingName, Context.MODE_PRIVATE);
     }

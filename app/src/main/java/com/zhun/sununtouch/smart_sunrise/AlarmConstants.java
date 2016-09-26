@@ -9,7 +9,6 @@ public abstract class AlarmConstants {
 
     //Shared Pref Settings
     public final static String WAKEUP_TIMER            = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
-    public final static String WAKEUP_TIMER_INFO       = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS_INFO";
 
     //Alarm
     public final static String ALARM                      = "Alarm";
@@ -53,12 +52,6 @@ public abstract class AlarmConstants {
     public final static String ALARM_LIGHT_FADECOLOR         = "Alarm_FadeColor";
     public final static String ALARM_LIGHT_USELED            = "Alarm_UseLED";
     public final static String ALARM_LIGHT_LED_START_TIME    = "Alarm_LEDStartTime";
-
-    //ChildItems
-    public final static String WAKEUP_DAYS    = "Days";
-    public final static String WAKEUP_TIME    = "Time";
-    public final static String WAKEUP_MUSIC   = "Music";
-    public final static String WAKEUP_LIGHT   = "Light";
 
     //StartValues
     static Calendar calendar = Calendar.getInstance();

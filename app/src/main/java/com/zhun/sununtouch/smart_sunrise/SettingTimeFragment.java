@@ -33,10 +33,6 @@ public /*static*/ class SettingTimeFragment extends DialogFragment{ //no need of
 
         //Use Current Time as Default Value for Picker
         final Calendar calendar = Calendar.getInstance();
-        int hour   = calendar.get(Calendar.HOUR_OF_DAY);
-        int minute = calendar.get(Calendar.MINUTE);
-
-        //Create new Instance of TimePicker and return it
-        return new TimePickerDialog(mActivity, mListener, hour, minute, true); //TODO: Settings for 12 and 24 Hours
+        return new TimePickerDialog(mActivity, mListener, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true); //TODO: Settings for 12 and 24 Hours
     }
 }

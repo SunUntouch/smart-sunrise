@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -40,7 +39,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -113,6 +111,9 @@ public class MainActivity extends AppCompatActivity
      * DATA VALUES
      **********************************************************************************************/
     private void prepareConfiguration(){
+        prepareConfiguration(getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0), true);
+    }
+    private void prepareConfiguration(int id, boolean loadAll){
 
         //Check if we have a Alarm
         if(getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0) == 0)
@@ -122,7 +123,11 @@ public class MainActivity extends AppCompatActivity
         }
         else
         {
-            loadConfig();
+            if(loadAll)
+                loadConfig();
+            else
+                loadConfig(id, true);
+
             AlarmNoLayout.setVisibility(LinearLayout.GONE);
             AlarmGroupView.setVisibility(ExpandableListView.VISIBLE);
         }
@@ -151,7 +156,7 @@ public class MainActivity extends AppCompatActivity
         editor.apply();
 
         //prepare new List Data
-        prepareConfiguration();
+        prepareConfiguration(id, false);
     }
 
     public  void deleteChild(View v){
@@ -176,9 +181,6 @@ public class MainActivity extends AppCompatActivity
         //Get Current Alarm
         int ID = actualAlarm;
 
-        //Delete Map
-        alarmConfigurations.remove(ID);
-
         //Collapse Group
         AlarmGroupView.collapseGroup(ID);
 
@@ -194,7 +196,8 @@ public class MainActivity extends AppCompatActivity
                     SharedPreferences settingsOld      = getPreferenceSettings(id + 1);
                     Map<String, ?> settingOld = settingsOld.getAll();
 
-                    for (Map.Entry<String, ?> value : settingOld.entrySet()) {
+                    for (Map.Entry<String, ?> value : settingOld.entrySet())
+                    {
                         if (value.getValue().getClass().equals(Boolean.class))
                             editorNew.putBoolean(value.getKey(), (Boolean) value.getValue());
                         else if (value.getValue().getClass().equals(Float.class))
@@ -222,6 +225,7 @@ public class MainActivity extends AppCompatActivity
             editorInf.apply();
 
             //prepare new List Data
+            alarmConfigurations.remove(ID);
             prepareConfiguration();
         }
     }
@@ -300,57 +304,62 @@ public class MainActivity extends AppCompatActivity
     private void loadConfig(){
 
         for(int ID = 0; ID < getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0); ++ID)
-        {
-            //save Settings
-            SharedPreferences settings = getPreferenceSettings(ID);
-            AlarmConfiguration newAlarm = new AlarmConfiguration();
-
-            //ID, Name, AlarmSet
-            newAlarm.setAlarmID(ID);
-            newAlarm.setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(ID)));
-            newAlarm.setAlarm(settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false));
-
-            //Days
-            newAlarm.setMonday   (settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , AlarmConstants.ACTUAL_DAY_MONDAY));
-            newAlarm.setTuesday  (settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , AlarmConstants.ACTUAL_DAY_TUESDAY));
-            newAlarm.setWednesday(settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, AlarmConstants.ACTUAL_DAY_WEDNESDAY));
-            newAlarm.setThursday (settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , AlarmConstants.ACTUAL_DAY_THURSDAY));
-            newAlarm.setFriday   (settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , AlarmConstants.ACTUAL_DAY_FRIDAY));
-            newAlarm.setSaturday (settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , AlarmConstants.ACTUAL_DAY_SATURDAY));
-            newAlarm.setSunday   (settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , AlarmConstants.ACTUAL_DAY_SUNDAY)); // Monday - Sunday
-
-            //Load Music
-            newAlarm.setSongURI          (settings.getString(AlarmConstants.ALARM_MUSIC_SONGID      , AlarmConstants.ACTUAL_MUSIC_SONG_URI));
-            newAlarm.setSongStart        (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , AlarmConstants.ACTUAL_MUSIC_START));
-            newAlarm.setSongLength       (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGLENGTH     , AlarmConstants.ACTUAL_MUSIC_LENGTH));
-            newAlarm.setVolume           (settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , AlarmConstants.ACTUAL_MUSIC_VOLUME));
-            newAlarm.setFadeIn           (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN));
-            newAlarm.setFadeInTime       (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME));
-            newAlarm.setVibration        (settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, AlarmConstants.ACTUAL_MUSIC_VIBRATION));
-            newAlarm.setVibrationStrength(settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH));// Song, StartTime, Volume, FadIn, FadeInTime
-
-            //Load Light
-            newAlarm.setScreen          (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN));
-            newAlarm.setScreenBrightness(settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS));
-            newAlarm.setScreenStartTime (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, AlarmConstants.ACTUAL_SCREEN_START));
-
-            newAlarm.setLightColor1(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1   , AlarmConstants.ACTUAL_SCREEN_COLOR1));
-            newAlarm.setLightColor2(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2   , AlarmConstants.ACTUAL_SCREEN_COLOR2));
-            newAlarm.setLightFade  (settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR, AlarmConstants.ACTUAL_SCREEN_COLOR_FADE));
-
-            newAlarm.setLED         (settings.getInt(AlarmConstants.ALARM_LIGHT_USELED        , AlarmConstants.ACTUAL_LED));
-            newAlarm.setLEDStartTime(settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME, AlarmConstants.ACTUAL_LED_START));// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
-
-            //Time
-            Calendar calendar = Calendar.getInstance();
-            newAlarm.setHour  (settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , calendar.get(Calendar.HOUR_OF_DAY)));
-            newAlarm.setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, calendar.get(Calendar.MINUTE)));
-            newAlarm.setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE));    // hour, minute, snooze
-
-            alarmConfigurations.put(ID, newAlarm);
-        }
+            loadConfig(ID, false);
 
         if(AlarmViewAdapter != null)
+            AlarmViewAdapter.notifyDataSetChanged(alarmConfigurations);
+    }
+    private void loadConfig(int ID, boolean notify){
+
+        //save Settings
+        SharedPreferences settings = getPreferenceSettings(ID);
+        AlarmConfiguration newAlarm = new AlarmConfiguration();
+
+        //ID, Name, AlarmSet
+        newAlarm.setAlarmID(ID);
+        newAlarm.setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(ID)));
+        newAlarm.setAlarm(settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false));
+
+        //Days
+        newAlarm.setMonday   (settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , AlarmConstants.ACTUAL_DAY_MONDAY));
+        newAlarm.setTuesday  (settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , AlarmConstants.ACTUAL_DAY_TUESDAY));
+        newAlarm.setWednesday(settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, AlarmConstants.ACTUAL_DAY_WEDNESDAY));
+        newAlarm.setThursday (settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , AlarmConstants.ACTUAL_DAY_THURSDAY));
+        newAlarm.setFriday   (settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , AlarmConstants.ACTUAL_DAY_FRIDAY));
+        newAlarm.setSaturday (settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , AlarmConstants.ACTUAL_DAY_SATURDAY));
+        newAlarm.setSunday   (settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , AlarmConstants.ACTUAL_DAY_SUNDAY)); // Monday - Sunday
+
+        //Load Music
+        newAlarm.setSongURI          (settings.getString(AlarmConstants.ALARM_MUSIC_SONGID      , AlarmConstants.ACTUAL_MUSIC_SONG_URI));
+        newAlarm.setSongStart        (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , AlarmConstants.ACTUAL_MUSIC_START));
+        newAlarm.setSongLength       (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGLENGTH     , AlarmConstants.ACTUAL_MUSIC_LENGTH));
+        newAlarm.setVolume           (settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , AlarmConstants.ACTUAL_MUSIC_VOLUME));
+        newAlarm.setFadeIn           (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN));
+        newAlarm.setFadeInTime       (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME));
+        newAlarm.setVibration        (settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, AlarmConstants.ACTUAL_MUSIC_VIBRATION));
+        newAlarm.setVibrationStrength(settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH));// Song, StartTime, Volume, FadIn, FadeInTime
+
+        //Load Light
+        newAlarm.setScreen          (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN));
+        newAlarm.setScreenBrightness(settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS));
+        newAlarm.setScreenStartTime (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, AlarmConstants.ACTUAL_SCREEN_START));
+
+        newAlarm.setLightColor1(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1   , AlarmConstants.ACTUAL_SCREEN_COLOR1));
+        newAlarm.setLightColor2(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2   , AlarmConstants.ACTUAL_SCREEN_COLOR2));
+        newAlarm.setLightFade  (settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR, AlarmConstants.ACTUAL_SCREEN_COLOR_FADE));
+
+        newAlarm.setLED         (settings.getInt(AlarmConstants.ALARM_LIGHT_USELED        , AlarmConstants.ACTUAL_LED));
+        newAlarm.setLEDStartTime(settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME, AlarmConstants.ACTUAL_LED_START));// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
+
+        //Time
+        Calendar calendar = Calendar.getInstance();
+        newAlarm.setHour  (settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , calendar.get(Calendar.HOUR_OF_DAY)));
+        newAlarm.setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, calendar.get(Calendar.MINUTE)));
+        newAlarm.setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE));    // hour, minute, snooze
+
+        alarmConfigurations.put(ID, newAlarm);
+
+        if(AlarmViewAdapter != null && notify)
             AlarmViewAdapter.notifyDataSetChanged(alarmConfigurations);
     }
     private void loadValuesNew(int ID){
@@ -455,6 +464,14 @@ public class MainActivity extends AppCompatActivity
         return AlarmSharedPreferences.getSharedPreference(getApplicationContext());
     }
 
+    private int getSeekBarPosition(int progress, int right, int left, int width, int offset, int max){
+        //Get Position of Text
+        return (progress * (width - (right + left) * offset)) / max;
+    }
+    private int getSeekBarPosition(int progress, int right, int width, int offset, int max){
+        //Get Position of Text
+        return getSeekBarPosition(progress, right, 0, width, offset, max);
+    }
     private void debug_assertion(boolean check){
 
         if(BuildConfig.DEBUG && check)
@@ -480,13 +497,11 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
 
         //show Toast
-        String alarmText = String.format(getString(
-                R.string.toast_positive_alarm),
-                String.format("%02d:%02d",
-                        alarmConfigurations.get(actualAlarm).getHour(),
-                        alarmConfigurations.get(actualAlarm).getMinute()));
+        String alarmText = String.format(
+                getString(R.string.toast_positive_alarm),
+                String.format("%02d:%02d", getConfig(actualAlarm).getHour(), getConfig(actualAlarm).getMinute()));
 
-        AlarmToast.showToastShort(getApplicationContext(), alarmConfigurations.get(actualAlarm).isAlarmSet(), alarmText, getString(R.string.toast_negative_alarm));
+        AlarmToast.showToastShort(getApplicationContext(), getConfig(actualAlarm).isAlarmSet(), alarmText, getString(R.string.toast_negative_alarm));
     }
     private boolean activateAlarm(boolean active){
 
@@ -546,10 +561,8 @@ public class MainActivity extends AppCompatActivity
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
-        //save Settings
+        //save Settings and reactivate Alarm
         saveListDataChild(name, actualAlarm);
-
-        //reactivate Alarm
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
@@ -565,8 +578,6 @@ public class MainActivity extends AppCompatActivity
 
         //The Day View has only Toggle Buttons which call this method
         ToggleButton toggle = (ToggleButton) v;
-
-        //when togglebutton is checked set Alarm for this day
         switch(actualButtonID){
             case R.id.wakeup_monday   : alarmConfigurations.get(actualAlarm).setMonday   ((toggle.isChecked()) ? 1 : 0); break;
             case R.id.wakeup_tuesday  : alarmConfigurations.get(actualAlarm).setTuesday  ((toggle.isChecked()) ? 1 : 0); break;
@@ -577,13 +588,10 @@ public class MainActivity extends AppCompatActivity
             case R.id.wakeup_sunday   : alarmConfigurations.get(actualAlarm).setSunday   ((toggle.isChecked()) ? 1 : 0); break;
             default: debug_assertion(true); break;
         }
-
-        //save Settings
+        //save Settings and reactivate Alarm
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
+        activateAlarm(getConfig(actualAlarm).isAlarmSet());
         AlarmGroupView.invalidateViews();
-
-        //reactivate Alarm
-        activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
     /***********************************************************************************************
@@ -609,7 +617,7 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
 
         //reactivate Alarm
-        activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
+        activateAlarm(getConfig(actualAlarm).isAlarmSet());
     }
 
     /***********************************************************************************************
@@ -632,7 +640,7 @@ public class MainActivity extends AppCompatActivity
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                 //Set Position of Text
-                int val = (progress * (seekBar.getWidth() - 6 * seekBar.getThumbOffset())) / seekBar.getMax();
+                int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 String message = Integer.toString(++progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
@@ -711,7 +719,6 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
     private void onMusicSet(int modeID){
-
         //Get All Song Values from the Android Media Content URI
         //Default for Uri is the internal Memory, because it is every time available
         //If the User Chooses the second entry switch to external Files
@@ -771,20 +778,20 @@ public class MainActivity extends AppCompatActivity
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song));
 
         //Get SongNames from SongInformationArray
-        ArrayList<String> songNameArrayList = new ArrayList<>();
+        ArrayList<String> songNames = new ArrayList<>();
         for(SongInformation song : songs)
         {
             //Get Name with Extension and remove it
-            String nameWithoutExtension  = song.getTitle();
-            if(nameWithoutExtension != null)
+            String songName  = song.getTitle();
+            if(songName != null)
             {
-                if(nameWithoutExtension.contains("."))
-                    nameWithoutExtension = nameWithoutExtension.substring(0, nameWithoutExtension.lastIndexOf('.'));
-                songNameArrayList.add(nameWithoutExtension);
+                if(songName.contains("."))
+                    songName = songName.substring(0, songName.lastIndexOf('.'));
+                songNames.add(songName);
             }
         }
         //Get Song Name Array and set it for Alarm Dialog Builder
-        builder.setItems(songNameArrayList.toArray(new String[songNameArrayList.size()]), new DialogInterface.OnClickListener() {
+        builder.setItems(songNames.toArray(new String[songNames.size()]), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
@@ -793,7 +800,7 @@ public class MainActivity extends AppCompatActivity
 
                 //save Settings reactivate Alarm
                 saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
-                activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
+                activateAlarm(getConfig(actualAlarm).isAlarmSet());
                 dialog.dismiss();
             }
         });
@@ -894,7 +901,7 @@ public class MainActivity extends AppCompatActivity
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                 //Set Position of Text
-                int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
+                int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 textView.setText(String.format("%d", progress));
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
@@ -962,7 +969,7 @@ public class MainActivity extends AppCompatActivity
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                 //Set Position of Text
-                int val = (progress * (seekBar.getWidth() - 5 * seekBar.getThumbOffset())) / seekBar.getMax();
+                int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                 textView.setText(
                         String.format(
@@ -1039,7 +1046,7 @@ public class MainActivity extends AppCompatActivity
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
-                //Seekbar
+                //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -1047,7 +1054,7 @@ public class MainActivity extends AppCompatActivity
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                         //Set Position of Text
-                        int val = (progress * (seekBar.getWidth() - 5 * seekBar.getThumbOffset())) / seekBar.getMax();
+                        int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                         textView.setText(
                                 String.format(
@@ -1070,7 +1077,7 @@ public class MainActivity extends AppCompatActivity
             final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
             builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_song_fadeIn));
 
-            //Set Alertdialog View
+            //Set AlertDialog View
             builder.setView(
                     createAlertLinearLayout(
                         v,
@@ -1141,7 +1148,7 @@ public class MainActivity extends AppCompatActivity
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
-                //Seekbar
+                //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -1149,7 +1156,7 @@ public class MainActivity extends AppCompatActivity
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                         //Set Position of Text
-                        int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
+                        int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                         String message = Integer.toString(progress) + "%";
                         textView.setText(message);
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
@@ -1237,7 +1244,7 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         //Set Position of Text
-                        int val = (progress * (seekBar.getWidth() - 4 * seekBar.getThumbOffset())) / seekBar.getMax();
+                        int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                         String message = Integer.toString(progress + 1)+ "%";
                         textView.setText(message);
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
@@ -1310,7 +1317,7 @@ public class MainActivity extends AppCompatActivity
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                 //Set Position of Text
-                int val = (progress * (seekBar.getWidth() - 6 * seekBar.getThumbOffset())) / seekBar.getMax();
+                int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 String message = Integer.toString(progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
@@ -1457,7 +1464,7 @@ public class MainActivity extends AppCompatActivity
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                 //Set Position of Text
-                int val = (progress * (seekBar.getWidth() - 6 * seekBar.getThumbOffset())) / seekBar.getMax();
+                int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 String message = Integer.toString(progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);

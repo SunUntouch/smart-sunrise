@@ -4,15 +4,11 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 
 import java.util.Calendar;
-import java.util.LinkedHashMap;
-import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmManage extends AppCompatActivity {

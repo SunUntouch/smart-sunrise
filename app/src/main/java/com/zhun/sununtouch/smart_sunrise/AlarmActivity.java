@@ -170,19 +170,19 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     private void doColorFading( int minutes, final int minutesScreen){
 
-        if(minutes > 0){
-            Runnable initialColorFadeRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    changeColors(getConfig().getLightFade() == 1, minutesScreen);
-
-                }
-            };
-            alarmHandler.postDelayed(initialColorFadeRunnable, TimeUnit.MINUTES.toMillis(minutes));
-        }
-        else
+        if(minutes == 0)
+        {
             changeColors(getConfig().getLightFade() == 1, minutesScreen);
+            return;
+        }
 
+        Runnable initialColorFadeRunnable = new Runnable() {
+            @Override
+            public void run() {
+                changeColors(getConfig().getLightFade() == 1, minutesScreen);
+            }
+        };
+        alarmHandler.postDelayed(initialColorFadeRunnable, TimeUnit.MINUTES.toMillis(minutes));
     }
     private void changeColors(boolean _colorFading, int _minutesScreen){
 
@@ -199,8 +199,8 @@ public class AlarmActivity extends AppCompatActivity {
         colorFade1.start();
 
         //Check if Fading is true
-        if(_colorFading){
-
+        if(_colorFading)
+        {
             //Change Color a Second Time
             final ObjectAnimator colorFade2 = ObjectAnimator.ofObject(linearLayout,"backgroundColor", new ArgbEvaluator(), getConfig().getLightColor1(), getConfig().getLightColor2());
             colorFade2.setDuration(duration * 3);
@@ -223,17 +223,19 @@ public class AlarmActivity extends AppCompatActivity {
     }
     private void doBrightness(int minuteScreenStart){
 
-        if(minuteScreenStart > 0){
-            Runnable screenTimerRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    setBrightness(getConfig().getScreenStartTime(), getConfig().getScreenBrightness());
-                }
-            };
-            alarmHandler.postDelayed(screenTimerRunnable, TimeUnit.MINUTES.toMillis(minuteScreenStart));
-        }
-        else
+        if(minuteScreenStart == 0)
+        {
             setBrightness(getConfig().getScreenStartTime(), getConfig().getScreenBrightness());
+            return;
+        }
+
+        Runnable screenTimerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                setBrightness(getConfig().getScreenStartTime(), getConfig().getScreenBrightness());
+            }
+        };
+        alarmHandler.postDelayed(screenTimerRunnable, TimeUnit.MINUTES.toMillis(minuteScreenStart));
     }
     private void setBrightness(int _screenStartTime, int _screenBrightness){
 
@@ -292,8 +294,8 @@ public class AlarmActivity extends AppCompatActivity {
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolumeAndroid, 0);
 
         mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(getConfig().getSongStart()));
-        if(getConfig().useFadeIn()){
-
+        if(getConfig().useFadeIn())
+        {
             currentVolume = 0;
             mediaPlayer.setVolume(currentVolume, currentVolume);
             Runnable musicFadeInRunnable = new Runnable() {
@@ -319,8 +321,10 @@ public class AlarmActivity extends AppCompatActivity {
             };
             alarmHandler.postDelayed(musicFadeInRunnable, TimeUnit.MINUTES.toMillis(minutes) + 1);
         }
-        else{
-            if(minutes > 0){
+        else
+        {
+            if(minutes > 0)
+            {
                 Runnable musicPlayRunnable = new Runnable() {
                     @Override
                     public void run() {
@@ -333,7 +337,8 @@ public class AlarmActivity extends AppCompatActivity {
                 };
                 alarmHandler.postDelayed(musicPlayRunnable, TimeUnit.MINUTES.toMillis(minutes));
             }
-            else{
+            else
+            {
                 int musicVolume = config.getVolume();
                 float volume= 1 - (float)(Math.log(0)/Math.log(musicVolume));
                 mediaPlayer.setVolume(volume, volume);
@@ -351,8 +356,7 @@ public class AlarmActivity extends AppCompatActivity {
             mediaPlayer.reset();
 
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        Uri newSongUri = Uri.parse(_SongUri);
-        mediaPlayer.setDataSource(getApplicationContext(), newSongUri);
+        mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(_SongUri));
         mediaPlayer.setLooping(true);
         mediaPlayer.prepare();
     }
@@ -374,20 +378,20 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     private void doVibrate(int minutes){
 
-        if(minutes > 0){
-            //Set new Handler
-            Runnable vibrationRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    setVibrationStart(getConfig().getVibrationStrength(), 1000);
-                }
-            };
-
-            //Get Time Value till Vibration Starts
-            alarmHandler.postDelayed(vibrationRunnable, TimeUnit.MINUTES.toMillis(minutes));
-        }
-        else
+        if(minutes == 0)
+        {
             setVibrationStart(getConfig().getVibrationStrength(), 1000);
+            return;
+        }
+
+        //Set new Handler
+        Runnable vibrationRunnable = new Runnable() {
+            @Override
+            public void run() {
+                setVibrationStart(getConfig().getVibrationStrength(), 1000);
+            }
+        };
+        alarmHandler.postDelayed(vibrationRunnable, TimeUnit.MINUTES.toMillis(minutes));
     }
     private void setVibrationStart(){
         long[] pattern = { 0, 100, 200, 300, 400 };
@@ -423,7 +427,8 @@ public class AlarmActivity extends AppCompatActivity {
     private void setVibrationStop(){
 
         //Cancel and Release Vibrator
-        if(m_Vibrator != null){
+        if(m_Vibrator != null)
+        {
             m_Vibrator.cancel();
             m_Vibrator = null;
         }
@@ -434,42 +439,44 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     private void doLED(int minutes){
 
-        if(minutes > 0){
-            //New Handler for Waiting Till Time to show LED
-            Runnable runLED = new Runnable() {
-                @Override
-                public void run() {
-                    startLED();
-                }
-            };
-            //Start Delayed
-            alarmHandler.postDelayed(runLED, TimeUnit.MINUTES.toMillis(minutes));
-        }
-        else
+        if(minutes == 0)
+        {
             startLED();
+            return;
+        }
+
+        //New Handler for Waiting Till Time to show LED
+        Runnable runLED = new Runnable() {
+            @Override
+            public void run() {
+                startLED();
+            }
+        };
+        //Start Delayed
+        alarmHandler.postDelayed(runLED, TimeUnit.MINUTES.toMillis(minutes));
     }
     private void startLED(){
 
-        if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)){
-
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){  //TODO Test with new Version when available
+        if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
+        {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            {  //TODO Test with new Version when available
                 CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
 
-                try {
+                try
+                {
                     String[] cameraIds = cameraManager.getCameraIdList();
 
-                    for(String cameraID : cameraIds){
-
+                    for(String cameraID : cameraIds)
+                    {
                         CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
-                        if(cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE)){
+                        if(cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE))
                             cameraManager.setTorchMode(cameraID, true);
-                        }
                     }
-                } catch (Exception e){
-                    //TODO Catch Exception
-                }
+                } catch (Exception e){/*TODO Catch Exception*/ }
             }
-            else{
+            else
+            {
                 //Start new Cam
                 m_Cam = android.hardware.Camera.open();
 
@@ -486,7 +493,8 @@ public class AlarmActivity extends AppCompatActivity {
     private void stopLED(){
 
         //Stop and Release LED
-        if(m_Cam != null){
+        if(m_Cam != null)
+        {
             m_Cam.stopPreview();
             m_Cam.release();
             m_Cam = null;

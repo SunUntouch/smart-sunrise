@@ -15,7 +15,6 @@ public class AlarmIntentService extends IntentService {
         alarmIntent.putExtras(intent);
         alarmIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(alarmIntent);
-
         AlarmReceiver.completeWakefulIntent(intent);
     }
 }
