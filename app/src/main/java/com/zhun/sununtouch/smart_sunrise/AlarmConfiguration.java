@@ -240,6 +240,26 @@ public class AlarmConfiguration {
             default: return false;
         }
     }
+    public int getDaySet(){
+        return isMonday() + isTuesday() + isWednesday() + isThursday() + isFriday() + isSaturday() + isSunday();
+    }
+    public int getTimeToNextDay(int currentDay){
+
+        if(!isDaySet())
+            return 0;
+
+        int nextDay = 1;
+        if((currentDay == 6) ? isDaySet(0) : isDaySet(++currentDay))
+            return nextDay;
+
+        while (!isDaySet(currentDay++))
+        {
+            ++nextDay;
+            if(currentDay == 7)
+                currentDay = 0;
+        }
+        return nextDay;
+    }
     public Vector<Integer> getDays(){
 
         Vector<Integer> days = new Vector<>(7);

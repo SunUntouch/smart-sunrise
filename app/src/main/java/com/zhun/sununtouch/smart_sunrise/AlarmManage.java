@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
@@ -76,12 +77,11 @@ public class AlarmManage extends AppCompatActivity {
             calendar.set(Calendar.HOUR_OF_DAY, conf.getHour());
             calendar.set(Calendar.MINUTE     , conf.getMinute());
 
-            long lightStart    = TimeUnit.MINUTES.toMillis(getTimeBeforeMusic(conf));
+            long lightStart    = TimeUnit.MINUTES.toMillis(getTimeBeforeMusic());
             long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm());
 
             //Add all necessary values to alarm time
             alarmTime = calendar.getTimeInMillis() + timeToNextDay - lightStart;
-
             //Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
             alarmTime = (alarmTime < System.currentTimeMillis()) ? alarmTime + TimeUnit.DAYS.toMillis(1) : alarmTime;
         }
@@ -139,36 +139,30 @@ public class AlarmManage extends AppCompatActivity {
     }
     private int getDaysToNextAlarm(){
 
-        AlarmConfiguration conf = getConfig();
-
         //Load Calendar Instance and get Actual Day of the Week
         Calendar calendar = Calendar.getInstance();
-        int currentDay    =(calendar.get(Calendar.DAY_OF_WEEK) - 1 < 6) ? calendar.get(Calendar.DAY_OF_WEEK) : 0;
-        if(!conf.isDaySet())
-            return 0;
-
-        //get Days till Next Alarm
-        int daysToNextAlarm = 1;
-        while(!conf.isDaySet(currentDay))
+        switch (calendar.get(Calendar.DAY_OF_WEEK))
         {
-            ++daysToNextAlarm;
-            if(conf.isDaySet(currentDay))
-                break;
-            //If Sunday is Arrived switch to Monday index
-            currentDay = (currentDay < 6) ? ++currentDay : 0;
+            case Calendar.MONDAY   : return  getConfig().getTimeToNextDay(0);
+            case Calendar.TUESDAY  : return  getConfig().getTimeToNextDay(1);
+            case Calendar.WEDNESDAY: return  getConfig().getTimeToNextDay(2);
+            case Calendar.THURSDAY : return  getConfig().getTimeToNextDay(3);
+            case Calendar.FRIDAY   : return  getConfig().getTimeToNextDay(4);
+            case Calendar.SATURDAY : return  getConfig().getTimeToNextDay(5);
+            case Calendar.SUNDAY   : return  getConfig().getTimeToNextDay(6);
+            default: return 0;
         }
-        return daysToNextAlarm;
     }
 
     public long getTimeAlarmStarts(int hours, int minutes){
         return TimeUnit.HOURS.toMinutes(hours) + minutes ;
     }
 
-    public int getTimeBeforeMusic(AlarmConfiguration conf){
+    public int getTimeBeforeMusic(){
 
         //Screen
-        int minuteScreen = conf.useScreen() ? conf.getScreenStartTime() : 0;
-        int minuteLED    = conf.useLED()    ? conf.getLEDStartTime()    : 0;
+        int minuteScreen = getConfig().useScreen() ? getConfig().getScreenStartTime() : 0;
+        int minuteLED    = getConfig().useLED()    ? getConfig().getLEDStartTime()    : 0;
 
         //Max Minutes
         return (minuteScreen >= minuteLED) ? minuteScreen : minuteLED;
