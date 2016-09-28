@@ -23,6 +23,7 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmActivity extends AppCompatActivity {
@@ -53,9 +54,10 @@ public class AlarmActivity extends AppCompatActivity {
         }
 
         alarmHandler.removeCallbacksAndMessages(null);
+
+        stopLED();
         setVibrationStop();
         stopMusic();
-        stopLED();
     }
 
     @Override
@@ -143,7 +145,7 @@ public class AlarmActivity extends AppCompatActivity {
         int currentMinute = calendar.get(Calendar.MINUTE);
 
         final TextView timeText = (TextView) findViewById(R.id.wakeup_timer_wakescreen_textview);
-        timeText.setText(String.format("%02d:%02d", currentHour, currentMinute));
+        timeText.setText(String.format(Locale.US, "%02d:%02d", currentHour, currentMinute));
 
         //Set new Handler for Updating Date and Time
         final Runnable timeRunnable = new Runnable() {
@@ -151,7 +153,7 @@ public class AlarmActivity extends AppCompatActivity {
             public void run() {
                 //Update Time
                 Calendar calendarNew = Calendar.getInstance();
-                timeText.setText(String.format("%02d:%02d", calendarNew.get(Calendar.HOUR_OF_DAY), calendarNew.get(Calendar.MINUTE)));
+                timeText.setText(String.format(Locale.US, "%02d:%02d", calendarNew.get(Calendar.HOUR_OF_DAY), calendarNew.get(Calendar.MINUTE)));
                 //Update Date
                 dateText.setText(
                         getDayName(calendarNew) + ", " +
@@ -368,6 +370,7 @@ public class AlarmActivity extends AppCompatActivity {
 
             if(mediaPlayer.isPlaying())
                 mediaPlayer.stop();
+
             mediaPlayer.release();
             mediaPlayer = null;
         }

@@ -91,4 +91,6 @@ public abstract class AlarmConstants {
     public final static int ACTUAL_SCREEN_COLOR_FADE = 1;
     public final static int ACTUAL_LED               = 0;
     public final static int ACTUAL_LED_START         = 10;
+
+    public final static int ALARM_PERMISSION_MUSIC = 0;
 }

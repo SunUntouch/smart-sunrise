@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -53,7 +54,6 @@ public class MainActivity extends AppCompatActivity
     //ExpendableList
     private ExpandableListAdapter AlarmViewAdapter;
     private ExpandableListView    AlarmGroupView;
-    private LinearLayout          AlarmNoLayout;
 
     //Actual Alarm Values
     private LinkedHashMap<Integer, AlarmConfiguration> alarmConfigurations = new LinkedHashMap<>();
@@ -61,13 +61,8 @@ public class MainActivity extends AppCompatActivity
     //Last Clicked AlarmGroup
     private int actualAlarm    =-1;
 
-    //Last Clicked Button
-    private int actualButtonID    = 0;
-
     //Media Player
     private MediaPlayer mediaPlayer;
-
-    private boolean MusicPermission = false;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     /***********************************************************************************************
@@ -75,12 +70,22 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Set MainView//////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
+
+        //Set Toolbar///////////////////////////////////////////////////////////////////////////////
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //No Alarm Layout///////////////////////////////////////////////////////////////////////////
-        AlarmNoLayout  = (LinearLayout) findViewById(R.id.wakeup_timer_no_Alarm_set_View);
+        //Floating ActionButton/////////////////////////////////////////////////////////////////////
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveListDataChild(AlarmConstants.ALARM); //Add New Alarm
+            }
+        });
 
         // New Configuration and List View//////////////////////////////////////////////////////////
         AlarmViewAdapter = new ExpandableListAdapter(this, alarmConfigurations);
@@ -89,8 +94,8 @@ public class MainActivity extends AppCompatActivity
 
         AlarmGroupView.setAdapter(AlarmViewAdapter);
         AlarmGroupView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            int previousGroup = -1;
 
+            int previousGroup = -1;
             @Override
             public void onGroupExpand(int groupPosition) {
 
@@ -104,66 +109,64 @@ public class MainActivity extends AppCompatActivity
                 AlarmGroupView.invalidateViews();
             }
         });
-
-        //Floating ActionButton/////////////////////////////////////////////////////////////////////
-        //Add New Alarm
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveListDataChild(AlarmConstants.ALARM);
-            }
-        });
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
         switch (requestCode) {
-            case 0:
+            case AlarmConstants.ALARM_PERMISSION_MUSIC:
             {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    MusicPermission = true;
                     searchMusic(1); //External Mode
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
                 } else {
-                    MusicPermission = false;
                     Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
             }
-            default: return;
         }
     }
 
     /***********************************************************************************************
      * DATA VALUES
      **********************************************************************************************/
+    private void switchAlarmView(boolean visible, boolean invalidateView){
+
+        LinearLayout AlarmNoLayout  = (LinearLayout) findViewById(R.id.wakeup_timer_no_Alarm_set_View);
+        if(visible)
+        {
+            AlarmNoLayout.setVisibility(LinearLayout.GONE);
+            AlarmGroupView.setVisibility(ExpandableListView.VISIBLE);
+        }
+        else
+        {
+            AlarmNoLayout.setVisibility(LinearLayout.VISIBLE);
+            AlarmGroupView.setVisibility(ExpandableListView.GONE);
+        }
+
+        if(invalidateView)
+            AlarmGroupView.invalidateViews();
+    }
+
     private void prepareConfiguration(){
         prepareConfiguration(getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0), true);
     }
     private void prepareConfiguration(int id, boolean loadAll){
 
         //Check if we have a Alarm
-        if(getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0) == 0)
-        {
-            AlarmNoLayout.setVisibility(LinearLayout.VISIBLE);
-            AlarmGroupView.setVisibility(ExpandableListView.GONE);
-        }
-        else
+        boolean alarmExists = getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0) != 0;
+        if(alarmExists)
         {
             if(loadAll)
                 loadConfig();
             else
                 loadConfig(id, true);
-
-            AlarmNoLayout.setVisibility(LinearLayout.GONE);
-            AlarmGroupView.setVisibility(ExpandableListView.VISIBLE);
         }
-        AlarmGroupView.invalidateViews();
+        switchAlarmView(alarmExists, true);
     }
 
     private void saveListDataChild(String name){
@@ -214,7 +217,8 @@ public class MainActivity extends AppCompatActivity
         int ID = actualAlarm;
 
         //Collapse Group
-        AlarmGroupView.collapseGroup(ID);
+        if(AlarmGroupView.isGroupExpanded(ID))
+            AlarmGroupView.collapseGroup(ID);
 
         //Copy Data to fill AlarmCount Gap
         int amount = getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0);
@@ -245,16 +249,15 @@ public class MainActivity extends AppCompatActivity
                 }
             }
 
-            //Set New Amount
-            int newAmount = --amount;
-            SharedPreferences.Editor editor = getPreferenceSettingsEditor(newAmount);
+            //Clear Old Entry
+            SharedPreferences.Editor editor = getPreferenceSettingsEditor( --amount);
             editor.clear();
             editor.apply();
 
             //Set new Amount Information
-            SharedPreferences.Editor editorInf = getPreferenceInfoEditor();
-            editorInf.putInt(AlarmConstants.ALARM_VALUE, newAmount);
-            editorInf.apply();
+            editor = getPreferenceInfoEditor();
+            editor.putInt(AlarmConstants.ALARM_VALUE,  amount);
+            editor.apply();
 
             //prepare new List Data
             alarmConfigurations.remove(ID);
@@ -270,10 +273,7 @@ public class MainActivity extends AppCompatActivity
         {
             //put Alarm in map
             alarmConfigurations.put(id, config);
-
-            //activate view
-            AlarmNoLayout.setVisibility(LinearLayout.VISIBLE);
-            AlarmGroupView.setVisibility(ExpandableListView.GONE);
+            switchAlarmView(false, false);
         }
         else
             config = alarmConfigurations.get(id);
@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences.Editor editor = getPreferenceSettingsEditor(id);
 
         //Check if Alarm Exists
-        String alarmName = AlarmConstants.ALARM + id;
+        //String alarmName = AlarmConstants.ALARM + id;
 
         //put StringSet back
         editor.putString(AlarmConstants.ALARM_NAME, name);
@@ -501,7 +501,6 @@ public class MainActivity extends AppCompatActivity
         return (progress * (width - (right + left) * offset)) / max;
     }
     private int getSeekBarPosition(int progress, int right, int width, int offset, int max){
-        //Get Position of Text
         return getSeekBarPosition(progress, right, 0, width, offset, max);
     }
     private void debug_assertion(boolean check){
@@ -513,9 +512,6 @@ public class MainActivity extends AppCompatActivity
      * Set New Alarm
      **********************************************************************************************/
     public     void setNewAlarm(View v){
-
-        //Set Button ID
-        actualButtonID = v.getId();
 
         //Get Toggle Button
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
@@ -529,24 +525,19 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
 
         //show Toast
-        String alarmText = String.format(
-                getString(R.string.toast_positive_alarm),
-                String.format("%02d:%02d", getConfig(actualAlarm).getHour(), getConfig(actualAlarm).getMinute()));
-
+        String alarmText = String.format(getString(R.string.toast_positive_alarm),
+                                String.format(Locale.US, "%02d:%02d", getConfig(actualAlarm).getHour(), getConfig(actualAlarm).getMinute()));
         AlarmToast.showToastShort(getApplicationContext(), getConfig(actualAlarm).isAlarmSet(), alarmText, getString(R.string.toast_negative_alarm));
     }
     private boolean activateAlarm(boolean active){
 
-        //Get new Alarm Manager
+        //Get new Alarm and Set
         AlarmManage newAlarm = new AlarmManage(getApplicationContext(), getConfig(actualAlarm) );
-
-        //Set Alarm
         if(active)
             newAlarm.setNewAlarm(actualAlarm, false);
         else
             newAlarm.cancelAlarmwithButton(actualAlarm);
 
-        //Return if Alarm is Set in the System
         return newAlarm.checkForPendingIntent(actualAlarm);
     }
 
@@ -586,7 +577,15 @@ public class MainActivity extends AppCompatActivity
 
         //Set Visible Keyboard to AlarmAlertDialog and show Dialog
         AlertDialog AlarmNameAlert = builder.create();
-        AlarmNameAlert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE); //TODO
+        try
+        {
+            AlarmNameAlert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE); //TODO
+        }
+        catch (NullPointerException e)
+        {
+            AlarmToast.showToastShort(getApplicationContext(), getConfig(actualAlarm).isAlarmSet(), "Error: " + e.getMessage(), getString(R.string.toast_negative_alarm));
+        }
+
         AlarmNameAlert.show();
     }
     private void onAlarmNameSet(String name){
@@ -605,12 +604,9 @@ public class MainActivity extends AppCompatActivity
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
-        //save Button Id
-        actualButtonID = v.getId();
-
         //The Day View has only Toggle Buttons which call this method
         ToggleButton toggle = (ToggleButton) v;
-        switch(actualButtonID){
+        switch(v.getId()){
             case R.id.wakeup_monday   : alarmConfigurations.get(actualAlarm).setMonday   ((toggle.isChecked()) ? 1 : 0); break;
             case R.id.wakeup_tuesday  : alarmConfigurations.get(actualAlarm).setTuesday  ((toggle.isChecked()) ? 1 : 0); break;
             case R.id.wakeup_wednesday: alarmConfigurations.get(actualAlarm).setWednesday((toggle.isChecked()) ? 1 : 0); break;
@@ -630,9 +626,6 @@ public class MainActivity extends AppCompatActivity
      * TIME SETTING DIALOG
      **********************************************************************************************/
     public void showTimeSettingsDialog(View v){
-
-        //save Button ID
-        actualButtonID = v.getId();
 
         //Open TimePicker Dialog
         DialogFragment newFragment = new SettingTimeFragment();
@@ -658,9 +651,6 @@ public class MainActivity extends AppCompatActivity
     public  void showMinuteSettingDialog(View v) {
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
-
-        //Save ID From Button
-        actualButtonID = v.getId();
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
@@ -729,8 +719,6 @@ public class MainActivity extends AppCompatActivity
      * MUSIC SET DIALOG
      **********************************************************************************************/
     public  void showMusicSettingDialog(View v){
-
-        actualButtonID = v.getId();
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -887,7 +875,7 @@ public class MainActivity extends AppCompatActivity
         String[] STAR = { "*" };
 
         //Resolve ContentURI
-        ContentResolver musicResolver = AlarmGroupView.getContext().getContentResolver();
+        ContentResolver musicResolver = getApplicationContext().getContentResolver();
         Cursor cursor = musicResolver.query(allSongUri, STAR, null, null, null);
 
         //Search Cursor for Values
@@ -923,16 +911,14 @@ public class MainActivity extends AppCompatActivity
     }
     private void checkMusicPermission(){
 
-        //TODO Make it with ALARM_MUSIC_PERMISSION or so and a id value
         if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
-
             if(ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE))
             {
                 //we will jump to the Handler if the user accepts or declines th permission and start there our Dialog
             }
             else
-                ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, 0);
+                ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
         }
     }
 
@@ -942,9 +928,6 @@ public class MainActivity extends AppCompatActivity
     public  void showMusicVolumeSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
-
-        //Save ID From Button
-        actualButtonID = v.getId();
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
@@ -957,7 +940,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Set Position of Text
                 int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
-                textView.setText(String.format("%d", progress));
+                textView.setText(String.format(Locale.US, "%d", progress));
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
 
@@ -1011,9 +994,6 @@ public class MainActivity extends AppCompatActivity
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
-        //Save ID From Button
-        actualButtonID = v.getId();
-
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
         //SeekBar
@@ -1026,11 +1006,8 @@ public class MainActivity extends AppCompatActivity
                 //Set Position of Text
                 int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
-                textView.setText(
-                        String.format(
-                            "%02d:%02d",
-                            TimeUnit.SECONDS.toMinutes(progress),
-                            progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
+                textView.setText(String.format(Locale.US, "%02d:%02d", TimeUnit.SECONDS.toMinutes(progress),
+                                                            progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
             }
 
             @Override
@@ -1088,16 +1065,10 @@ public class MainActivity extends AppCompatActivity
         //Set Vibration Checked
         alarmConfigurations.get(actualAlarm).setFadeIn((fadeInToggle.isChecked())? 1 : 0);
 
-        //Save ID From Button
-        actualButtonID = v.getId();
-
         //Set On LongClickListener
         fadeInToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
-                //Save ID From Button
-                actualButtonID = v.getId();
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
@@ -1111,11 +1082,8 @@ public class MainActivity extends AppCompatActivity
                         //Set Position of Text
                         int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
-                        textView.setText(
-                                String.format(
-                                    "%02d:%02d",
-                                    TimeUnit.SECONDS.toMinutes(progress),
-                                    progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
+                        textView.setText(String.format(Locale.US, "%02d:%02d", TimeUnit.SECONDS.toMinutes(progress),
+                                                                    progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
                     }
 
                     @Override
@@ -1190,16 +1158,10 @@ public class MainActivity extends AppCompatActivity
         //Set Vibration Checked
         alarmConfigurations.get(actualAlarm).setVibration((vibrationToggle.isChecked())? 1 : 0);
 
-        //Save ID From Button
-        actualButtonID = v.getId();
-
         //Set On LongClickListener
         vibrationToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
-                //Save ID From Button
-                actualButtonID = v.getId();
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
@@ -1279,16 +1241,10 @@ public class MainActivity extends AppCompatActivity
         //Set Screen Checked
         alarmConfigurations.get(actualAlarm).setScreen((screenToggle.isChecked())? 1 : 0);
 
-        //Save ID From Button
-        actualButtonID = v.getId();
-
         //Set On LongClickListener
         screenToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
-                //Save ID From Button
-                actualButtonID = v.getId();
 
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
@@ -1357,9 +1313,6 @@ public class MainActivity extends AppCompatActivity
     public  void showScreenLightStartSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
-
-        //Save ID From Button
-        actualButtonID = v.getId();
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
@@ -1473,9 +1426,6 @@ public class MainActivity extends AppCompatActivity
         //Set Vibration Checked
         alarmConfigurations.get(actualAlarm).setLightFade((screenFadeToggle.isChecked())? 1 : 0);
 
-        //Save ID From Button
-        actualButtonID = v.getId();
-
         //save Settings reactivate Alarm
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
@@ -1494,9 +1444,6 @@ public class MainActivity extends AppCompatActivity
         //Set LED Checked
         alarmConfigurations.get(actualAlarm).setLED((LEDToggle.isChecked())? 1 : 0);
 
-        //Save ID From Button
-        actualButtonID = v.getId();
-
         //save Settings reactivate Alarm
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
@@ -1504,9 +1451,6 @@ public class MainActivity extends AppCompatActivity
     public  void showLEDLightStartSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
-
-        //Save ID From Button
-        actualButtonID = v.getId();
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());

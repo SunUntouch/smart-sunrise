@@ -8,15 +8,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import java.sql.Time;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 public class AlarmManage extends AppCompatActivity {
 
-    private  AlarmManager alarmManager;
-    private AlarmConfiguration config;
     private final Context context;
+    private AlarmManager alarmManager;
+    private AlarmConfiguration config;
 
     AlarmManage(Context alarmContext, AlarmConfiguration alarmConfig){
 
@@ -74,14 +73,14 @@ public class AlarmManage extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         if(!snooze)
         {
-            calendar.set(Calendar.HOUR_OF_DAY, conf.getHour());
-            calendar.set(Calendar.MINUTE     , conf.getMinute());
-
+            //Add all necessary values to alarm time
             long lightStart    = TimeUnit.MINUTES.toMillis(getTimeBeforeMusic());
             long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm());
 
-            //Add all necessary values to alarm time
-            alarmTime = calendar.getTimeInMillis() + timeToNextDay - lightStart;
+            calendar.set(Calendar.HOUR_OF_DAY, conf.getHour());
+            calendar.set(Calendar.MINUTE     , conf.getMinute());
+            alarmTime = calendar.getTimeInMillis() + timeToNextDay - lightStart; //TODO What if the user sets a Alarm and the light time is lower then the current time?
+
             //Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
             alarmTime = (alarmTime < System.currentTimeMillis()) ? alarmTime + TimeUnit.DAYS.toMillis(1) : alarmTime;
         }
@@ -159,7 +158,6 @@ public class AlarmManage extends AppCompatActivity {
     }
 
     public int getTimeBeforeMusic(){
-
         //Screen
         int minuteScreen = getConfig().useScreen() ? getConfig().getScreenStartTime() : 0;
         int minuteLED    = getConfig().useLED()    ? getConfig().getLEDStartTime()    : 0;

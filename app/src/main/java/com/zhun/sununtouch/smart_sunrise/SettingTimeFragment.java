@@ -24,7 +24,7 @@ public /*static*/ class SettingTimeFragment extends DialogFragment{ //no need of
         try{
             mListener = (TimePickerDialog.OnTimeSetListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + "must implement OnTimeSetlistener");
+            throw new ClassCastException(activity.toString() + "must implement OnTimeSetListener");
         }
     }
 

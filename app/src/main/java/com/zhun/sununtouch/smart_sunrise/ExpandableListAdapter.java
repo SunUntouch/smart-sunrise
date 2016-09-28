@@ -11,6 +11,7 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
@@ -44,12 +45,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         txtListChild.setText(view.getContext().getString(R.string.wakeup_time));
 
         Button setTimeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonTime);
-        setTimeButton.setText(String.format("%02d:%02d".toLowerCase(),config.getHour(), config.getMinute()));
+        setTimeButton.setText(String.format(Locale.US, "%02d:%02d",config.getHour(), config.getMinute()));
 
         Button setSnoozeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonSnooze);
-        setSnoozeButton.setText(
-                view.getContext().getString(R.string.wakeup_time_snooze) + " " +
-                config.getSnooze() + " " + view.getContext().getString(R.string.wakeup_time_minutes));
+        setSnoozeButton.setText( view.getContext().getString(R.string.wakeup_time_snooze) + " " + config.getSnooze() + " " + view.getContext().getString(R.string.wakeup_time_minutes));
 
         return view;
     }
@@ -99,40 +98,34 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         String newMusicText = config.getSongName();
         if(newMusicText.indexOf('.') != -1)
             newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
-
         Button setMusicButton = (Button) view.findViewById(R.id.wakeup_timer_music_buttonMusic);
         setMusicButton.setText(newMusicText);
 
         //Set Volume Button
         Button setMusicVolumeButton = (Button) view.findViewById(R.id.wakeup_timer_music_buttonMusicVolume);
-        setMusicVolumeButton.setText(String.format("%d%s", config.getVolume(), "%"));
+        setMusicVolumeButton.setText(String.format(Locale.US, "%d%s", config.getVolume(), "%"));
 
         //Set Start Time Button
-        int seconds = config.getSongStart();
+        long seconds   = config.getSongStart();
+        long minutes   = TimeUnit.SECONDS.toMinutes(seconds);
+        seconds -= TimeUnit.MINUTES.toSeconds(minutes);
         Button setMusicStartTime = (Button) view.findViewById(R.id.wakeup_timer_music_SongStart);
-        setMusicStartTime.setText(
-                String.format(
-                    "%02d:%02d".toLowerCase(),
-                    TimeUnit.SECONDS.toMinutes(seconds),
-                    seconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(seconds))));
+        setMusicStartTime.setText(String.format(Locale.US,"%02d:%02d", minutes, seconds));
 
         //Set FadeIn ToggleButton
-        int fadeSeconds  = config.getFadeIn();
+        seconds  = config.getFadeIn();
+        minutes  = TimeUnit.SECONDS.toMinutes(seconds);
+        seconds -= TimeUnit.MINUTES.toSeconds(minutes);
         ToggleButton setFadeIn = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleFadeIn);
-        setFadeIn.setChecked(config.getFadeIn() == 1);
+        setFadeIn.setTextOn(String.format(Locale.US, "%02d:%02d", minutes, seconds));
         setFadeIn.setTextOff(view.getContext().getString(R.string.wakeup_music_fadeOff));
-        setFadeIn.setTextOn(
-                String.format(
-                    "%02d:%02d".toLowerCase(),
-                    TimeUnit.SECONDS.toMinutes(fadeSeconds),
-                    fadeSeconds - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(fadeSeconds))));
+        setFadeIn.setChecked(config.useFadeIn());
 
         //Set Vibration ToggleButton
         ToggleButton setVibrationButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleVibration);
         setVibrationButton.setTextOn(config.getVibrationStrength() + "%");
         setVibrationButton.setTextOff(view.getContext().getString(R.string.wakeup_music_vibraOff));
-        setVibrationButton.setChecked(config.getVibration() == 1);
-
+        setVibrationButton.setChecked(config.useVibration());
         return view;
     }
     private View createLightView(int ID){
@@ -271,20 +264,18 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //time Text
         TextView txtListTime = (TextView) convertView.findViewById(R.id.wakeup_group_time);
-        txtListTime.setText(
-                String.format("%02d:%02d".toLowerCase(),config.getHour(), config.getMinute()));
+        txtListTime.setText(String.format(Locale.US, "%02d:%02d",config.getHour(), config.getMinute()));
 
         //Day Text
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
-        txtListDays.setText(
-                String.format("%s %s %s %s %s %s %s",
-                    (config.isMonday(true))    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
-                    (config.isTuesday(true))   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
-                    (config.isWednesday(true)) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
-                    (config.isThursday(true))  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
-                    (config.isFriday(true))    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
-                    (config.isSaturday(true))  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
-                    (config.isSunday(true))    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
+        txtListDays.setText(String.format("%s %s %s %s %s %s %s",
+                                (config.isMonday(true))    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
+                                (config.isTuesday(true))   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
+                                (config.isWednesday(true)) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
+                                (config.isThursday(true))  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
+                                (config.isFriday(true))    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
+                                (config.isSaturday(true))  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
+                                (config.isSunday(true))    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
         return convertView;
     }
 
