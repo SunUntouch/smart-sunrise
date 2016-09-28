@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 saveListDataChild(AlarmConstants.ALARM); //Add New Alarm
+                AlarmGroupView.collapseGroup(actualAlarm);
             }
         });
 
@@ -99,16 +100,17 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onGroupExpand(int groupPosition) {
 
-                loadValuesNew(groupPosition);
-                actualAlarm = groupPosition;
-
                 if (groupPosition != previousGroup)
-                    AlarmGroupView.collapseGroup(previousGroup);
+                {
+                    if(previousGroup != -1)
+                        AlarmGroupView.collapseGroup(previousGroup);
 
-                previousGroup = groupPosition;
-                AlarmGroupView.invalidateViews();
+                    previousGroup = groupPosition;
+                    actualAlarm = groupPosition;
+                }
             }
         });
+        AlarmGroupView.requestFocus();
     }
 
     @Override
@@ -392,62 +394,6 @@ public class MainActivity extends AppCompatActivity
         if(AlarmViewAdapter != null && notify)
             AlarmViewAdapter.notifyDataSetChanged(alarmConfigurations);
     }
-    private void loadValuesNew(int ID){
-
-        debug_assertion(!alarmConfigurations.containsKey(ID));
-
-        //Set actual Alarm
-        actualAlarm = ID;
-
-        //save Settings
-        SharedPreferences settings = getPreferenceSettings(ID);
-
-        //ID, name, AlarmSet
-        alarmConfigurations.get(ID).setAlarmID(ID);
-        alarmConfigurations.get(ID).setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(ID)));
-        alarmConfigurations.get(ID).setAlarm(settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false));
-
-        //Days
-        alarmConfigurations.get(ID).setMonday   (settings.getInt(AlarmConstants.ALARM_DAY_MONDAY   , AlarmConstants.ACTUAL_DAY_MONDAY));
-        alarmConfigurations.get(ID).setTuesday  (settings.getInt(AlarmConstants.ALARM_DAY_TUESDAY  , AlarmConstants.ACTUAL_DAY_TUESDAY));
-        alarmConfigurations.get(ID).setWednesday(settings.getInt(AlarmConstants.ALARM_DAY_WEDNESDAY, AlarmConstants.ACTUAL_DAY_WEDNESDAY));
-        alarmConfigurations.get(ID).setThursday (settings.getInt(AlarmConstants.ALARM_DAY_THURSDAY , AlarmConstants.ACTUAL_DAY_THURSDAY));
-        alarmConfigurations.get(ID).setFriday   (settings.getInt(AlarmConstants.ALARM_DAY_FRIDAY   , AlarmConstants.ACTUAL_DAY_FRIDAY));
-        alarmConfigurations.get(ID).setSaturday (settings.getInt(AlarmConstants.ALARM_DAY_SATURDAY , AlarmConstants.ACTUAL_DAY_SATURDAY));
-        alarmConfigurations.get(ID).setSunday   (settings.getInt(AlarmConstants.ALARM_DAY_SUNDAY   , AlarmConstants.ACTUAL_DAY_SUNDAY)); // Monday - Sunday
-
-        //Load Music
-        alarmConfigurations.get(ID).setSongURI          (settings.getString(AlarmConstants.ALARM_MUSIC_SONGID      , AlarmConstants.ACTUAL_MUSIC_SONG_URI));
-        alarmConfigurations.get(ID).setSongStart        (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGSTART      , AlarmConstants.ACTUAL_MUSIC_START));
-        alarmConfigurations.get(ID).setSongLength       (settings.getInt(AlarmConstants.ALARM_MUSIC_SONGLENGTH     , AlarmConstants.ACTUAL_MUSIC_LENGTH));
-        alarmConfigurations.get(ID).setVolume           (settings.getInt(AlarmConstants.ALARM_MUSIC_VOLUME         , AlarmConstants.ACTUAL_MUSIC_VOLUME));
-        alarmConfigurations.get(ID).setFadeIn           (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEIN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN));
-        alarmConfigurations.get(ID).setFadeInTime       (settings.getInt(AlarmConstants.ALARM_MUSIC_FADEINTIME     , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME));
-        alarmConfigurations.get(ID).setVibration        (settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIV, AlarmConstants.ACTUAL_MUSIC_VIBRATION));
-        alarmConfigurations.get(ID).setVibrationStrength(settings.getInt(AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE, AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH));// Song, StartTime, Volume, FadIn, FadeInTime
-
-        //Load Light
-        alarmConfigurations.get(ID).setScreen          (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN           , AlarmConstants.ACTUAL_SCREEN));
-        alarmConfigurations.get(ID).setScreenBrightness(settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_BRIGTHNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS));
-        alarmConfigurations.get(ID).setScreenStartTime (settings.getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, AlarmConstants.ACTUAL_SCREEN_START));
-
-        alarmConfigurations.get(ID).setLightColor1(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR1   , AlarmConstants.ACTUAL_SCREEN_COLOR1));
-        alarmConfigurations.get(ID).setLightColor2(settings.getInt(AlarmConstants.ALARM_LIGHT_COLOR2   , AlarmConstants.ACTUAL_SCREEN_COLOR2));
-        alarmConfigurations.get(ID).setLightFade  (settings.getInt(AlarmConstants.ALARM_LIGHT_FADECOLOR, AlarmConstants.ACTUAL_SCREEN_COLOR_FADE));
-
-        alarmConfigurations.get(ID).setLED         (settings.getInt(AlarmConstants.ALARM_LIGHT_USELED        , AlarmConstants.ACTUAL_LED));
-        alarmConfigurations.get(ID).setLEDStartTime(settings.getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME, AlarmConstants.ACTUAL_LED_START));// UseScreen, ScreenColor1, ScreenColor2, Fadecolor, FadeTime, UseLED
-
-        //Time
-        Calendar calendar = Calendar.getInstance();
-        alarmConfigurations.get(ID).setHour  (settings.getInt(AlarmConstants.ALARM_TIME_HOUR   , calendar.get(Calendar.HOUR_OF_DAY)));
-        alarmConfigurations.get(ID).setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, calendar.get(Calendar.MINUTE)));
-        alarmConfigurations.get(ID).setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE));    // hour, minute, snooze
-
-        if(AlarmViewAdapter != null)
-            AlarmViewAdapter.notifyDataSetChanged(alarmConfigurations);
-    }
-
     private AlarmConfiguration getConfig(int ID){
         return alarmConfigurations.get(ID);
     }
@@ -617,7 +563,6 @@ public class MainActivity extends AppCompatActivity
         //save Settings and reactivate Alarm
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(getConfig(actualAlarm).isAlarmSet());
-        AlarmGroupView.invalidateViews();
     }
 
     /***********************************************************************************************
@@ -738,17 +683,22 @@ public class MainActivity extends AppCompatActivity
     }
     private void onMusicSet(int modeID){
 
-        if(modeID == 0)
-            searchMusic(modeID);
-        else
+        if(modeID != 0)
         {
-            //Check if SD Card is Present
-            boolean isSDPresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
-            if(isSDPresent )
-                checkMusicPermission();
-            else
+            //Check if External Media is Present, send Toast if not and return
+            if(!android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
+            {
                 Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            //Return if we wait for Handler
+            if(!checkMusicPermission())
+                return;
         }
+
+        //Ready for instant Search and Play
+        searchMusic(modeID);
     }
     private void chooseAlarmSongDialog(final ArrayList<SongInformation> songs){
 
@@ -907,7 +857,7 @@ public class MainActivity extends AppCompatActivity
         else
             Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
     }
-    private void checkMusicPermission(){
+    private boolean checkMusicPermission(){
 
         if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
@@ -917,7 +867,12 @@ public class MainActivity extends AppCompatActivity
             }
             else
                 ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
+
+            //We must wait for granting
+            return false;
         }
+        //Granted
+        return true;
     }
 
     /***********************************************************************************************
