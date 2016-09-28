@@ -224,43 +224,41 @@ public class MainActivity extends AppCompatActivity
         int amount = getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0);
         if( amount > 0)
         {
+            --amount;
             for (int id = ID; id < amount; ++id)
             {
-                if(id < amount -1)
-                {
-                    SharedPreferences.Editor editorNew = getPreferenceSettingsEditor(id);
-                    SharedPreferences settingsOld      = getPreferenceSettings(id + 1);
-                    Map<String, ?> settingOld = settingsOld.getAll();
+                SharedPreferences.Editor editorNew = getPreferenceSettingsEditor(id++);
+                SharedPreferences settingsOld      = getPreferenceSettings(id);
+                Map<String, ?> settingOld = settingsOld.getAll();
 
-                    for (Map.Entry<String, ?> value : settingOld.entrySet())
-                    {
-                        if (value.getValue().getClass().equals(Boolean.class))
-                            editorNew.putBoolean(value.getKey(), (Boolean) value.getValue());
-                        else if (value.getValue().getClass().equals(Float.class))
-                            editorNew.putFloat(value.getKey(), (Float) value.getValue());
-                        else if (value.getValue().getClass().equals(Integer.class))
-                            editorNew.putInt(value.getKey(), (Integer) value.getValue());
-                        else if (value.getValue().getClass().equals(Long.class))
-                            editorNew.putLong(value.getKey(), (Long) value.getValue());
-                        else if (value.getValue().getClass().equals(String.class))
-                            editorNew.putString(value.getKey(), (String) value.getValue());
-                    }
-                    editorNew.apply();
+                for (Map.Entry<String, ?> value : settingOld.entrySet())
+                {
+                    if (value.getValue().getClass().equals(Boolean.class))
+                        editorNew.putBoolean(value.getKey(), (Boolean) value.getValue());
+                    else if (value.getValue().getClass().equals(Float.class))
+                        editorNew.putFloat(value.getKey(), (Float) value.getValue());
+                    else if (value.getValue().getClass().equals(Integer.class))
+                        editorNew.putInt(value.getKey(), (Integer) value.getValue());
+                    else if (value.getValue().getClass().equals(Long.class))
+                        editorNew.putLong(value.getKey(), (Long) value.getValue());
+                    else if (value.getValue().getClass().equals(String.class))
+                        editorNew.putString(value.getKey(), (String) value.getValue());
                 }
+                editorNew.apply();
             }
 
             //Clear Old Entry
-            SharedPreferences.Editor editor = getPreferenceSettingsEditor( --amount);
+            SharedPreferences.Editor editor = getPreferenceSettingsEditor(amount);
             editor.clear();
             editor.apply();
 
             //Set new Amount Information
             editor = getPreferenceInfoEditor();
-            editor.putInt(AlarmConstants.ALARM_VALUE,  amount);
+            editor.putInt(AlarmConstants.ALARM_VALUE, amount);
             editor.apply();
 
             //prepare new List Data
-            alarmConfigurations.remove(ID);
+            alarmConfigurations.remove(amount);
             prepareConfiguration();
         }
     }
