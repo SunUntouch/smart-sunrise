@@ -9,7 +9,7 @@ import java.util.Vector;
 /**
  * Created by Sunny on 18.09.2016.
  */
-public class AlarmConfiguration {
+class AlarmConfiguration {
 
     //Actual Alarm Values
     private int actualAlarm    =-1;
@@ -51,9 +51,9 @@ public class AlarmConfiguration {
     private int actualLightLED         = AlarmConstants.ACTUAL_LED;
     private int actualLightLEDStartTime= AlarmConstants.ACTUAL_LED_START;
 
-    public AlarmConfiguration(){
+    AlarmConfiguration(){
     }
-    public AlarmConfiguration(Context context, int ID){
+    AlarmConfiguration(Context context, int ID){
 
         //save Settings
         SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(context, AlarmConstants.WAKEUP_TIMER, ID);
@@ -100,7 +100,7 @@ public class AlarmConfiguration {
         this.setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES, calendar.get(Calendar.MINUTE)));
         this.setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE));    // hour, minute, snooze
     }
-    public AlarmConfiguration(SharedPreferences settings, int ID){
+    AlarmConfiguration(SharedPreferences settings, int ID){
 
         //ID, name, AlarmSet
         this.setAlarmID(ID);
@@ -145,7 +145,7 @@ public class AlarmConfiguration {
         this.setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE , AlarmConstants.ACTUAL_TIME_SNOOZE));    // hour, minute, snooze
     }
     //Enums
-    public enum childItem{
+    enum childItem{
         WAKEUP_DELETE,
         WAKEUP_TIME,
         WAKEUP_DAYS,
@@ -155,37 +155,48 @@ public class AlarmConfiguration {
 
     private final int childItems = childItem.values().length;
 
-    public int getChildItemSize(){
+    int getChildItemSize(){
         return childItems;
     }
+
+    enum alarmTask{
+        ACTIVITY_VIBRATE,
+        ACTIVITY_COLORFADE,
+        ACTIVITY_LED
+    }
+    private final int alarmTasks = alarmTask.values().length;
+    int getAlarmTaskSize(){
+        return alarmTasks;
+    }
+
     //Name
     private String actualAlarmname = AlarmConstants.ALARM;
 
-    public String getAlarmName(){
+    String getAlarmName(){
         return actualAlarmname;
     }
-    public void setAlarmName(String name){
+    void setAlarmName(String name){
         actualAlarmname = name;
     }
 
     //Actual Alarm Values
-    public int getAlarmID(){
+    int getAlarmID(){
         return actualAlarm;
     }
-    public void setAlarmID(int id){
+    void setAlarmID(int id){
         actualAlarm = id;
     }
 
     //Actual Alarm Set
-    public boolean isAlarmSet(){
+    boolean isAlarmSet(){
         return alarmSet;
     }
-    public void setAlarm(boolean alarm){
+    void setAlarm(boolean alarm){
         alarmSet = alarm;
     }
 
     //Time
-    public Vector<Integer> getTime(){
+    Vector<Integer> getTime(){
         Vector<Integer> time = new Vector<>(3);
         time.addElement(getHour());
         time.addElement(getMinute());
@@ -193,57 +204,57 @@ public class AlarmConfiguration {
 
         return time;
     }
-    public int getHour(){
+    int getHour(){
         return actualHour;
     }
-    public int getMinute(){
+    int getMinute(){
         return actualMin;
     }
-    public int getSnooze(){
+    int getSnooze(){
         return actualSnooze;
     }
 
-    public void setTime(int hour, int minute, int snooze){
+    void setTime(int hour, int minute, int snooze){
         setHour(hour);
         setMinute(minute);
         setSnooze(snooze);
     }
-    public void setTime(int hour, int minute){
+    void setTime(int hour, int minute){
         setHour(hour);
         setMinute(minute);
     }
-    public void setHour(int hour){
+    void setHour(int hour){
         actualHour   = hour;
     }
-    public void setMinute(int minute){
+    void setMinute(int minute){
         actualMin    = minute;
     }
-    public void setSnooze(int snooze){
+    void setSnooze(int snooze){
         actualSnooze = snooze;
     }
 
     //Days
-    public boolean isDaySet(){
-        return (isMonday(true)|| isTuesday(true) || isWednesday(true) || isThursday(true) || isFriday(true) || isSaturday(true) || isSunday(true));
+    boolean isDaySet(){
+        return (Monday()|| Tuesday() || Wednesday() || Thursday() || Friday() || Saturday() || Sunday());
     }
-    public boolean isDaySet(int day){
+    boolean isDaySet(int day){
 
         switch(day)
         {
-            case 0: return isMonday(true);
-            case 1: return isTuesday(true);
-            case 2: return isWednesday(true);
-            case 3: return isThursday(true);
-            case 4: return isFriday(true);
-            case 5: return isSaturday(true);
-            case 6: return isSunday(true);
+            case 0: return Monday();
+            case 1: return Tuesday();
+            case 2: return Wednesday();
+            case 3: return Thursday();
+            case 4: return Friday();
+            case 5: return Saturday();
+            case 6: return Sunday();
             default: return false;
         }
     }
-    public int getDaySet(){
+    int getDaySet(){
         return isMonday() + isTuesday() + isWednesday() + isThursday() + isFriday() + isSaturday() + isSunday();
     }
-    public int getTimeToNextDay(int currentDay){
+    int getTimeToNextDay(int currentDay){
 
         if(!isDaySet())
             return 0;
@@ -260,7 +271,7 @@ public class AlarmConfiguration {
         }
         return nextDay;
     }
-    public Vector<Integer> getDays(){
+    Vector<Integer> getDays(){
 
         Vector<Integer> days = new Vector<>(7);
         days.addElement(isMonday());
@@ -272,50 +283,50 @@ public class AlarmConfiguration {
         days.addElement(isSunday());
         return days;
     }
-    public int isMonday(){
+    int isMonday(){
         return isMonday;
     }
-    public int isTuesday(){
+    int isTuesday(){
         return isTuesday;
     }
-    public int isWednesday(){
+    int isWednesday(){
         return isWednesday;
     }
-    public int isThursday(){
+    int isThursday(){
         return isThursday;
     }
-    public int isFriday(){
+    int isFriday(){
         return isFriday;
     }
-    public int isSaturday(){
+    int isSaturday(){
         return isSaturday;
     }
-    public int isSunday(){
+    int isSunday(){
         return isSunday;
     }
 
-    public boolean isMonday(boolean set){
+    boolean Monday(){
         return isMonday == 1;
     }
-    public boolean isTuesday(boolean set){
+    boolean Tuesday(){
         return isTuesday == 1;
     }
-    public boolean isWednesday(boolean set){
+    boolean Wednesday(){
         return isWednesday == 1;
     }
-    public boolean isThursday(boolean set){
+    boolean Thursday(){
         return isThursday == 1;
     }
-    public boolean isFriday(boolean set){
+    boolean Friday(){
         return isFriday == 1;
     }
-    public boolean isSaturday(boolean set){
+    boolean Saturday(){
         return isSaturday == 1;
     }
-    public boolean isSunday(boolean set){ return isSunday == 1;
+    boolean Sunday(){ return isSunday == 1;
     }
 
-    public void setDays(int monday, int tuesday, int wednesday, int thursday, int friday, int saturday, int sunday){
+    void setDays(int monday, int tuesday, int wednesday, int thursday, int friday, int saturday, int sunday){
         setMonday(monday);
         setTuesday(tuesday);
         setWednesday(wednesday);
@@ -324,227 +335,227 @@ public class AlarmConfiguration {
         setSaturday(saturday);
         setSunday(sunday);
     }
-    public void setMonday(int monday){
+    void setMonday(int monday){
         isMonday = monday;
     }
-    public void setTuesday(int tuesday){
+    void setTuesday(int tuesday){
         isTuesday = tuesday;
     }
-    public void setWednesday(int wednesday){
+    void setWednesday(int wednesday){
         isWednesday = wednesday;
     }
-    public void setThursday(int thursday){
+    void setThursday(int thursday){
         isThursday = thursday;
     }
-    public void setFriday(int friday){
+    void setFriday(int friday){
         isFriday = friday;
     }
-    public void setSaturday(int saturday){
+    void setSaturday(int saturday){
         isSaturday = saturday;
     }
-    public void setSunday(int sunday){
+    void setSunday(int sunday){
         isSunday = sunday;
     }
 
     //Music
-    public String getSongName(){
+    String getSongName(){
         return actualSongURI.substring(actualSongURI.lastIndexOf('/') + 1);
     }
-    public String getSongURI(){
+    String getSongURI(){
         return actualSongURI;
     }
-    public void setSongURI(String uri){
+    void setSongURI(String uri){
         actualSongURI = uri;
     }
 
 
-    public Vector<Integer> getSongTimes(){
+    Vector<Integer> getSongTimes(){
         Vector<Integer> time = new Vector<>(2);
         time.addElement(getSongLength());
         time.addElement(getSongStart());
         return time;
     }
-    public void setSongTimes(int length, int start){
+    void setSongTimes(int length, int start){
         setSongLength(length);
         setSongStart(start);
     }
 
-    public int getSongStart(){
+    int getSongStart(){
         return actualSongStart;
     }
-    public void setSongStart(int start){
+    void setSongStart(int start){
         actualSongStart = start;
     }
 
-    public int getSongLength(){
+    int getSongLength(){
         return actualSongLength;
     }
-    public void setSongLength(int length){
+    void setSongLength(int length){
         actualSongLength = length;
     }
 
-    public int getVolume(){
+    int getVolume(){
         return actualVolume;
     }
-    public void setVolume(int volume){
+    void setVolume(int volume){
         actualVolume = volume;
     }
 
-    public Vector<Integer> getFadeValues(){
+    Vector<Integer> getFadeValues(){
         Vector<Integer> fadeIn = new Vector<>(2);
         fadeIn.addElement(getFadeIn());
         fadeIn.addElement(getFadeInTime());
         return fadeIn;
     }
-    public void setFadeValues(int fadein, int time){
+    void setFadeValues(int fadein, int time){
         setFadeIn(fadein);
         setFadeInTime(time);
     }
 
-    public boolean useFadeIn(){
+    boolean useFadeIn(){
         return actualFadeIn == 1;
     }
-    public int getFadeIn(){
+    int getFadeIn(){
         return actualFadeIn;
     }
-    public void setFadeIn(int fadein){
+    void setFadeIn(int fadein){
         actualFadeIn = fadein;
     }
 
-    public int getFadeInTime(){
+    int getFadeInTime(){
         return actualFadeInTime;
     }
-    public void setFadeInTime(int time){
+    void setFadeInTime(int time){
         actualFadeInTime = time;
     }
 
-    public Vector<Integer> getVibrationValues(){
+    Vector<Integer> getVibrationValues(){
         Vector<Integer> vibration = new Vector<>(2);
         vibration.addElement(getVibration());
         vibration.addElement(getVibrationStrength());
         return vibration;
     }
-    public void setVibrationValues(int vibration, int strength){
+    void setVibrationValues(int vibration, int strength){
         setVibration(vibration);
         setVibrationStrength(strength);
     }
 
-    public boolean useVibration(){
+    boolean useVibration(){
         return actualVibra == 1;
     }
-    public int getVibration(){
+    int getVibration(){
         return actualVibra;
     }
-    public void setVibration(int vibration){
+    void setVibration(int vibration){
         actualVibra = vibration;
     }
 
-    public int getVibrationStrength(){
+    int getVibrationStrength(){
         return actualVibraStr;
     }
-    public void setVibrationStrength(int strength){
+    void setVibrationStrength(int strength){
         actualVibraStr = strength;
     }
 
     //Screen
-    public Vector<Integer> getScreenValues(){
+    Vector<Integer> getScreenValues(){
         Vector<Integer> screen = new Vector<>(3);
         screen.addElement(getScreen());
         screen.addElement(getScreenBrightness());
         screen.addElement(getScreenStartTime());
         return screen;
     }
-    public void setScreenValues(int screen, int brightness, int start){
+    void setScreenValues(int screen, int brightness, int start){
         setScreen(screen);
         setScreenBrightness(brightness);
         setScreenStartTime(start);
     }
 
-    public int getScreen(){
+    int getScreen(){
         return actualScreen;
     }
-    public boolean useScreen(){
+    boolean useScreen(){
         return actualScreen == 1;
     }
-    public void setScreen(int screen){
+    void setScreen(int screen){
         actualScreen = screen;
     }
 
-    public int getScreenBrightness(){
+    int getScreenBrightness(){
         return actualScreenBrightness;
     }
-    public void setScreenBrightness(int brightness){
+    void setScreenBrightness(int brightness){
         actualScreenBrightness = brightness;
     }
 
-    public int getScreenStartTime(){
+    int getScreenStartTime(){
         return actualScreenStartTime;
     }
-    public void setScreenStartTime(int time){
+    void setScreenStartTime(int time){
         actualScreenStartTime = time;
     }
 
     //Light
-    public Vector<Integer> getLightValues(){
+    Vector<Integer> getLightValues(){
         Vector<Integer> light = new Vector<>(3);
         light.addElement(getLightFade());
         light.addElement(getLightColor1());
         light.addElement(getLightColor2());
         return light;
     }
-    public void setLightValues(int fade, int color1, int color2){
+    void setLightValues(int fade, int color1, int color2){
         setLightFade(fade);
         setLightColor1(color1);
         setLightColor2(color2);
     }
 
-    public int getLightColor1(){
+    int getLightColor1(){
         return actualLightColor1;
     }
-    public void setLightColor1(int color){
+    void setLightColor1(int color){
         actualLightColor1 = color;
     }
 
-    public int getLightColor2(){
+    int getLightColor2(){
         return actualLightColor2;
     }
-    public void setLightColor2(int color){
+    void setLightColor2(int color){
         actualLightColor2 = color;
     }
 
-    public int getLightFade(){
+    int getLightFade(){
         return actualLightFade;
     }
-    public void setLightFade(int fade){
+    void setLightFade(int fade){
         actualLightFade = fade;
     }
 
     //LED
-    public Vector<Integer> getLEDValues(){
+    Vector<Integer> getLEDValues(){
         Vector<Integer> led = new Vector<>(2);
         led.addElement(getLED());
         led.addElement(getLEDStartTime());
         return led;
     }
-    public void setLEDValues(int led, int time){
+    void setLEDValues(int led, int time){
         setLED(led);
         setLEDStartTime(time);
     }
 
-    public boolean useLED(){
+    boolean useLED(){
         return actualLightLED == 1;
     }
-    public int getLED(){
+    int getLED(){
         return actualLightLED;
     }
-    public void setLED(int led){
+    void setLED(int led){
         actualLightLED = led;
     }
 
-    public int getLEDStartTime(){
+    int getLEDStartTime(){
         return actualLightLEDStartTime;
     }
-    public void setLEDStartTime(int time){
+    void setLEDStartTime(int time){
         actualLightLEDStartTime = time;
     }
 }

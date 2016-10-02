@@ -72,13 +72,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         ToggleButton setSaturday  = (ToggleButton) view.findViewById(R.id.wakeup_saturday);
         ToggleButton setSunday    = (ToggleButton) view.findViewById(R.id.wakeup_sunday);
 
-        setMonday   .setChecked(config.isMonday(true));
-        setTuesday  .setChecked(config.isTuesday(true));
-        setWednesday.setChecked(config.isWednesday(true));
-        setThursday .setChecked(config.isThursday(true));
-        setFriday   .setChecked(config.isFriday(true));
-        setSaturday .setChecked(config.isSaturday(true));
-        setSunday   .setChecked(config.isSunday(true));
+        setMonday   .setChecked(config.Monday());
+        setTuesday  .setChecked(config.Tuesday());
+        setWednesday.setChecked(config.Wednesday());
+        setThursday .setChecked(config.Thursday());
+        setFriday   .setChecked(config.Friday());
+        setSaturday .setChecked(config.Saturday());
+        setSunday   .setChecked(config.Sunday());
 
         return view;
     }
@@ -269,13 +269,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         //Day Text
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
         txtListDays.setText(String.format("%s %s %s %s %s %s %s",
-                                (config.isMonday(true))    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
-                                (config.isTuesday(true))   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
-                                (config.isWednesday(true)) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
-                                (config.isThursday(true))  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
-                                (config.isFriday(true))    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
-                                (config.isSaturday(true))  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
-                                (config.isSunday(true))    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
+                                (config.Monday())    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
+                                (config.Tuesday())   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
+                                (config.Wednesday()) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
+                                (config.Thursday())  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
+                                (config.Friday())    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
+                                (config.Saturday())  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
+                                (config.Sunday())    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
         return convertView;
     }
 
