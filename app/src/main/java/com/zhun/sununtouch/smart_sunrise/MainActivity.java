@@ -42,7 +42,10 @@ import android.widget.ToggleButton;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -719,7 +722,8 @@ public class MainActivity extends AppCompatActivity
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_artist));
 
         //Get SongNames from SongInformationArray
-        final String[] artists = songs.getArtistStrings();
+        final ArrayList<String> artists = new ArrayList<>(Arrays.asList(songs.getArtistStrings()));
+        Collections.sort(artists);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, artists);
 
@@ -728,7 +732,7 @@ public class MainActivity extends AppCompatActivity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                chooseAlarmAlbumDialog(artists[position], songs);
+                chooseAlarmAlbumDialog(artists.get(position), songs);
             }
         });
 
@@ -743,16 +747,17 @@ public class MainActivity extends AppCompatActivity
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_album));
 
         //Get SongNames from SongInformationArray
-        final String[] albums = songs.getAlbumStrings(artist);
+        final ArrayList<String> album = new ArrayList<>(Arrays.asList(songs.getAlbumStrings(artist)));
+        Collections.sort(album);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, albums);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, album);
 
         ListView listView = new ListView(this);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                chooseAlarmSongDialog(songs.getSongs(artist, albums[position]));
+                chooseAlarmSongDialog(songs.getSongs(artist, album.get(position)));
             }
         });
 
@@ -760,23 +765,31 @@ public class MainActivity extends AppCompatActivity
         builder.setView(listView);
         mDialogs.addElement(builder.show());
     }
-    private void chooseAlarmSongDialog(final SongInformation[] songs){
+    private void chooseAlarmSongDialog(SongInformation[] songs){
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song)); //TODO
 
-        ArrayList<String> songNames = new ArrayList<>();
-        for(SongInformation song : songs)
-            songNames.add(song.getTitle());
+        final ArrayList<SongInformation> sortedSongs = new ArrayList<>(Arrays.asList(songs));
+        Collections.sort(sortedSongs, new Comparator<SongInformation>() {
+            @Override
+            public int compare(SongInformation lhs, SongInformation rhs) {
+                return (int) (lhs.getID() - rhs.getID());
+            }
+        });
+
+        ArrayList<String> namedSongs = new ArrayList<>();
+        for(SongInformation song : sortedSongs)
+            namedSongs.add(song.getTitle());
 
         //Get Song Name Array and set it for Alarm Dialog Builder
-        builder.setItems(songNames.toArray(new String[songNames.size()]), new DialogInterface.OnClickListener() {
+        builder.setItems(namedSongs.toArray(new String[namedSongs.size()]), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
                 //Get Song Lengh
-                saveSongLength(songs[which].getPath());
+                saveSongLength(sortedSongs.get(which).getPath());
 
                 //save Settings reactivate Alarm
                 saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
@@ -784,9 +797,7 @@ public class MainActivity extends AppCompatActivity
 
                 dialog.dismiss();
                 for(AlertDialog dia : mDialogs)
-                {
                     dia.dismiss();
-                }
             }
         });
 
@@ -803,7 +814,7 @@ public class MainActivity extends AppCompatActivity
                         stopMusic(false);
                         try
                         {
-                            prepareMusic(Uri.parse(songs[position].getPath()));
+                            prepareMusic(Uri.parse(sortedSongs.get(position).getPath()));
                         } catch (IOException e) {
                             Log.e("Exception: ", e.getMessage());
                         }
