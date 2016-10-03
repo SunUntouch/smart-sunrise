@@ -43,33 +43,10 @@ public class AlarmActivity extends AppCompatActivity {
     private AlarmWorkerThread alarmThread;
 
     private boolean snoozed = false;
-    @Override
-    protected void onDestroy() {
-        alarmThread.quit();
-        super.onDestroy();
-    }
 
-    @Override
-    protected void onStop() {
-
-        if(!snoozed){
-            AlarmManage newAlarm = new AlarmManage(this, getConfig());
-            newAlarm.cancelAlarm(actualAlarm);
-        }
-
-        alarmHandler.removeCallbacksAndMessages(null);
-
-        if(mUseThread)
-            alarmThread.removeCallBacks(null);
-
-        stopLED();
-        setVibrationStop();
-        stopMusic();
-
-        super.onStop();
-    }
-
-    @Override
+    /***********************************************************************************************
+     * ONCREATE AND HELPER
+     **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -101,37 +78,26 @@ public class AlarmActivity extends AppCompatActivity {
             doLED(minutesMax - minuteLED);
         }
     }
+    protected void onStop() {
 
-    private String getDayName(Calendar _calendar){
-        String dayName = "";
-        switch(_calendar.get(Calendar.DAY_OF_WEEK)){
-            case Calendar.MONDAY:
-                dayName = this.getString(R.string.wakeup_day_monday);
-                break;
-            case Calendar.TUESDAY:
-                dayName = this.getString(R.string.wakeup_day_tuesday);
-                break;
-            case Calendar.WEDNESDAY:
-                dayName = this.getString(R.string.wakeup_day_wednesday);
-                break;
-            case Calendar.THURSDAY:
-                dayName = this.getString(R.string.wakeup_day_thursday);
-                break;
-            case Calendar.FRIDAY:
-                dayName = this.getString(R.string.wakeup_day_friday);
-                break;
-            case Calendar.SATURDAY:
-                dayName = this.getString(R.string.wakeup_day_saturday);
-                break;
-            case Calendar.SUNDAY:
-                dayName = this.getString(R.string.wakeup_day_sunday);
-                break;
+        if(!snoozed){
+            AlarmManage newAlarm = new AlarmManage(this, getConfig());
+            newAlarm.cancelAlarm(actualAlarm);
         }
-        return dayName;
-    }
 
-    private AlarmConfiguration getConfig(){
-        return config;
+        alarmHandler.removeCallbacksAndMessages(null);
+
+        if(mUseThread)
+            alarmThread.removeCallBacks(null);
+
+        stopLED();
+        setVibrationStop();
+        stopMusic();
+        super.onStop();
+    }
+    protected void onDestroy() {
+        alarmThread.quit();
+        super.onDestroy();
     }
 
     private void setRunnable(Runnable runnable, long millis){
@@ -161,6 +127,23 @@ public class AlarmActivity extends AppCompatActivity {
             thread.postTask(runnable);
         else
             thread.postDelayedTask(runnable, millis);
+    }
+
+    private AlarmConfiguration getConfig(){
+        return config;
+    }
+    /***********************************************************************************************
+     * WAKEUP AND SNOOZE BUTTON
+     **********************************************************************************************/
+    public void onWakeUpClick(View v){
+        this.finish();
+    }
+    public void onSnoozeClick(View v){
+
+        AlarmManage newAlarm = new AlarmManage(this, config);
+        snoozed = true;
+        newAlarm.snoozeAlarm(actualAlarm);
+        this.finish();
     }
     /***********************************************************************************************
      * CONSTRUCT VIEWS
@@ -206,7 +189,33 @@ public class AlarmActivity extends AppCompatActivity {
         };
         setRunnable(timeRunnable, 100);//1 second check for new Time
     }
-
+    private String getDayName(Calendar _calendar){
+        String dayName = "";
+        switch(_calendar.get(Calendar.DAY_OF_WEEK)){
+            case Calendar.MONDAY:
+                dayName = this.getString(R.string.wakeup_day_monday);
+                break;
+            case Calendar.TUESDAY:
+                dayName = this.getString(R.string.wakeup_day_tuesday);
+                break;
+            case Calendar.WEDNESDAY:
+                dayName = this.getString(R.string.wakeup_day_wednesday);
+                break;
+            case Calendar.THURSDAY:
+                dayName = this.getString(R.string.wakeup_day_thursday);
+                break;
+            case Calendar.FRIDAY:
+                dayName = this.getString(R.string.wakeup_day_friday);
+                break;
+            case Calendar.SATURDAY:
+                dayName = this.getString(R.string.wakeup_day_saturday);
+                break;
+            case Calendar.SUNDAY:
+                dayName = this.getString(R.string.wakeup_day_sunday);
+                break;
+        }
+        return dayName;
+    }
     /***********************************************************************************************
      * COLOR FADING
      **********************************************************************************************/
@@ -306,7 +315,6 @@ public class AlarmActivity extends AppCompatActivity {
             getWindow().setAttributes(layoutNew);
         }
     }
-
     /***********************************************************************************************
      * MUSIC
      **********************************************************************************************/
@@ -380,7 +388,6 @@ public class AlarmActivity extends AppCompatActivity {
         mediaPlayer.setLooping(true);
         mediaPlayer.prepare();
     }
-
     private void stopMusic(){
 
         //Stop and Release Music
@@ -389,11 +396,11 @@ public class AlarmActivity extends AppCompatActivity {
             if(mediaPlayer.isPlaying())
                 mediaPlayer.stop();
 
+            mediaPlayer.reset();
             mediaPlayer.release();
             mediaPlayer = null;
         }
     }
-
     /***********************************************************************************************
      * VIBRATION
      **********************************************************************************************/
@@ -448,7 +455,6 @@ public class AlarmActivity extends AppCompatActivity {
             m_Vibrator = null;
         }
     }
-
     /***********************************************************************************************
      * LED
      **********************************************************************************************/
@@ -508,20 +514,5 @@ public class AlarmActivity extends AppCompatActivity {
             m_Cam.release();
             m_Cam = null;
         }
-    }
-
-    /***********************************************************************************************
-     * WAKEUP AND SNOOZE BUTTON
-     **********************************************************************************************/
-    public void onWakeUpClick(View v){
-        this.finish();
-    }
-
-    public void onSnoozeClick(View v){
-
-        AlarmManage newAlarm = new AlarmManage(this, config);
-        snoozed = true;
-        newAlarm.snoozeAlarm(actualAlarm);
-        this.finish();
     }
 }

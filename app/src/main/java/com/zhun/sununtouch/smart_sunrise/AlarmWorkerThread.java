@@ -12,8 +12,6 @@ import android.support.annotation.Nullable;
 class AlarmWorkerThread extends HandlerThread{
 
     private android.os.Handler mHandler;
-
-
     AlarmWorkerThread(String name) {
         super(name);
     }
@@ -21,7 +19,6 @@ class AlarmWorkerThread extends HandlerThread{
     void postTask(Runnable task){
         mHandler.post(task);
     }
-
     void postDelayedTask(Runnable task, long millis){
         mHandler.postDelayed(task, millis);
     }
@@ -29,7 +26,6 @@ class AlarmWorkerThread extends HandlerThread{
     void prepareHandler(){
         mHandler = new Handler(getLooper());
     }
-
     void removeCallBacks(@Nullable Object token){
         mHandler.removeCallbacksAndMessages(token);
     }

@@ -9,7 +9,6 @@ class SongInformation {
     private String artist;
     private String album;
     private String path;
-    //private int year;
 
     SongInformation(long songID, String songTitle, String songArtist, String songAlbum, String songPath){
 
@@ -23,19 +22,15 @@ class SongInformation {
     long getID(){
         return this.id;
     }
-
     String getTitle(){
         return this.title;
     }
-
     String getArtist(){
         return this.artist;
     }
-
     String getAlbum(){
         return this.album;
     }
-
     String getPath(){
         return this.path;
     }

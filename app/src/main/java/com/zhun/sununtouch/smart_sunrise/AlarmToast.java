@@ -8,34 +8,33 @@ import android.widget.Toast;
  */
 class AlarmToast {
 
-    static void showToastShort(Context _context, String _toastShortText){
-        Toast.makeText(_context, _toastShortText, Toast.LENGTH_SHORT).show();
-    }
+    static void showToast(Context context, boolean longToast, String toastShortText, String toastLongText){
 
-    static void showToastLong(Context _context, String _toastLongText){
-        Toast.makeText(_context, _toastLongText, Toast.LENGTH_LONG).show();
-    }
-
-    static void showToast(Context _context, boolean _longToast, String _toastShortText, String _toastLongText){
-
-        if(!_longToast)
-            Toast.makeText(_context, _toastLongText, Toast.LENGTH_LONG).show();
+        if(longToast)
+            showToastLong(context, toastLongText);
         else
-            Toast.makeText(_context, _toastShortText, Toast.LENGTH_SHORT).show();
-    }
-    static void showToastShort(Context _context, boolean _shortToast, String _toastTextPositive, String _toastTextNegative){
-
-        if(_shortToast)
-            Toast.makeText(_context, _toastTextPositive, Toast.LENGTH_SHORT).show();
-        else
-            Toast.makeText(_context, _toastTextNegative, Toast.LENGTH_SHORT).show();
+            showToastShort(context, toastShortText);
     }
 
-    static void showToastLong(Context _context, boolean _longToast, String _toastTextPositive, String _toastTextNegative){
+    static void showToastShort(Context context, String toastShortText){
+        Toast.makeText(context, toastShortText, Toast.LENGTH_SHORT).show();
+    }
+    static void showToastShort(Context context, boolean shortToast, String toastTextPositive, String toastTextNegative){
 
-        if(_longToast)
-            Toast.makeText(_context, _toastTextPositive, Toast.LENGTH_LONG).show();
+        if(shortToast)
+            showToastShort(context, toastTextPositive);
         else
-            Toast.makeText(_context, _toastTextNegative, Toast.LENGTH_LONG).show();
+            showToastShort(context, toastTextNegative);
+    }
+
+    static void showToastLong(Context context, String toastLongText){
+        Toast.makeText(context, toastLongText, Toast.LENGTH_LONG).show();
+    }
+    static void showToastLong(Context context, boolean longToast, String toastTextPositive, String toastTextNegative){
+
+        if(longToast)
+            showToastLong(context, toastTextPositive);
+        else
+            showToastLong(context, toastTextNegative);
     }
 }

@@ -28,20 +28,8 @@ public class AlarmManage extends AppCompatActivity {
         if(alarmManager == null)
             alarmManager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
     }
-
-    private PendingIntent getPendingIntent(int alarmId){
-        //Create new PendingIntent
-        return PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    private PendingIntent getSnoozePendingIntent(int alarmId){
-        //Create new PendingIntent
-        return PendingIntent.getBroadcast(context, alarmId, getSnoozeIntent(alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-    public boolean checkForPendingIntent(int alarmId){
-        //Check if Intent exists
-        return (PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_NO_CREATE) != null);
+    private AlarmConfiguration getConfig(){
+        return config;
     }
 
     private Intent getIntent(int ID){
@@ -51,13 +39,25 @@ public class AlarmManage extends AppCompatActivity {
         bundle.putInt(AlarmConstants.ALARM_ID, ID);
         return new Intent(context, AlarmReceiver.class).putExtras(bundle);
     }
-
     private Intent getSnoozeIntent(int ID){
 
         //Fill Intent
         Bundle bundle = new Bundle();
         bundle.putInt(AlarmConstants.ALARM_ID, ID);
         return new Intent(context, AlarmReceiver.class).putExtras(bundle);
+    }
+
+    private PendingIntent getPendingIntent(int alarmId){
+        //Create new PendingIntent
+        return PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+    private PendingIntent getSnoozePendingIntent(int alarmId){
+        //Create new PendingIntent
+        return PendingIntent.getBroadcast(context, alarmId, getSnoozeIntent(alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+    public boolean checkForPendingIntent(int alarmId){
+        //Check if Intent exists
+        return (PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_NO_CREATE) != null);
     }
 
     public void setNewAlarm(int ID, boolean snooze){
@@ -99,13 +99,11 @@ public class AlarmManage extends AppCompatActivity {
         else
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
     }
-
     public void snoozeAlarm(int ID){
         if(ID > -1)
             setNewAlarm(ID, true);
     }
-
-    public  void cancelAlarm(int ID){
+    public void cancelAlarm(int ID){
 
         createAlarmManager();
 
@@ -132,9 +130,8 @@ public class AlarmManage extends AppCompatActivity {
     private boolean isAlarmRepeat(){
         return getConfig().isDaySet();
     }
-
-    private AlarmConfiguration getConfig(){
-        return config;
+    public long getTimeAlarmStarts(int hours, int minutes){
+        return TimeUnit.HOURS.toMinutes(hours) + minutes ;
     }
     private int getDaysToNextAlarm(){
 
@@ -152,11 +149,6 @@ public class AlarmManage extends AppCompatActivity {
             default: return 0;
         }
     }
-
-    public long getTimeAlarmStarts(int hours, int minutes){
-        return TimeUnit.HOURS.toMinutes(hours) + minutes ;
-    }
-
     public int getTimeBeforeMusic(){
         //Screen
         int minuteScreen = getConfig().useScreen() ? getConfig().getScreenStartTime() : 0;

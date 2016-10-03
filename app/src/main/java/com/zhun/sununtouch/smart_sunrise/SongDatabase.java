@@ -24,7 +24,6 @@ class SongDatabase {
 
         addSong(song);
     }
-
     void addSong(SongInformation song){
         if(mDatabase == null)
             mDatabase = new LinkedHashMap<>();
@@ -63,7 +62,6 @@ class SongDatabase {
         songCount++;
     }
 
-
     String[] getArtistStrings(){
         return mDatabase.keySet().toArray(new String[mDatabase.size()]);
     }
@@ -83,16 +81,18 @@ class SongDatabase {
     int getArtistCount(){
         return artistCount;
     }
+
     int getAlbumCount(){
         return albumCount;
     }
     int getAlbumCount(String artist){
         return (mDatabase.containsKey(artist)) ? mDatabase.get(artist).size() : 0;
     }
-    int songCount(){
+
+    int getSongCount(){
         return songCount;
     }
-    int songCount(String artist){
+    int getSongCount(String artist){
 
         if(!mDatabase.containsKey(artist))
             return 0;
@@ -101,8 +101,6 @@ class SongDatabase {
         Map<String, HashSet<SongInformation>> artistAlbums = mDatabase.get(artist);
         for( Map.Entry<String, HashSet<SongInformation>> album : artistAlbums.entrySet())
             count += album.getValue().size();
-
-
         return count;
     }
     int getSongCount(String artist, String album){

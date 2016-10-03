@@ -19,19 +19,23 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     private Context context;
     private LinkedHashMap<Integer, AlarmConfiguration> configuration;
 
+    /***********************************************************************************************
+     * HELPER
+     **********************************************************************************************/
     ExpandableListAdapter(Context context, LinkedHashMap<Integer, AlarmConfiguration> config){
         this.context       = context;
         this.configuration = config;
     }
-
     void notifyDataSetChanged(LinkedHashMap<Integer, AlarmConfiguration> config) {
         this.configuration = config;
     }
-
     private AlarmConfiguration getConfig(int ID){
         return configuration.get(ID);
     }
 
+    /***********************************************************************************************
+     * VIEWS
+     **********************************************************************************************/
     private View createTimeView(int ID){
 
         AlarmConfiguration config = getConfig(ID);
@@ -201,52 +205,25 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         return view;
     }
 
-    //Childs/////////////////////////////////////////////////////////////////////////////////////////
-    @Override
-    public Object getChild(int groupPosition, int childPosition) {
-        return  AlarmConfiguration.childItem.values()[childPosition];
-    }
-
-    @Override
-    public long getChildId(int groupPosition, int childPosition) {
-        return childPosition;
-    }
-
-    @Override
-    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-
-        switch ((AlarmConfiguration.childItem) getChild(groupPosition, childPosition))
-        {
-            case WAKEUP_TIME  : return createTimeView  (groupPosition);
-            case WAKEUP_DAYS  : return createDayView   (groupPosition);
-            case WAKEUP_MUSIC : return createMusicView (groupPosition);
-            case WAKEUP_LIGHT : return createLightView (groupPosition);
-            case WAKEUP_DELETE: return createDeleteView(groupPosition);
-            default: return null;
-        }
-    }
-
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return true;
-    }
-
-    @Override
-    public int getChildrenCount(int groupPosition) {
-        return this.getConfig(groupPosition).getChildItemSize();
-    }
-
-    //Groups/////////////////////////////////////////////////////////////////////////
-    @Override
-    public Object getGroup(int groupPosition) {
-        return groupPosition;
-    }
-
+    /***********************************************************************************************
+     * GROUPS
+     **********************************************************************************************/
     @Override
     public int getGroupCount() {
         return this.configuration.size();
     }
-
+    @Override
+    public long getGroupId(int groupPosition) {
+        return groupPosition;
+    }
+    @Override
+    public boolean hasStableIds() {
+        return false;
+    }
+    @Override
+    public Object getGroup(int groupPosition) {
+        return groupPosition;
+    }
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
@@ -269,23 +246,45 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         //Day Text
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
         txtListDays.setText(String.format("%s %s %s %s %s %s %s",
-                                (config.Monday())    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
-                                (config.Tuesday())   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
-                                (config.Wednesday()) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
-                                (config.Thursday())  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
-                                (config.Friday())    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
-                                (config.Saturday())  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
-                                (config.Sunday())    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
+                (config.Monday())    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
+                (config.Tuesday())   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
+                (config.Wednesday()) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
+                (config.Thursday())  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
+                (config.Friday())    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
+                (config.Saturday())  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
+                (config.Sunday())    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
         return convertView;
     }
-
+    /***********************************************************************************************
+     * CHILDS
+     **********************************************************************************************/
     @Override
-    public long getGroupId(int groupPosition) {
-        return groupPosition;
+    public int getChildrenCount(int groupPosition) {
+        return this.getConfig(groupPosition).getChildItemSize();
     }
-
     @Override
-    public boolean hasStableIds() {
-        return false;
+    public long getChildId(int groupPosition, int childPosition) {
+        return childPosition;
+    }
+    @Override
+    public boolean isChildSelectable(int groupPosition, int childPosition) {
+        return true;
+    }
+    @Override
+    public Object getChild(int groupPosition, int childPosition) {
+        return  AlarmConfiguration.childItem.values()[childPosition];
+    }
+    @Override
+    public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
+
+        switch ((AlarmConfiguration.childItem) getChild(groupPosition, childPosition))
+        {
+            case WAKEUP_TIME  : return createTimeView  (groupPosition);
+            case WAKEUP_DAYS  : return createDayView   (groupPosition);
+            case WAKEUP_MUSIC : return createMusicView (groupPosition);
+            case WAKEUP_LIGHT : return createLightView (groupPosition);
+            case WAKEUP_DELETE: return createDeleteView(groupPosition);
+            default: return null;
+        }
     }
 }

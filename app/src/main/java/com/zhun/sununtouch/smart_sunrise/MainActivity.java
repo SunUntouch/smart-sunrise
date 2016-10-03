@@ -69,11 +69,11 @@ public class MainActivity extends AppCompatActivity
     //Media Player
     private MediaPlayer mediaPlayer;
 
+    //Thread
     private AlarmWorkerThread mThread;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     /***********************************************************************************************
-     * ONCREATE
+     * ONCREATE AND HELPER
      **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,54 +123,17 @@ public class MainActivity extends AppCompatActivity
 
         searchMusic();
     }
-
-    @Override
     protected void onDestroy() {
 
         mThread.quit();
         super.onDestroy();
     }
+    private void debug_assertion(boolean check){
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        switch (requestCode) {
-            case AlarmConstants.ALARM_PERMISSION_MUSIC:
-            {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    searchMusic(1); //External Mode
-                    // permission was granted, yay! Do the
-                    // contacts-related task you need to do.
-                } else {
-                    Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-            }
-        }
+        if(BuildConfig.DEBUG && check)
+            throw new AssertionError();
     }
 
-    private void setRunnable(Runnable runnable){
-        setRunnable(mThread, runnable, 0);
-    }
-    private void setRunnable(AlarmWorkerThread thread, Runnable runnable, long millis){
-
-        if(!thread.isAlive())
-        {
-            thread.start();
-            thread.prepareHandler();
-        }
-
-        if(millis == 0)
-            thread.postTask(runnable);
-        else
-            thread.postDelayedTask(runnable, millis);
-    }
-
-    /***********************************************************************************************
-     * DATA VALUES
-     **********************************************************************************************/
     private void switchAlarmView(boolean visible, boolean invalidateView){
 
         LinearLayout AlarmNoLayout  = (LinearLayout) findViewById(R.id.wakeup_timer_no_Alarm_set_View);
@@ -189,6 +152,50 @@ public class MainActivity extends AppCompatActivity
             AlarmGroupView.invalidateViews();
     }
 
+    private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int max, int increment, int progress){
+
+        //LinearLayout
+        LinearLayout linearLayout = new LinearLayout(v.getContext());
+        linearLayout.setOrientation(LinearLayout.VERTICAL);
+
+        //TextView to show Value of SeekBar
+        textView.setVisibility(TextView.INVISIBLE);
+        linearLayout.addView(textView);
+
+        //Seek Bar
+        seekBar.setMax(max);
+        seekBar.setKeyProgressIncrement(increment);
+        seekBar.setProgress(progress);
+        linearLayout.addView(seekBar);
+        return linearLayout;
+    }
+    private int getSeekBarPosition(int progress, int right, int left, int width, int offset, int max){
+        //Get Position of Text
+        return (progress * (width - (right + left) * offset)) / max;
+    }
+    private int getSeekBarPosition(int progress, int right, int width, int offset, int max){
+        return getSeekBarPosition(progress, right, 0, width, offset, max);
+    }
+
+    private void setRunnable(Runnable runnable){
+        setRunnable(mThread, runnable, 0);
+    }
+    private void setRunnable(AlarmWorkerThread thread, Runnable runnable, long millis){
+
+        if(!thread.isAlive())
+        {
+            thread.start();
+            thread.prepareHandler();
+        }
+
+        if(millis == 0)
+            thread.postTask(runnable);
+        else
+            thread.postDelayedTask(runnable, millis);
+    }
+    /***********************************************************************************************
+     * DATA VALUES
+     **********************************************************************************************/
     private void prepareConfiguration(){
         prepareConfiguration(getPreferenceInfo().getInt(AlarmConstants.ALARM_VALUE, 0), true);
     }
@@ -433,8 +440,6 @@ public class MainActivity extends AppCompatActivity
         return alarmConfigurations.get(ID);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
     private void saveSettings(int actualAlarm, String alarmName){
         saveSettings(actualAlarm, alarmName, alarmName);
     }
@@ -442,24 +447,6 @@ public class MainActivity extends AppCompatActivity
         //save Settings
         SharedPreferences settings = getPreferenceSettings(ID);
         saveListDataChild(settings.getString(alarmName, alarmIdentifier), ID);
-    }
-
-    private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int max, int increment, int progress){
-
-        //LinearLayout
-        LinearLayout linearLayout = new LinearLayout(v.getContext());
-        linearLayout.setOrientation(LinearLayout.VERTICAL);
-
-        //TextView to show Value of SeekBar
-        textView.setVisibility(TextView.INVISIBLE);
-        linearLayout.addView(textView);
-
-        //Seek Bar
-        seekBar.setMax(max);
-        seekBar.setKeyProgressIncrement(increment);
-        seekBar.setProgress(progress);
-        linearLayout.addView(seekBar);
-        return linearLayout;
     }
 
     private SharedPreferences.Editor getPreferenceSettingsEditor(int id){
@@ -474,23 +461,10 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences getPreferenceInfo(){
         return AlarmSharedPreferences.getSharedPreference(getApplicationContext());
     }
-
-    private int getSeekBarPosition(int progress, int right, int left, int width, int offset, int max){
-        //Get Position of Text
-        return (progress * (width - (right + left) * offset)) / max;
-    }
-    private int getSeekBarPosition(int progress, int right, int width, int offset, int max){
-        return getSeekBarPosition(progress, right, 0, width, offset, max);
-    }
-    private void debug_assertion(boolean check){
-
-        if(BuildConfig.DEBUG && check)
-            throw new AssertionError();
-    }
     /***********************************************************************************************
      * Set New Alarm
      **********************************************************************************************/
-    public     void setNewAlarm(View v){
+    public void setNewAlarm(View v){
 
         //Get Toggle Button
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
@@ -519,11 +493,10 @@ public class MainActivity extends AppCompatActivity
 
         return newAlarm.checkForPendingIntent(actualAlarm);
     }
-
     /***********************************************************************************************
      * AlarmConstants.ALARM NAME SETTING DIALOG
      **********************************************************************************************/
-    public  void showNameSettingDialog(View v){
+    public void showNameSettingDialog(View v){
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -575,7 +548,6 @@ public class MainActivity extends AppCompatActivity
         saveListDataChild(name, actualAlarm);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * DAY SETTING DIALOG
      **********************************************************************************************/
@@ -599,7 +571,6 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(getConfig(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * TIME SETTING DIALOG
      **********************************************************************************************/
@@ -622,11 +593,10 @@ public class MainActivity extends AppCompatActivity
         //reactivate Alarm
         activateAlarm(getConfig(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * MINUTE SETTING DIALOG
      **********************************************************************************************/
-    public  void showMinuteSettingDialog(View v) {
+    public void showMinuteSettingDialog(View v) {
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -692,12 +662,11 @@ public class MainActivity extends AppCompatActivity
         //reactivate Alarm
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * MUSIC SET DIALOG
      **********************************************************************************************/
-    final Vector<AlertDialog> mDialogs = new Vector<>();
-    public  void showMusicSettingDialog(View v){
+    private final Vector<AlertDialog> mDialogs = new Vector<>();
+    public void showMusicSettingDialog(View v){
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -1005,10 +974,29 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case AlarmConstants.ALARM_PERMISSION_MUSIC:
+            {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    searchMusic(1); //External Mode
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+        }
+    }
     /***********************************************************************************************
      * MUSIC VOLUME DIALOG
      **********************************************************************************************/
-    public  void showMusicVolumeSettingDialog(View v){
+    public void showMusicVolumeSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1069,11 +1057,10 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * MUSIC START TIME DIALOG
      **********************************************************************************************/
-    public  void showMusicStartSettingDialog(View v){
+    public void showMusicStartSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1135,11 +1122,10 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * MUSIC FADEIN TIME DIALOG
      **********************************************************************************************/
-    public  void showFadeInSettingsDialog(View v){
+    public void showFadeInSettingsDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1227,11 +1213,10 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * MUSIC VIBRATION DIALOG
      **********************************************************************************************/
-    public  void showVibrationSettingDialog(View v){
+    public void showVibrationSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1310,11 +1295,10 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * SCEEN LIGHT SETTING DIALOG
      **********************************************************************************************/
-    public  void showScreenLightSettingDialog(View v){
+    public void showScreenLightSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1393,7 +1377,7 @@ public class MainActivity extends AppCompatActivity
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
 
-    public  void showScreenLightStartSettingDialog(View v){
+    public void showScreenLightStartSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1456,11 +1440,10 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * SCREEN COLOR SETTING DIALOG
      **********************************************************************************************/
-    public  void showScreenColor1SettingDialog(View v){
+    public void showScreenColor1SettingDialog(View v){
 
         final Button bColor = (Button) v;
 
@@ -1495,7 +1478,6 @@ public class MainActivity extends AppCompatActivity
         //reactivate Alarm
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * SCREEN COLOR FADE SETTING DIALOG
      **********************************************************************************************/
@@ -1513,11 +1495,10 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * LED LIGHT SETTING DIALOG
      **********************************************************************************************/
-    public  void showLEDLightSettingDialog(View v){
+    public void showLEDLightSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1531,7 +1512,7 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-    public  void showLEDLightStartSettingDialog(View v){
+    public void showLEDLightStartSettingDialog(View v){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
@@ -1594,7 +1575,6 @@ public class MainActivity extends AppCompatActivity
         saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
         activateAlarm(alarmConfigurations.get(actualAlarm).isAlarmSet());
     }
-
     /***********************************************************************************************
      * OPTIONSMENU
      **********************************************************************************************/
@@ -1605,7 +1585,6 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
