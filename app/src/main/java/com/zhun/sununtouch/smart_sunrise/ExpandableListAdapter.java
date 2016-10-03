@@ -14,17 +14,17 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class ExpandableListAdapter extends BaseExpandableListAdapter {
+class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
     private LinkedHashMap<Integer, AlarmConfiguration> configuration;
 
-    public ExpandableListAdapter(Context context, LinkedHashMap<Integer, AlarmConfiguration> config){
+    ExpandableListAdapter(Context context, LinkedHashMap<Integer, AlarmConfiguration> config){
         this.context       = context;
         this.configuration = config;
     }
 
-    public void notifyDataSetChanged(LinkedHashMap<Integer, AlarmConfiguration> config) {
+    void notifyDataSetChanged(LinkedHashMap<Integer, AlarmConfiguration> config) {
         this.configuration = config;
     }
 

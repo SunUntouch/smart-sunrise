@@ -30,16 +30,16 @@ public class ColorPickingDialog extends AlertDialog{
     private final OnColorSelectedListener listener;
     private int selectedColor;
 
-    public interface OnColorSelectedListener {
+    interface OnColorSelectedListener {
         /**
          * @param color The color code selected, or null if no color. No color is only
          * possible if {@link HSVColorPickerDialog#setNoColorButton(int) setNoColorButton()}
          * has been called on the dialog before showing it
          */
-        public void colorSelected( Integer color );
+        void colorSelected(Integer color);
     }
 
-    public ColorPickingDialog(Context context, int initialColor, final OnColorSelectedListener listener) {
+    ColorPickingDialog(Context context, int initialColor, final OnColorSelectedListener listener) {
         super(context);
         this.selectedColor = initialColor;
         this.listener = listener;

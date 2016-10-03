@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
@@ -45,6 +46,7 @@ import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // New Configuration and List View//////////////////////////////////////////////////////////
+        // New com.zhun.sununtouch.smart_sunrise.Configuration and List View//////////////////////////////////////////////////////////
         AlarmViewAdapter = new ExpandableListAdapter(this, alarmConfigurations);
         AlarmGroupView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendbleList);
         prepareConfiguration();
@@ -661,6 +663,7 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * MUSIC SET DIALOG
      **********************************************************************************************/
+    final Vector<AlertDialog> mDialogs = new Vector<>();
     public  void showMusicSettingDialog(View v){
 
         //Create new Builder
@@ -668,18 +671,27 @@ public class MainActivity extends AppCompatActivity
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_menu));
 
         String[] ringtoneMode = { this.getString(R.string.wakeup_music_ringtone), this.getString(R.string.wakeup_music_music)};
-        builder.setItems(ringtoneMode, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
 
-                onMusicSet(which);
-                stopMusic(true);
-                dialog.dismiss();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, ringtoneMode);
+
+        ListView listView = new ListView(this);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onMusicSet(position);
             }
         });
 
         //Show Builder
-        builder.show();
+        builder.setView(listView);
+        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                stopMusic(true);
+            }
+        });
+        mDialogs.addElement(builder.show());
     }
     private void onMusicSet(int modeID){
 
@@ -700,39 +712,81 @@ public class MainActivity extends AppCompatActivity
         //Ready for instant Search and Play
         searchMusic(modeID);
     }
-    private void chooseAlarmSongDialog(final ArrayList<SongInformation> songs){
+    private void chooseAlarmArtistDialog( final SongDatabase songs){
 
-        debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
+        //Create new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_artist));
+
+        //Get SongNames from SongInformationArray
+        final String[] artists = songs.getArtistStrings();
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, artists);
+
+        ListView listView = new ListView(this);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                chooseAlarmAlbumDialog(artists[position], songs);
+            }
+        });
+
+        //Show Builder
+        builder.setView(listView);
+        mDialogs.addElement(builder.show());
+    }
+    void chooseAlarmAlbumDialog( final String artist, final SongDatabase songs){
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song));
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_album));
 
         //Get SongNames from SongInformationArray
+        final String[] albums = songs.getAlbumStrings(artist);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, albums);
+
+        ListView listView = new ListView(this);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                chooseAlarmSongDialog(songs.getSongs(artist, albums[position]));
+            }
+        });
+
+        //Show Builder
+        builder.setView(listView);
+        mDialogs.addElement(builder.show());
+    }
+    private void chooseAlarmSongDialog(final SongInformation[] songs){
+
+        //Create new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song)); //TODO
+
         ArrayList<String> songNames = new ArrayList<>();
         for(SongInformation song : songs)
-        {
-            //Get Name with Extension and remove it
-            String songName  = song.getTitle();
-            if(songName != null)
-            {
-                if(songName.contains("."))
-                    songName = songName.substring(0, songName.lastIndexOf('.'));
-                songNames.add(songName);
-            }
-        }
+            songNames.add(song.getTitle());
+
         //Get Song Name Array and set it for Alarm Dialog Builder
         builder.setItems(songNames.toArray(new String[songNames.size()]), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
                 //Get Song Lengh
-                saveSongLength(songs.get(which).getPath());
+                saveSongLength(songs[which].getPath());
 
                 //save Settings reactivate Alarm
                 saveSettings(actualAlarm, AlarmConstants.ALARM_NAME);
                 activateAlarm(getConfig(actualAlarm).isAlarmSet());
+
                 dialog.dismiss();
+                for(AlertDialog dia : mDialogs)
+                {
+                    dia.dismiss();
+                }
             }
         });
 
@@ -749,7 +803,7 @@ public class MainActivity extends AppCompatActivity
                         stopMusic(false);
                         try
                         {
-                            prepareMusic(Uri.parse(songs.get(position).getPath()));
+                            prepareMusic(Uri.parse(songs[position].getPath()));
                         } catch (IOException e) {
                             Log.e("Exception: ", e.getMessage());
                         }
@@ -757,13 +811,6 @@ public class MainActivity extends AppCompatActivity
                         return true;
                     }
                 });
-            }
-        });
-
-        alertDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-            @Override
-            public void onDismiss(DialogInterface dialog) {
-                stopMusic(true);
             }
         });
         alertDialog.show();
@@ -830,7 +877,7 @@ public class MainActivity extends AppCompatActivity
         if(cursor != null)
         {
             //ArrayList for Music Entries
-            ArrayList<SongInformation> songList = new ArrayList<>();
+            SongDatabase songData = new SongDatabase();
             if(cursor.moveToFirst())
             {
                 do{
@@ -839,7 +886,7 @@ public class MainActivity extends AppCompatActivity
                     String fullPath    = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
                     String album_name  = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
                     String artist_name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                    songList.add(new SongInformation(song_id,  song_name, artist_name, album_name, fullPath));
+                    songData.addSong(new SongInformation(song_id,  song_name, artist_name, album_name, fullPath));
 
                     //int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
                     //int album_id   = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
@@ -848,14 +895,15 @@ public class MainActivity extends AppCompatActivity
                     //int isRingtone = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
                 }
                 while(cursor.moveToNext());
+                cursor.close();
 
                 //Choose an Alarm
-                chooseAlarmSongDialog(songList);
-                cursor.close();
+                chooseAlarmArtistDialog(songData);
             }
         }
         else
             Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
+
     }
     private boolean checkMusicPermission(){
 

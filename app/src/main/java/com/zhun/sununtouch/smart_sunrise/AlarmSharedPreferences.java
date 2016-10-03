@@ -7,15 +7,15 @@ import android.preference.PreferenceManager;
 /**
  * Created by Sunny on 22.01.2016.
  */
-public class AlarmSharedPreferences {
+class AlarmSharedPreferences {
 
-    public static SharedPreferences getSharedPreference(Context context, String _settingName){
+    static SharedPreferences getSharedPreference(Context context, String _settingName){
         return context.getSharedPreferences(_settingName, Context.MODE_PRIVATE);
     }
-    public static SharedPreferences getSharedPreference(Context context, String _settingName, int _actualAlarm){
+    static SharedPreferences getSharedPreference(Context context, String _settingName, int _actualAlarm){
         return context.getSharedPreferences(_settingName + Integer.toString(_actualAlarm), Context.MODE_PRIVATE);
     }
-    public static SharedPreferences getSharedPreference(Context context){
+    static SharedPreferences getSharedPreference(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 

@@ -15,7 +15,9 @@
     <string name="wakeup_set_alarm_minutes">Set Minutes</string>
 
     <string name="wakeup_set_alarm_song_menu">Choose Alarm</string>
-    <string name="wakeup_set_alarm_song">Choose Alarm Tone</string>
+    <string name="wakeup_set_alarm_artist">Choose Artiste</string>
+    <string name="wakeup_set_alarm_album">Choose Album</string>
+    <string name="wakeup_set_alarm_song">Choose Song</string>
     <string name="wakeup_set_alarm_song_Volume">Set Music Volume</string>
     <string name="wakeup_set_alarm_song_Start">Set Start Time</string>
     <string name="wakeup_set_alarm_song_fadeIn">Set FadeIn Time</string>

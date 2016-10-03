@@ -159,16 +159,6 @@ class AlarmConfiguration {
         return childItems;
     }
 
-    enum alarmTask{
-        ACTIVITY_VIBRATE,
-        ACTIVITY_COLORFADE,
-        ACTIVITY_LED
-    }
-    private final int alarmTasks = alarmTask.values().length;
-    int getAlarmTaskSize(){
-        return alarmTasks;
-    }
-
     //Name
     private String actualAlarmname = AlarmConstants.ALARM;
 

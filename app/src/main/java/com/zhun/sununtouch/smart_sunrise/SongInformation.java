@@ -3,7 +3,7 @@ package com.zhun.sununtouch.smart_sunrise;
 /**
  * Created by Sunny on 20.12.2015.
  */
-public class SongInformation {
+class SongInformation {
     private long id;
     private String title;
     private String artist;
@@ -11,7 +11,7 @@ public class SongInformation {
     private String path;
     //private int year;
 
-    public SongInformation(long songID, String songTitle, String songArtist, String songAlbum, String songPath){
+    SongInformation(long songID, String songTitle, String songArtist, String songAlbum, String songPath){
 
         this.id     = songID;
         this.title  = songTitle;
@@ -20,25 +20,23 @@ public class SongInformation {
         this.path   = songPath;
     }
 
-    public long getID(){
+    long getID(){
         return this.id;
     }
 
-    public String getTitle(){
+    String getTitle(){
         return this.title;
     }
 
-    public String getArtist(){
+    String getArtist(){
         return this.artist;
     }
 
-    public String getAlbum(){
+    String getAlbum(){
         return this.album;
     }
 
-    public String getPath(){
+    String getPath(){
         return this.path;
     }
-
-
 }
