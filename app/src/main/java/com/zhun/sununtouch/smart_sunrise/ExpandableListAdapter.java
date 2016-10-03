@@ -117,7 +117,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         setMusicStartTime.setText(String.format(Locale.US,"%02d:%02d", minutes, seconds));
 
         //Set FadeIn ToggleButton
-        seconds  = config.getFadeIn();
+        seconds  = config.getFadeInTime();
         minutes  = TimeUnit.SECONDS.toMinutes(seconds);
         seconds -= TimeUnit.MINUTES.toSeconds(minutes);
         ToggleButton setFadeIn = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleFadeIn);

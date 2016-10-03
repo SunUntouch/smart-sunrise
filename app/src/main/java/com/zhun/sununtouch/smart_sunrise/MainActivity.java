@@ -792,7 +792,7 @@ public class MainActivity extends AppCompatActivity
 
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                        prepareMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true);
+                        startMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true);
                         return true;
                     }
                 });
@@ -895,13 +895,20 @@ public class MainActivity extends AppCompatActivity
         else if(showToast)
             Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
     }
-    private void prepareMusic(final Uri uri) {
-        prepareMusic(uri, false);
+
+    private void startMusic(final Uri uri) {
+        startMusic(uri, false);
     }
-    private void prepareMusic(final Uri uri, boolean start) {
-        prepareMusic(uri, start, false);
+    private void startMusic(final Uri uri, boolean start) {
+        startMusic(uri, start, false);
     }
-    private void prepareMusic(final Uri uri, final boolean start, final boolean stop){
+    private void startMusic(final Uri uri, final boolean start, final boolean stop){
+        startMusic(uri, start, stop, -1);
+    }
+    private void startMusic(final Uri uri, final boolean start, final boolean stop, final int volume){
+        startMusic(uri, start, stop, false, volume);
+    }
+    private void startMusic(final Uri uri, final boolean start, final boolean stop, final boolean looping, final int volume){
 
         Runnable runnable = new Runnable() {
             @Override
@@ -929,10 +936,19 @@ public class MainActivity extends AppCompatActivity
 
                 if(start)
                     mediaPlayer.start();
+
+                if(volume > -1)
+                {
+                    float vol = 1 - (float)(Math.log(100-volume)/Math.log(100));
+                    mediaPlayer.setVolume(vol, vol);
+                }
+
+                mediaPlayer.setLooping(looping);
             }
         };
         setRunnable(runnable);
     }
+
     private void stopMusic(boolean release){
 
         //Check for MediaPlayer
@@ -1000,6 +1016,9 @@ public class MainActivity extends AppCompatActivity
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
 
+        AlarmConfiguration config = getConfig(actualAlarm);
+        startMusic(Uri.parse(config.getSongURI()), true, true, true, config.getVolume());
+
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
         //SeekBar
@@ -1013,6 +1032,12 @@ public class MainActivity extends AppCompatActivity
                 int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 textView.setText(String.format(Locale.US, "%d", progress));
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
+
+                if(mediaPlayer != null && mediaPlayer.isPlaying())
+                {
+                    float volume = 1 - (float)(Math.log(100-progress)/Math.log(100));
+                    mediaPlayer.setVolume(volume, volume);
+                }
             }
 
             @Override
@@ -1028,7 +1053,7 @@ public class MainActivity extends AppCompatActivity
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Volume));
-        builder.setView(createAlertLinearLayout(v, textView, seekBar, 100, 1, alarmConfigurations.get(actualAlarm).getVolume()));
+        builder.setView(createAlertLinearLayout(v, textView, seekBar, 100, 1, config.getVolume()));
         builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -1042,6 +1067,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+            }
+        });
+
+        //Show Builder
+        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                stopMusic(true);
             }
         });
         builder.show();
@@ -1194,8 +1227,6 @@ public class MainActivity extends AppCompatActivity
                     dialog.dismiss();
                 }
             });
-
-            //Show Builder
             builder.show();
             return false;
             }
