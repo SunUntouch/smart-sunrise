@@ -69,12 +69,16 @@ public class MainActivity extends AppCompatActivity
     //Media Player
     private MediaPlayer mediaPlayer;
 
+    private AlarmWorkerThread mThread;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     /***********************************************************************************************
      * ONCREATE
      **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mThread = new AlarmWorkerThread("Smart_Sunrise_Main_Worker");
 
         //Set MainView//////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
@@ -116,6 +120,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
         AlarmGroupView.requestFocus();
+
+        searchMusic();
+    }
+
+    @Override
+    protected void onDestroy() {
+
+        mThread.quit();
+        super.onDestroy();
     }
 
     @Override
@@ -136,6 +149,23 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
+    }
+
+    private void setRunnable(Runnable runnable){
+        setRunnable(mThread, runnable, 0);
+    }
+    private void setRunnable(AlarmWorkerThread thread, Runnable runnable, long millis){
+
+        if(!thread.isAlive())
+        {
+            thread.start();
+            thread.prepareHandler();
+        }
+
+        if(millis == 0)
+            thread.postTask(runnable);
+        else
+            thread.postDelayedTask(runnable, millis);
     }
 
     /***********************************************************************************************
@@ -682,7 +712,7 @@ public class MainActivity extends AppCompatActivity
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                onMusicSet(position);
+                searchMusic(position);
             }
         });
 
@@ -695,25 +725,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
         mDialogs.addElement(builder.show());
-    }
-    private void onMusicSet(int modeID){
-
-        if(modeID != 0)
-        {
-            //Check if External Media is Present, send Toast if not and return
-            if(!android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
-            {
-                Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            //Return if we wait for Handler
-            if(!checkMusicPermission())
-                return;
-        }
-
-        //Ready for instant Search and Play
-        searchMusic(modeID);
     }
     private void chooseAlarmArtistDialog( final SongDatabase songs){
 
@@ -740,7 +751,7 @@ public class MainActivity extends AppCompatActivity
         builder.setView(listView);
         mDialogs.addElement(builder.show());
     }
-    void chooseAlarmAlbumDialog( final String artist, final SongDatabase songs){
+    private void chooseAlarmAlbumDialog( final String artist, final SongDatabase songs){
 
         //Create new Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -806,19 +817,13 @@ public class MainActivity extends AppCompatActivity
 
             public void onShow(DialogInterface dialog) {
 
+                final int previosID = -1;
                 ListView songsView = alertDialog.getListView();
                 songsView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                        stopMusic(false);
-                        try
-                        {
-                            prepareMusic(Uri.parse(sortedSongs.get(position).getPath()));
-                        } catch (IOException e) {
-                            Log.e("Exception: ", e.getMessage());
-                        }
-                        mediaPlayer.start();
+                        prepareMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true);
                         return true;
                     }
                 });
@@ -826,37 +831,6 @@ public class MainActivity extends AppCompatActivity
         });
         alertDialog.show();
     }
-    private void prepareMusic(Uri uri) throws IOException{
-
-        //Check for MediaPlayer
-        if(mediaPlayer == null)
-            mediaPlayer = new MediaPlayer();
-        else
-            mediaPlayer.reset();
-
-        //Set MediaPlayer Values
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-        mediaPlayer.setDataSource(getApplicationContext(), uri);
-        mediaPlayer.prepare();
-    }
-    private void stopMusic(boolean release){
-
-        //Check for MediaPlayer
-        if(mediaPlayer==null)
-            return;
-
-        //Stop if Playing
-        if(mediaPlayer.isPlaying())
-            mediaPlayer.stop();
-
-        //Release and Set null
-        if(!release)
-            return;
-
-        mediaPlayer.release();
-        mediaPlayer = null;
-    }
-
     private void saveSongLength(String uri){
 
         debug_assertion(!alarmConfigurations.containsKey(actualAlarm));
@@ -871,7 +845,39 @@ public class MainActivity extends AppCompatActivity
         alarmConfigurations.get(actualAlarm).setSongURI(uri);
     }
 
+    private SongDatabase mSongDatabase = null;
+    private void searchMusic(){
+
+        if(checkMusicPermission(false))
+        {
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    searchMusic(1, false, false);
+                }
+            };
+            setRunnable(runnable);
+        }
+    }
     private void searchMusic(int modeID){
+        searchMusic(modeID, true, true);
+    }
+    private void searchMusic(int modeID, boolean showToast, boolean startDialog){
+
+        if(modeID != 0)
+        {
+            //Check if External Media is Present, send Toast if not and return
+            if(!android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
+            {
+                Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            //Return if we wait for Handler
+            if(!checkMusicPermission())
+                return;
+        }
+
         //Get All Song Values from the Android Media Content URI
         //Default for Uri is the internal Memory, because it is every time available
         //If the User Chooses the second entry switch to external Files
@@ -887,46 +893,111 @@ public class MainActivity extends AppCompatActivity
         //Search Cursor for Values
         if(cursor != null)
         {
-            //ArrayList for Music Entries
-            SongDatabase songData = new SongDatabase();
-            if(cursor.moveToFirst())
-            {
-                do{
-                    int song_id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
-                    String song_name   = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
-                    String fullPath    = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-                    String album_name  = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                    String artist_name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                    songData.addSong(new SongInformation(song_id,  song_name, artist_name, album_name, fullPath));
-
-                    //int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
-                    //int album_id   = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
-                    //int artist_id  = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
-                    //int isAlarm    = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_ALARM));
-                    //int isRingtone = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
+            try {
+                if(mSongDatabase == null && cursor.moveToFirst())
+                {
+                    //ArrayList for Music Entries
+                    SongDatabase songData = new SongDatabase();
+                    do{
+                        int song_id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
+                        String song_name   = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+                        String fullPath    = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
+                        String album_name  = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                        String artist_name = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                        songData.addSong(new SongInformation(song_id,  song_name, artist_name, album_name, fullPath));
+                        //int isMusic = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
+                        //int album_id   = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
+                        //int artist_id  = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
+                        //int isAlarm    = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_ALARM));
+                        //int isRingtone = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
+                    }
+                    while(cursor.moveToNext());
+                    mSongDatabase = songData;
                 }
-                while(cursor.moveToNext());
-                cursor.close();
-
-                //Choose an Alarm
-                chooseAlarmArtistDialog(songData);
             }
-        }
-        else
-            Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
+            finally{
+                cursor.close();
+            }
 
+            //Choose an Alarm
+            if(startDialog)
+                chooseAlarmArtistDialog(mSongDatabase);
+        }
+        else if(showToast)
+            Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
+    }
+    private void prepareMusic(final Uri uri) {
+        prepareMusic(uri, false);
+    }
+    private void prepareMusic(final Uri uri, boolean start) {
+        prepareMusic(uri, start, false);
+    }
+    private void prepareMusic(final Uri uri, final boolean start, final boolean stop){
+
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+
+                if(stop)
+                    stopMusic(false);
+
+                //Check for MediaPlayer
+                if(mediaPlayer == null)
+                    mediaPlayer = new MediaPlayer();
+                else
+                    mediaPlayer.reset();
+
+                //Set MediaPlayer Values
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+                try
+                {
+                    mediaPlayer.setDataSource(getApplicationContext(), uri);
+                    mediaPlayer.prepare();
+                } catch (IOException e) {
+                    Log.e("Exception: ", e.getMessage());
+                }
+
+                if(start)
+                    mediaPlayer.start();
+            }
+        };
+        setRunnable(runnable);
+    }
+    private void stopMusic(boolean release){
+
+        //Check for MediaPlayer
+        if(mediaPlayer==null)
+            return;
+
+        //Stop if Playing
+        if(mediaPlayer.isPlaying())
+            mediaPlayer.stop();
+
+        //Release and Set null
+        if(release)
+        {
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
     private boolean checkMusicPermission(){
+        return  checkMusicPermission(true);
+    }
+    private boolean checkMusicPermission(boolean askPermission){
 
         if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
         {
-            if(ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE))
+            if(askPermission)
             {
-                //we will jump to the Handler if the user accepts or declines th permission and start there our Dialog
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE))
+                {
+                    //we will jump to the Handler if the user accepts or declines th permission and start there our Dialog
+                }
+                else
+                    ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
             }
-            else
-                ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
-
             //We must wait for granting
             return false;
         }

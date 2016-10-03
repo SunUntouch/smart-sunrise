@@ -151,17 +151,17 @@ public class AlarmActivity extends AppCompatActivity {
     }
     private void setRunnable(AlarmWorkerThread thread, Runnable runnable, long millis){
 
-    if(!thread.isAlive())
-    {
-        thread.start();
-        thread.prepareHandler();
-    }
+        if(!thread.isAlive())
+        {
+            thread.start();
+            thread.prepareHandler();
+        }
 
-    if(millis == 0)
-        thread.postTask(runnable);
-    else
-        thread.postDelayedTask(runnable, millis);
-}
+        if(millis == 0)
+            thread.postTask(runnable);
+        else
+            thread.postDelayedTask(runnable, millis);
+    }
     /***********************************************************************************************
      * CONSTRUCT VIEWS
      **********************************************************************************************/
