@@ -120,8 +120,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
         AlarmGroupView.requestFocus();
-
-        searchMusic();
     }
     protected void onDestroy() {
 
@@ -785,14 +783,13 @@ public class MainActivity extends AppCompatActivity
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
 
             public void onShow(DialogInterface dialog) {
-
-                final int previosID = -1;
+                
                 ListView songsView = alertDialog.getListView();
                 songsView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
 
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                        startMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true);
+                        startMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true, false, getConfig(actualAlarm).getVolume());
                         return true;
                     }
                 });
@@ -814,7 +811,6 @@ public class MainActivity extends AppCompatActivity
         alarmConfigurations.get(actualAlarm).setSongURI(uri);
     }
 
-    private SongDatabase mSongDatabase = null;
     private void searchMusic(){
 
         if(checkMusicPermission(false))
@@ -862,11 +858,13 @@ public class MainActivity extends AppCompatActivity
         //Search Cursor for Values
         if(cursor != null)
         {
+            //ArrayList for Music Entries
+            SongDatabase songData = new SongDatabase();
+
             try {
-                if(mSongDatabase == null && cursor.moveToFirst())
+                if(cursor.moveToFirst())
                 {
-                    //ArrayList for Music Entries
-                    SongDatabase songData = new SongDatabase();
+
                     do{
                         int song_id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
                         String song_name   = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
@@ -881,7 +879,6 @@ public class MainActivity extends AppCompatActivity
                         //int isRingtone = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.IS_RINGTONE));
                     }
                     while(cursor.moveToNext());
-                    mSongDatabase = songData;
                 }
             }
             finally{
@@ -890,7 +887,7 @@ public class MainActivity extends AppCompatActivity
 
             //Choose an Alarm
             if(startDialog)
-                chooseAlarmArtistDialog(mSongDatabase);
+                chooseAlarmArtistDialog(songData);
         }
         else if(showToast)
             Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
