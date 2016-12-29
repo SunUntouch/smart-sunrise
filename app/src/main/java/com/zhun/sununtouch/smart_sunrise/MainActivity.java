@@ -239,13 +239,23 @@ public class MainActivity extends AppCompatActivity
     private AlarmConfiguration getAlarm(int ID){
         return m_AlarmConfigurations.getAlarm(ID);
     }
+
     private void updateChanges(AlarmConfiguration alarm){
+        updateChanges(alarm, true);
+    }
+    private void updateChanges(AlarmConfiguration alarm, boolean notify){
+        updateChanges(alarm, notify, false);
+    }
+    private void updateChanges(AlarmConfiguration alarm, boolean notify, boolean invalidate){
         alarm.commit();
         m_AlarmConfigurations.setAlarm(alarm);
         activateAlarm(alarm.isAlarmSet());
 
-        //TODO test if this works, or if we need to invalidate views again in the other method
-        AlarmViewAdapter.notifyDataSetChanged(m_AlarmConfigurations);
+        //Don't need both
+        if(invalidate)
+            AlarmGroupView.invalidateViews();
+        else if(notify)
+            AlarmViewAdapter.notifyDataSetChanged(m_AlarmConfigurations);
     }
 
     /***********************************************************************************************
@@ -988,7 +998,7 @@ public class MainActivity extends AppCompatActivity
         //Set Vibration Checked
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setFadeIn((fadeInToggle.isChecked())? 1 : 0);
-        updateChanges(alarm);
+        updateChanges(alarm,false);
     }
     private void onFadeInTimeSet(int seconds){
 
@@ -1003,19 +1013,13 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showVibrationSettingDialog(View v){
 
-        //Get ToggleButton
+        //Get ToggleButton and Set On LongClickListener
         final ToggleButton vibrationToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_music_toggleVibration);
-
-        //Set Vibration Checked
-        AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setVibration((vibrationToggle.isChecked())? 1 : 0);
-        updateChanges(alarm);
-
-        //Set On LongClickListener
         vibrationToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
 
+                //TODO Let it vibrate
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
                 //SeekBar
@@ -1067,6 +1071,11 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
+
+        //Set Vibration Checked
+        AlarmConfiguration alarm = getAlarm(actualAlarm);
+        alarm.setVibration((vibrationToggle.isChecked())? 1 : 0);
+        updateChanges(alarm, false);
     }
     private void onVibrationStrengthSet(int strength){
 
@@ -1081,16 +1090,8 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showScreenLightSettingDialog(View v){
 
-        AlarmConfiguration alarm = getAlarm(actualAlarm);
-
-        //GEt ToggleButton
+        //GEt ToggleButton and Set On LongClickListener
         final ToggleButton screenToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_light_buttonLight);
-
-        //Set Screen Checked
-        alarm.setScreen((screenToggle.isChecked())? 1 : 0);
-        updateChanges(alarm);
-
-        //Set On LongClickListener
         screenToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -1146,6 +1147,11 @@ public class MainActivity extends AppCompatActivity
                 return false;
             }
         });
+
+        //Set Screen Checked
+        AlarmConfiguration alarm = getAlarm(actualAlarm);
+        alarm.setScreen((screenToggle.isChecked())? 1 : 0);
+        updateChanges(alarm, false);
     }
     private void onScreenBrightnessSet(int brightness){
 
