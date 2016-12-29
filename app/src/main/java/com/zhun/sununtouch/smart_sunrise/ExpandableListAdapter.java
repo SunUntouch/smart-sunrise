@@ -10,27 +10,24 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
-    private LinkedHashMap<Integer, AlarmConfiguration> configuration;
+    private AlarmConfigurationList configuration;
 
     /***********************************************************************************************
      * HELPER
      **********************************************************************************************/
-    ExpandableListAdapter(Context context, LinkedHashMap<Integer, AlarmConfiguration> config){
+    ExpandableListAdapter(Context context, AlarmConfigurationList alarms){
         this.context       = context;
-        this.configuration = config;
+        this.configuration = alarms;
     }
-    void notifyDataSetChanged(LinkedHashMap<Integer, AlarmConfiguration> config) {
+    void notifyDataSetChanged(AlarmConfigurationList config) {
         this.configuration = config;
-    }
-    private AlarmConfiguration getConfig(int ID){
-        return configuration.get(ID);
+        super.notifyDataSetChanged();
     }
 
     /***********************************************************************************************
@@ -38,7 +35,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
      **********************************************************************************************/
     private View createTimeView(int ID){
 
-        AlarmConfiguration config = getConfig(ID);
+        AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -58,7 +55,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createDayView(int ID){
 
-        AlarmConfiguration config = getConfig(ID);
+        AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -88,7 +85,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createMusicView(int ID){
 
-        AlarmConfiguration config = getConfig(ID);
+        AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -134,7 +131,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createLightView(int ID){
 
-        AlarmConfiguration config = getConfig(ID);
+        AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -184,7 +181,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createDeleteView(int ID){
 
-        AlarmConfiguration config = getConfig(ID);
+        AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -232,7 +229,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, null);
         }
 
-        AlarmConfiguration config = getConfig(groupPosition);
+        AlarmConfiguration config = configuration.getAlarm(groupPosition);
 
         //Set Group Title
         TextView txtListHeader = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
@@ -260,7 +257,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
      **********************************************************************************************/
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this.getConfig(groupPosition).getChildItemSize();
+        return this.configuration.getAlarm(groupPosition).getChildItemSize();
     }
     @Override
     public long getChildId(int groupPosition, int childPosition) {

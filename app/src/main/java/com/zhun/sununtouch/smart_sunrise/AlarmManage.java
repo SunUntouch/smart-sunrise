@@ -39,22 +39,11 @@ public class AlarmManage extends AppCompatActivity {
         bundle.putInt(AlarmConstants.ALARM_ID, ID);
         return new Intent(context, AlarmReceiver.class).putExtras(bundle);
     }
-    private Intent getSnoozeIntent(int ID){
-
-        //Fill Intent
-        Bundle bundle = new Bundle();
-        bundle.putInt(AlarmConstants.ALARM_ID, ID);
-        return new Intent(context, AlarmReceiver.class).putExtras(bundle);
-    }
-
     private PendingIntent getPendingIntent(int alarmId){
         //Create new PendingIntent
         return PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
     }
-    private PendingIntent getSnoozePendingIntent(int alarmId){
-        //Create new PendingIntent
-        return PendingIntent.getBroadcast(context, alarmId, getSnoozeIntent(alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
-    }
+
     public boolean checkForPendingIntent(int alarmId){
         //Check if Intent exists
         return (PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_NO_CREATE) != null);
@@ -74,21 +63,42 @@ public class AlarmManage extends AppCompatActivity {
         if(!snooze)
         {
             //Add all necessary values to alarm time
-            long lightStart    = TimeUnit.MINUTES.toMillis(getTimeBeforeMusic());
+            long lightStart    = getTimeBeforeMusic();
             long timeToNextDay = TimeUnit.DAYS.toMillis(getDaysToNextAlarm());
 
             calendar.set(Calendar.HOUR_OF_DAY, conf.getHour());
             calendar.set(Calendar.MINUTE     , conf.getMinute());
-            alarmTime = calendar.getTimeInMillis() + timeToNextDay - lightStart; //TODO What if the user sets a Alarm and the light time is lower then the current time?
+            alarmTime = calendar.getTimeInMillis() + timeToNextDay;
 
             //Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
-            alarmTime = (alarmTime < System.currentTimeMillis()) ? alarmTime + TimeUnit.DAYS.toMillis(1) : alarmTime;
+            long currentTime = System.currentTimeMillis();
+            alarmTime = (alarmTime < currentTime) ? alarmTime + TimeUnit.DAYS.toMillis(1) : alarmTime;
+
+            if(alarmTime - lightStart < currentTime)
+            {
+                long screen = getBeforeScreenTime();
+                long led = getBeforeLEDTime();
+
+                lightStart = (screen > led)? screen - currentTime - alarmTime : led - currentTime - alarmTime;
+                lightStart = (lightStart < 0) ? 0 : lightStart; //1 less minute
+
+                if(lightStart > led || lightStart > screen)
+                {
+                    led    = lightStart;
+                    screen = lightStart;
+                }
+
+                //Safe newly set Values
+                conf.setFromAlarmManager();
+                conf.setScreenStartTime((int)TimeUnit.MILLISECONDS.toMinutes(screen));
+                conf.setLEDStartTime((int)TimeUnit.MILLISECONDS.toMinutes(led));
+                conf.commit();
+            }
+
+            alarmTime -= lightStart - 10000; //+10secs
         }
         else //Snooze
-        {
-            pendingIntent = getSnoozePendingIntent(ID);
             alarmTime = calendar.getTimeInMillis() + TimeUnit.MINUTES.toMillis(conf.getSnooze()); //+ Snooze
-        }
 
         //Check for SDK Version and Use different AlarmManager Functions
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
@@ -149,12 +159,20 @@ public class AlarmManage extends AppCompatActivity {
             default: return 0;
         }
     }
-    public int getTimeBeforeMusic(){
+    private long getTimeBeforeMusic(){
         //Screen
-        int minuteScreen = getConfig().useScreen() ? getConfig().getScreenStartTime() : 0;
-        int minuteLED    = getConfig().useLED()    ? getConfig().getLEDStartTime()    : 0;
-
         //Max Minutes
-        return (minuteScreen >= minuteLED) ? minuteScreen : minuteLED;
+        long screen = getBeforeScreenTime();
+        long led = getBeforeLEDTime();
+
+        return (screen >= led) ? screen : led;
+    }
+
+    private long getBeforeScreenTime(){
+        return (getConfig().useScreen()) ? TimeUnit.MINUTES.toMillis(getConfig().getScreenStartTime()) : 0;
+    }
+
+    private long getBeforeLEDTime(){
+        return (getConfig().useLED()) ? TimeUnit.MINUTES.toMillis(getConfig().getLEDStartTime()) : 0;
     }
 }
