@@ -195,9 +195,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         deleteAlarm.setText(view.getContext().getString(R.string.wakeup_delete));
 
         //Check for Alarm and Set Button to boolean value
-        AlarmManage newAlarm = new AlarmManage(view.getContext(), config);
         ToggleButton setNewAlarm = (ToggleButton) view.findViewById(R.id.wakeup_timer_setAlarmButton);
-        setNewAlarm.setChecked(newAlarm.checkForPendingIntent(ID));
+        setNewAlarm.setChecked(config.checkForPendingIntent());
 
         return view;
     }

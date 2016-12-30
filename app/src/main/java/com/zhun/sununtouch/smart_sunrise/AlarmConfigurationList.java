@@ -106,6 +106,7 @@ public class AlarmConfigurationList {
             return false;
         }
 
+        alarm.commit();
         return true;
     }
 

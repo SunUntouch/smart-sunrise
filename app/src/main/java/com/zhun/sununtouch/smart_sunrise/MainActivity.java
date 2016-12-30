@@ -247,9 +247,9 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm, notify, false);
     }
     private void updateChanges(AlarmConfiguration alarm, boolean notify, boolean invalidate){
-        alarm.commit();
+
         m_AlarmConfigurations.setAlarm(alarm);
-        activateAlarm(alarm.isAlarmSet());
+        //alarm.activateAlarm();
 
         //Don't need both
         if(invalidate)
@@ -266,12 +266,12 @@ public class MainActivity extends AppCompatActivity
         //Get Toggle Button
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 
-        //Set Alarm
-        final boolean toggle = activateAlarm(activeAlarmToggle.isChecked());
-        activeAlarmToggle.setChecked(toggle);
-
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setAlarm(toggle);
+
+        if(activeAlarmToggle.isChecked() && alarm.checkForPendingIntent())
+            return;
+
+        activeAlarmToggle.setChecked(alarm.setAlarm(activeAlarmToggle.isChecked(), true));
         updateChanges(alarm);
 
         //show Toast
@@ -279,17 +279,7 @@ public class MainActivity extends AppCompatActivity
                            String.format(Locale.US, "%02d:%02d", alarm.getHour(), alarm.getMinute()));
         AlarmToast.showToastShort(getApplicationContext(), alarm.isAlarmSet(), alarmText, getString(R.string.toast_negative_alarm));
     }
-    private boolean activateAlarm(boolean active){
 
-        //Get new Alarm and Set
-        AlarmManage newAlarm = new AlarmManage(getApplicationContext(), getAlarm(actualAlarm) );
-        if(active)
-            newAlarm.setNewAlarm(actualAlarm, false);
-        else
-            newAlarm.cancelAlarmwithButton(actualAlarm);
-
-        return newAlarm.checkForPendingIntent(actualAlarm);
-    }
     /***********************************************************************************************
      * AlarmConstants.ALARM NAME SETTING DIALOG
      **********************************************************************************************/

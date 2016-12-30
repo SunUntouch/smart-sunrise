@@ -13,6 +13,7 @@ import java.util.Vector;
 class AlarmConfiguration {
 
     Context m_Context;
+    AlarmManage manager;
 
     //Actual Alarm Values
     private int actualAlarm    = 0;
@@ -65,7 +66,13 @@ class AlarmConfiguration {
         m_Context = context;
     }
     AlarmConfiguration(Context context, int ID){
+        init(context,ID, true);
+    }
+    AlarmConfiguration(Context context, int ID, boolean active){
+        init(context, ID, active);
+    }
 
+    private void init(Context context,int ID, boolean active){
         m_Context = context;
 
         //save Settings
@@ -74,7 +81,7 @@ class AlarmConfiguration {
         //ID, name, AlarmSet
         this.setAlarmID(ID);
         this.setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(ID)));
-        this.setAlarm(settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false));
+        this.setAlarm(settings.getBoolean(AlarmConstants.ALARM_TIME_SET, false),active);
 
         this.m_AlarmManager = settings.getBoolean(AlarmConstants.ALARM_MANAGER, false);
 
@@ -118,7 +125,6 @@ class AlarmConfiguration {
         //Dirty
         this.m_Dirty = false;
     }
-
     public void commit(){
 
         //Load sharedPreferences
@@ -244,8 +250,69 @@ class AlarmConfiguration {
     boolean isAlarmSet(){
         return alarmSet;
     }
-    void setAlarm(boolean alarm){
+    boolean setAlarm(boolean alarm, boolean active){
         alarmSet = alarm;
+        return (active) ? activateAlarm() : alarmSet;
+    }
+    private boolean activateAlarm(){
+        //Get new Alarm and Set
+        if(manager == null)
+            manager = new AlarmManage(m_Context, this );
+
+        boolean alarmActive = manager.checkForPendingIntent(actualAlarm);
+        if(alarmSet && !alarmActive)
+            manager.setNewAlarm(actualAlarm);
+        else if(alarmActive)
+            manager.cancelAlarmwithButton(actualAlarm);
+
+        return checkForPendingIntent(manager);
+    }
+    public boolean snoozeAlarm(){
+
+        if(manager == null)
+            manager = new AlarmManage(m_Context, this );
+
+        manager.snoozeAlarm(actualAlarm);
+        return checkForPendingIntent(manager);
+    }
+    public boolean setNewAlarm(){
+
+        if(manager == null)
+            manager = new AlarmManage(m_Context, this );
+
+        manager.setNewAlarm(actualAlarm);
+        return checkForPendingIntent(manager);
+    }
+    public boolean cancelAlarm(){
+
+        if(manager == null)
+            manager = new AlarmManage(m_Context, this );
+
+        manager.cancelAlarm(actualAlarm);
+        return checkForPendingIntent(manager);
+    }
+    public boolean cancelAlarmwithButton(){
+
+        if(manager == null)
+            manager = new AlarmManage(m_Context, this );
+
+        manager.cancelAlarmwithButton(actualAlarm);
+        return checkForPendingIntent(manager);
+    }
+
+    public boolean checkForPendingIntent(){
+
+        if(manager == null)
+            manager = new AlarmManage(m_Context, this );
+
+        alarmSet = manager.checkForPendingIntent(actualAlarm);
+        return alarmSet;
+    }
+
+    public boolean checkForPendingIntent(AlarmManage newAlarm){
+        //Check if Intent exists
+        alarmSet = newAlarm.checkForPendingIntent(actualAlarm);
+        return alarmSet;
     }
 
     //Time
@@ -309,13 +376,14 @@ class AlarmConfiguration {
     }
     int getTimeToNextDay(int currentDay){
 
-        if(!isDaySet())
+        if(!isDaySet() || isDaySet(currentDay))
             return 0;
 
         int nextDay = 1;
         if((currentDay == 6) ? isDaySet(0) : isDaySet(++currentDay))
             return nextDay;
 
+        ++nextDay;
         while (!isDaySet(currentDay++))
         {
             ++nextDay;
@@ -548,8 +616,8 @@ class AlarmConfiguration {
 
         if(m_AlarmManager)
             m_ScreenStartTimeTemp = time;
-
-        m_ScreenStartTime = time;
+        else
+            m_ScreenStartTime = time;
     }
 
     //Light
@@ -580,6 +648,9 @@ class AlarmConfiguration {
         m_LightColor2 = color;
     }
 
+    boolean useLightFade(){
+        return m_LightFade == 1;
+    }
     int getLightFade(){
         return m_LightFade;
     }
@@ -616,8 +687,8 @@ class AlarmConfiguration {
 
         if(m_AlarmManager)
             m_LightLEDStartTimeTemp  = time;
-
-        m_LightLEDStartTime = time;
+        else
+            m_LightLEDStartTime = time;
     }
 
     void setFromAlarmManager(){
