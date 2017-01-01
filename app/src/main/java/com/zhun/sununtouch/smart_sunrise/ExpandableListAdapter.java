@@ -56,6 +56,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     private View createDayView(int ID){
 
         AlarmConfiguration config = configuration.getAlarm(ID);
+        config.clearAlarmManagerFlag();
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -86,6 +87,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     private View createMusicView(int ID){
 
         AlarmConfiguration config = configuration.getAlarm(ID);
+        config.clearAlarmManagerFlag();
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

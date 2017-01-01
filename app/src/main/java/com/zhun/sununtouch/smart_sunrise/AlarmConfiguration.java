@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.util.Calendar;
-import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -12,8 +11,8 @@ import java.util.Vector;
  */
 class AlarmConfiguration {
 
-    Context m_Context;
-    AlarmManage manager;
+    private Context m_Context;
+    private AlarmManage manager;
 
     //Actual Alarm Values
     private int actualAlarm    = 0;
@@ -177,41 +176,6 @@ class AlarmConfiguration {
         editor.apply();
     }
 
-    public void removeSharedPreference(int amount){
-
-        //Copy Data to fill AlarmCount Gap
-        if( amount > 0) {
-            --amount;
-            for (int id = actualAlarm; id < amount; ++id) {
-                SharedPreferences sharedPrefs = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.WAKEUP_TIMER, id++); //TODO check if thats right whith double ++id
-                SharedPreferences.Editor editorNew = sharedPrefs.edit();
-                SharedPreferences settingsOld = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.WAKEUP_TIMER, id);
-
-                Map<String, ?> settingOld = settingsOld.getAll();
-                for (Map.Entry<String, ?> value : settingOld.entrySet()) {
-                    if (value.getValue().getClass().equals(Boolean.class))
-                        editorNew.putBoolean(value.getKey(), (Boolean) value.getValue());
-                    else if (value.getValue().getClass().equals(Float.class))
-                        editorNew.putFloat(value.getKey(), (Float) value.getValue());
-                    else if (value.getValue().getClass().equals(Integer.class))
-                        editorNew.putInt(value.getKey(), (Integer) value.getValue());
-                    else if (value.getValue().getClass().equals(Long.class))
-                        editorNew.putLong(value.getKey(), (Long) value.getValue());
-                    else if (value.getValue().getClass().equals(String.class))
-                        editorNew.putString(value.getKey(), (String) value.getValue());
-                }
-                editorNew.apply();
-            }
-        }
-
-        //Clear Old Entry
-        SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.WAKEUP_TIMER, amount).edit();
-        editor.clear();
-        editor.apply();
-    }
-
-    //Get and Setter
-
 
     //Enums
     enum childItem{
@@ -221,20 +185,17 @@ class AlarmConfiguration {
         WAKEUP_MUSIC,
         WAKEUP_LIGHT
     }
-
     private final int childItems = childItem.values().length;
-
     int getChildItemSize(){
         return childItems;
     }
 
     //Name
     private String actualAlarmname = AlarmConstants.ALARM;
-
     String getAlarmName(){
         return actualAlarmname;
     }
-    void setAlarmName(String name){
+    void setAlarmName(final String name){
         actualAlarmname = name;
     }
 
@@ -242,7 +203,7 @@ class AlarmConfiguration {
     int getAlarmID(){
         return actualAlarm;
     }
-    void setAlarmID(int id){
+    void setAlarmID(final int id){
         actualAlarm = id;
     }
 
@@ -250,68 +211,57 @@ class AlarmConfiguration {
     boolean isAlarmSet(){
         return alarmSet;
     }
-    boolean setAlarm(boolean alarm, boolean active){
+    boolean setAlarm(final boolean alarm, final boolean active){
         alarmSet = alarm;
         return (active) ? activateAlarm() : alarmSet;
     }
     private boolean activateAlarm(){
+
         //Get new Alarm and Set
-        if(manager == null)
-            manager = new AlarmManage(m_Context, this );
+        if(alarmSet && !checkForPendingIntent())
+            return setNewAlarm();
+        else if(checkForPendingIntent())
+            return cancelAlarmwithButton();
 
-        boolean alarmActive = manager.checkForPendingIntent(actualAlarm);
-        if(alarmSet && !alarmActive)
-            manager.setNewAlarm(actualAlarm);
-        else if(alarmActive)
-            manager.cancelAlarmwithButton(actualAlarm);
-
-        return checkForPendingIntent(manager);
+        return checkForPendingIntent();
     }
     public boolean snoozeAlarm(){
 
         if(manager == null)
             manager = new AlarmManage(m_Context, this );
-
-        manager.snoozeAlarm(actualAlarm);
-        return checkForPendingIntent(manager);
+        manager.snoozeAlarm();
+        return checkForPendingIntent();
     }
     public boolean setNewAlarm(){
 
         if(manager == null)
             manager = new AlarmManage(m_Context, this );
-
-        manager.setNewAlarm(actualAlarm);
-        return checkForPendingIntent(manager);
+        manager.setNewAlarm();
+        return checkForPendingIntent();
     }
     public boolean cancelAlarm(){
 
+        clearAlarmManagerFlag();
+
         if(manager == null)
             manager = new AlarmManage(m_Context, this );
-
-        manager.cancelAlarm(actualAlarm);
-        return checkForPendingIntent(manager);
+        manager.cancelAlarm();
+        return checkForPendingIntent();
     }
     public boolean cancelAlarmwithButton(){
 
         if(manager == null)
             manager = new AlarmManage(m_Context, this );
-
-        manager.cancelAlarmwithButton(actualAlarm);
-        return checkForPendingIntent(manager);
+        manager.cancelAlarmwithButton();
+        return checkForPendingIntent();
     }
 
     public boolean checkForPendingIntent(){
-
         if(manager == null)
             manager = new AlarmManage(m_Context, this );
 
-        alarmSet = manager.checkForPendingIntent(actualAlarm);
-        return alarmSet;
-    }
-
-    public boolean checkForPendingIntent(AlarmManage newAlarm){
         //Check if Intent exists
-        alarmSet = newAlarm.checkForPendingIntent(actualAlarm);
+        alarmSet = manager.checkPendingIntent();
         return alarmSet;
     }
 
@@ -358,37 +308,39 @@ class AlarmConfiguration {
         return (Monday()|| Tuesday() || Wednesday() || Thursday() || Friday() || Saturday() || Sunday());
     }
     boolean isDaySet(int day){
-
         switch(day)
         {
-            case 0: return Monday();
-            case 1: return Tuesday();
-            case 2: return Wednesday();
-            case 3: return Thursday();
-            case 4: return Friday();
-            case 5: return Saturday();
-            case 6: return Sunday();
+            case Calendar.MONDAY   : return Monday();
+            case Calendar.TUESDAY  : return Tuesday();
+            case Calendar.WEDNESDAY: return Wednesday();
+            case Calendar.THURSDAY : return Thursday();
+            case Calendar.FRIDAY   : return Friday();
+            case Calendar.SATURDAY : return Saturday();
+            case Calendar.SUNDAY   : return Sunday();
             default: return false;
         }
     }
     int getDaySet(){
         return isMonday() + isTuesday() + isWednesday() + isThursday() + isFriday() + isSaturday() + isSunday();
     }
-    int getTimeToNextDay(int currentDay){
+    int getTimeToNextDay(){
 
-        if(!isDaySet() || isDaySet(currentDay))
+        //No Repeat Days set, return zero
+        if(!isDaySet())
             return 0;
 
-        int nextDay = 1;
-        if((currentDay == 6) ? isDaySet(0) : isDaySet(++currentDay))
-            return nextDay;
+        int currentDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        currentDay = (currentDay++ == Calendar.SATURDAY) ? Calendar.SUNDAY : currentDay;
 
-        ++nextDay;
-        while (!isDaySet(currentDay++))
+        //Count Days
+        int nextDay = 1;
+        while (!isDaySet(currentDay))
         {
-            ++nextDay;
-            if(currentDay == 7)
-                currentDay = 0;
+            if(nextDay++ == 7)
+                break;
+
+            if(currentDay++ == Calendar.SATURDAY)
+                currentDay = Calendar.SUNDAY;
         }
         return nextDay;
     }
@@ -488,7 +440,6 @@ class AlarmConfiguration {
     void setSongURI(String uri){
         m_SongURI = uri;
     }
-
 
     Vector<Integer> getSongTimes(){
         Vector<Integer> time = new Vector<>(2);

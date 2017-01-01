@@ -7,7 +7,9 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
@@ -18,7 +20,6 @@ public class AlarmManage extends AppCompatActivity {
     private AlarmConfiguration config;
 
     AlarmManage(Context alarmContext, AlarmConfiguration alarmConfig){
-
         context = alarmContext;
         config  = alarmConfig;
         createAlarmManager();
@@ -32,28 +33,27 @@ public class AlarmManage extends AppCompatActivity {
     }
 
     //Intents
-    public boolean checkForPendingIntent(int alarmId){
-        //Check if Intent exists
-        return (PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_NO_CREATE) != null);
-    }
-    private Intent getIntent(int ID){
-
+    private Intent getAlarmIntent(){
         //Fill Intent
         Bundle bundle = new Bundle();
-        bundle.putInt(AlarmConstants.ALARM_ID, ID);
+        bundle.putInt(AlarmConstants.ALARM_ID, getConfig().getAlarmID());
         return new Intent(context, AlarmReceiver.class).putExtras(bundle);
     }
-    private PendingIntent getPendingIntent(int alarmId){
+    private PendingIntent getPendingIntent(){
         //Create new PendingIntent
-        return PendingIntent.getBroadcast(context, alarmId, getIntent(alarmId), PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getBroadcast(context, getConfig().getAlarmID(), getAlarmIntent(), PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+    public boolean checkPendingIntent(){
+        //Check if Intent exists
+        return (PendingIntent.getBroadcast(context, getConfig().getAlarmID(), getAlarmIntent(), PendingIntent.FLAG_NO_CREATE) != null);
     }
 
     //Alarm Methods
-    private void setNewAlarm(int ID, boolean snooze){
+    private void setNewAlarm(boolean snooze){
 
         //create Alarm, PendingIntent inherit the actual Alarm ID
         createAlarmManager();
-        PendingIntent pendingIntent = getPendingIntent(ID);
+        PendingIntent pendingIntent = getPendingIntent();
         alarmManager.cancel(pendingIntent);
 
         //Get Days to next Alarm
@@ -66,7 +66,7 @@ public class AlarmManage extends AppCompatActivity {
             //Add all necessary values to alarm time
             calendar.set(Calendar.HOUR_OF_DAY, conf.getHour());
             calendar.set(Calendar.MINUTE     , conf.getMinute());
-            alarmTime = calendar.getTimeInMillis() + TimeUnit.DAYS.toMillis(getDaysToNextAlarm());
+            alarmTime = calendar.getTimeInMillis() + TimeUnit.DAYS.toMillis(conf.getTimeToNextDay());
 
             //Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
             final long currentTime = System.currentTimeMillis();
@@ -94,21 +94,22 @@ public class AlarmManage extends AppCompatActivity {
                     conf.setLEDStartTime((int)TimeUnit.MILLISECONDS.toMinutes(lightStart));
                 conf.commit();
             }
+            else{
+                conf.clearAlarmManagerFlag();
+                conf.commit();
+            }
             alarmTime -= lightStart ;
         }
         else{ //Snooze
 
+            //Set Light and LED to zero
             AlarmConfiguration conf = getConfig();
-            final int snoozeTime = conf.getSnooze();
-            alarmTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(snoozeTime); //+ Snooze
-
             conf.setFromAlarmManager();
-            final int screenTime = conf.getScreenStartTime();
-            conf.setScreenStartTime((screenTime < snoozeTime ) ? screenTime : 0 );
-
-            final int ledTime = conf.getLEDStartTime();
-            conf.setLEDStartTime((ledTime < snoozeTime) ? ledTime : 0 );
+            conf.setScreenStartTime(0);
+            conf.setLEDStartTime(0);
             conf.commit();
+
+            alarmTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(conf.getSnooze()); //+ Snooze
         }
 
         //Check for SDK Version and Use different AlarmManager Functions
@@ -119,33 +120,42 @@ public class AlarmManage extends AppCompatActivity {
         }
         else
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
+
+        //Show Toast when Set
+        if(checkPendingIntent())
+        {
+            //TODO More elegant solution
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(alarmTime);
+            Toast.makeText(context, SimpleDateFormat.getDateTimeInstance().format(cal.getTime()), Toast.LENGTH_SHORT).show();
+        }
     }
-    public void setNewAlarm(int ID){
-        setNewAlarm(ID, false);
+    public void setNewAlarm(){
+        setNewAlarm(false);
     }
-    public void snoozeAlarm(int ID){
-            setNewAlarm(ID, true);
+    public void snoozeAlarm(){
+            setNewAlarm(true);
     }
-    public void cancelAlarm(int ID){
+    public void cancelAlarm(){
 
         //get Days till Next Alarm
-        if(getDaysToNextAlarm() > 0)
-            setNewAlarm(ID);
+        if(isAlarmRepeat())
+            setNewAlarm();
         else
         {
             createAlarmManager();
-            alarmManager.cancel(getPendingIntent(ID));
-            getPendingIntent(ID).cancel();
+            alarmManager.cancel(getPendingIntent());
+            getPendingIntent().cancel();
         }
     }
 
-    public void cancelAlarmwithButton(int ID){
+    public void cancelAlarmwithButton(){
 
         createAlarmManager();
-        if(checkForPendingIntent(ID))
+        if(checkPendingIntent())
         {
-            alarmManager.cancel(getPendingIntent(ID));
-            getPendingIntent(ID).cancel();
+            alarmManager.cancel(getPendingIntent());
+            getPendingIntent().cancel();
         }
     }
 
@@ -156,29 +166,10 @@ public class AlarmManage extends AppCompatActivity {
     private long getTimeAlarmStarts(int hours, int minutes){
         return TimeUnit.HOURS.toMinutes(hours) + minutes ;
     }
-    private int getDaysToNextAlarm(){
 
-        //Load Calendar Instance and get Actual Day of the Week
-        Calendar calendar = Calendar.getInstance();
-        switch (calendar.get(Calendar.DAY_OF_WEEK))
-        {
-            case Calendar.MONDAY   : return  getConfig().getTimeToNextDay(0);
-            case Calendar.TUESDAY  : return  getConfig().getTimeToNextDay(1);
-            case Calendar.WEDNESDAY: return  getConfig().getTimeToNextDay(2);
-            case Calendar.THURSDAY : return  getConfig().getTimeToNextDay(3);
-            case Calendar.FRIDAY   : return  getConfig().getTimeToNextDay(4);
-            case Calendar.SATURDAY : return  getConfig().getTimeToNextDay(5);
-            case Calendar.SUNDAY   : return  getConfig().getTimeToNextDay(6);
-            default: return 0;
-        }
-    }
     private long getTimeBeforeMusic(){
-        //Screen
-        //Max Minutes
-        long screen = getBeforeScreenTime();
-        long led = getBeforeLEDTime();
-
-        return (screen >= led) ? screen : led;
+        //Screen Max Minutes
+        return (getBeforeScreenTime() >= getBeforeLEDTime()) ? getBeforeScreenTime() : getBeforeLEDTime();
     }
     private long getBeforeScreenTime(){
         return (getConfig().useScreen()) ? TimeUnit.MINUTES.toMillis(getConfig().getScreenStartTime()) : 0;

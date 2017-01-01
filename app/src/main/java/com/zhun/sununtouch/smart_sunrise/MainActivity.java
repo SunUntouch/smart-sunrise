@@ -249,7 +249,6 @@ public class MainActivity extends AppCompatActivity
     private void updateChanges(AlarmConfiguration alarm, boolean notify, boolean invalidate){
 
         m_AlarmConfigurations.setAlarm(alarm);
-        //alarm.activateAlarm();
 
         //Don't need both
         if(invalidate)
@@ -267,17 +266,11 @@ public class MainActivity extends AppCompatActivity
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-
         if(activeAlarmToggle.isChecked() && alarm.checkForPendingIntent())
             return;
 
         activeAlarmToggle.setChecked(alarm.setAlarm(activeAlarmToggle.isChecked(), true));
         updateChanges(alarm);
-
-        //show Toast
-        String alarmText = String.format(getString(R.string.toast_positive_alarm),
-                           String.format(Locale.US, "%02d:%02d", alarm.getHour(), alarm.getMinute()));
-        AlarmToast.showToastShort(getApplicationContext(), alarm.isAlarmSet(), alarmText, getString(R.string.toast_negative_alarm));
     }
 
     /***********************************************************************************************
@@ -354,6 +347,9 @@ public class MainActivity extends AppCompatActivity
         }
         //save Settings and reactivate Alarm
         updateChanges(alarm);
+
+        //refresh Alarm separate only for some Key Values
+        alarm.setNewAlarm();
     }
     /***********************************************************************************************
      * TIME SETTING DIALOG
@@ -371,6 +367,9 @@ public class MainActivity extends AppCompatActivity
         alarm.setHour(hourOfDay);
         alarm.setMinute(minute);
         updateChanges(alarm);
+
+        //refresh Alarm separate only for some Key Values
+        alarm.setNewAlarm();
     }
     /***********************************************************************************************
      * MINUTE SETTING DIALOG
@@ -382,7 +381,6 @@ public class MainActivity extends AppCompatActivity
         //SeekBar
         final SeekBar seekBar = new SeekBar(v.getContext());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
@@ -438,17 +436,13 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     private final Vector<AlertDialog> mDialogs = new Vector<>();
     public void showMusicSettingDialog(View v){
-
-        //Create new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_menu));
-
-        String[] ringtoneMode = { this.getString(R.string.wakeup_music_ringtone), this.getString(R.string.wakeup_music_music)};
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, ringtoneMode);
-
+        //Builder List view
         ListView listView = new ListView(this);
-        listView.setAdapter(adapter);
+        listView.setAdapter(new ArrayAdapter<>(
+                this,
+                R.layout.song_artist_listgroup,
+                R.id.song_artist_groupItem,
+                new String[]{this.getString(R.string.wakeup_music_ringtone), this.getString(R.string.wakeup_music_music)}));
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -456,7 +450,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //Show Builder
+        //Create and show new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_menu));
         builder.setView(listView);
         builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
@@ -468,18 +464,16 @@ public class MainActivity extends AppCompatActivity
     }
     private void chooseAlarmArtistDialog( final SongDatabase songs){
 
-        //Create new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-        builder.setTitle(this.getString(R.string.wakeup_set_alarm_artist));
-
         //Get SongNames from SongInformationArray
         final ArrayList<String> artists = new ArrayList<>(Arrays.asList(songs.getArtistStrings()));
         Collections.sort(artists);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, artists);
-
         ListView listView = new ListView(this);
-        listView.setAdapter(adapter);
+        listView.setAdapter(new ArrayAdapter<>(
+                this,
+                R.layout.song_artist_listgroup,
+                R.id.song_artist_groupItem,
+                artists));
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -487,24 +481,24 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //Show Builder
+        //Create and show new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_artist));
         builder.setView(listView);
         mDialogs.addElement(builder.show());
     }
     private void chooseAlarmAlbumDialog( final String artist, final SongDatabase songs){
 
-        //Create new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(this.getString(R.string.wakeup_set_alarm_album));
-
         //Get SongNames from SongInformationArray
         final ArrayList<String> album = new ArrayList<>(Arrays.asList(songs.getAlbumStrings(artist)));
         Collections.sort(album);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, R.layout.song_artist_listgroup, R.id.song_artist_groupItem, album);
-
         ListView listView = new ListView(this);
-        listView.setAdapter(adapter);
+        listView.setAdapter(new ArrayAdapter<>(
+                this,
+                R.layout.song_artist_listgroup,
+                R.id.song_artist_groupItem,
+                album));
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -512,15 +506,13 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //Show Builder
+        //Create and show new Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_album));
         builder.setView(listView);
         mDialogs.addElement(builder.show());
     }
     private void chooseAlarmSongDialog(SongInformation[] songs){
-
-        //Create new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song)); //TODO
 
         final ArrayList<SongInformation> sortedSongs = new ArrayList<>(Arrays.asList(songs));
         Collections.sort(sortedSongs, new Comparator<SongInformation>() {
@@ -534,18 +526,18 @@ public class MainActivity extends AppCompatActivity
         for(SongInformation song : sortedSongs)
             namedSongs.add(song.getTitle());
 
-        final AlarmConfiguration alarm = getAlarm(actualAlarm);
-        //Get Song Name Array and set it for Alarm Dialog Builder
+        //Create new Builder and Get Song Name Array and set it for Alarm Dialog Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song)); //TODO
         builder.setItems(namedSongs.toArray(new String[namedSongs.size()]), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
                 //Get Song Lengh
                 saveSongLength(sortedSongs.get(which).getPath());
-
-                dialog.dismiss();
                 for(AlertDialog dia : mDialogs)
                     dia.dismiss();
+                dialog.dismiss();
             }
         });
 
@@ -559,7 +551,7 @@ public class MainActivity extends AppCompatActivity
 
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                        startMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true, false, alarm.getVolume());
+                        startMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true, false, getAlarm(actualAlarm).getVolume());
                         return true;
                     }
                 });
@@ -573,11 +565,9 @@ public class MainActivity extends AppCompatActivity
         MediaMetadataRetriever metaRetriever = new MediaMetadataRetriever();
         metaRetriever.setDataSource(uri);
 
-        AlarmConfiguration alarm = getAlarm(actualAlarm);
-
         //Get Values from chosen Song
-        String durationStr = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        alarm.setSongLength((int) (Long.parseLong(durationStr) / 1000));
+        AlarmConfiguration alarm = getAlarm(actualAlarm);
+        alarm.setSongLength((int) (Long.parseLong(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)) / 1000));
         alarm.setSongURI(uri);
         updateChanges(alarm);
     }
@@ -617,25 +607,22 @@ public class MainActivity extends AppCompatActivity
         //Get All Song Values from the Android Media Content URI
         //Default for Uri is the internal Memory, because it is every time available
         //If the User Chooses the second entry switch to external Files
-        Uri allSongUri = (modeID == 1)? MediaStore.Audio.Media.EXTERNAL_CONTENT_URI : MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
-
-        //Set Values for the Resolver
-        String[] STAR = { "*" };
-
-        //Resolve ContentURI
         ContentResolver musicResolver = getApplicationContext().getContentResolver();
-        Cursor cursor = musicResolver.query(allSongUri, STAR, null, null, null);
+        Cursor cursor = musicResolver.query(
+                (modeID == 1)? MediaStore.Audio.Media.EXTERNAL_CONTENT_URI : MediaStore.Audio.Media.INTERNAL_CONTENT_URI,
+                new String[]{"*"},
+                null,
+                null,
+                null);
 
         //Search Cursor for Values
         if(cursor != null)
         {
             //ArrayList for Music Entries
             SongDatabase songData = new SongDatabase();
-
             try {
                 if(cursor.moveToFirst())
                 {
-
                     do{
                         int song_id = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media._ID));
                         String song_name   = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
@@ -677,44 +664,44 @@ public class MainActivity extends AppCompatActivity
         startMusic(uri, start, stop, false, volume);
     }
     private void startMusic(final Uri uri, final boolean start, final boolean stop, final boolean looping, final int volume){
-
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-
-                if(stop)
-                    stopMusic(false);
-
-                //Check for MediaPlayer
-                if(mediaPlayer == null)
-                    mediaPlayer = new MediaPlayer();
-                else
-                    mediaPlayer.reset();
-
-                //Set MediaPlayer Values
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-
-                try
+        //Set Runnable to play Music
+        setRunnable(
+                new Runnable()
                 {
-                    mediaPlayer.setDataSource(getApplicationContext(), uri);
-                    mediaPlayer.prepare();
-                } catch (IOException e) {
-                    Log.e("Exception: ", e.getMessage());
+                    @Override
+                    public void run() {
+
+                        if(stop)
+                            stopMusic(false);
+
+                        //Check for MediaPlayer
+                        if(mediaPlayer == null)
+                            mediaPlayer = new MediaPlayer();
+                        else
+                            mediaPlayer.reset();
+
+                        try
+                        {
+                            //Set MediaPlayer Values
+                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                            mediaPlayer.setDataSource(getApplicationContext(), uri);
+                            mediaPlayer.prepare();
+                        } catch (IOException e) {
+                            Log.e("Exception: ", e.getMessage());
+                        }
+
+                        if(start)
+                            mediaPlayer.start();
+
+                        if(volume > -1)
+                        {
+                            float vol = 1 - (float)(Math.log(100-volume)/Math.log(100));
+                            mediaPlayer.setVolume(vol, vol);
+                        }
+                        mediaPlayer.setLooping(looping);
+                    }
                 }
-
-                if(start)
-                    mediaPlayer.start();
-
-                if(volume > -1)
-                {
-                    float vol = 1 - (float)(Math.log(100-volume)/Math.log(100));
-                    mediaPlayer.setVolume(vol, vol);
-                }
-
-                mediaPlayer.setLooping(looping);
-            }
-        };
-        setRunnable(runnable);
+        );
     }
 
     private void stopMusic(boolean release){
@@ -740,22 +727,16 @@ public class MainActivity extends AppCompatActivity
     }
     private boolean checkMusicPermission(boolean askPermission){
 
-        if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            if(askPermission)
-            {
-                if(ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE))
-                {
-                    //we will jump to the Handler if the user accepts or declines th permission and start there our Dialog
-                }
-                else
-                    ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
-            }
-            //We must wait for granting
-            return false;
-        }
-        //Granted
-        return true;
+        if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+            return true; //Granted
+
+        if(askPermission && ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE))
+        {/*we will jump to the Handler if the user accepts or declines th permission and start there our Dialog*/}
+        else if(askPermission)
+            ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
+
+        //We must wait for granting
+        return false;
     }
 
     @Override
@@ -790,22 +771,20 @@ public class MainActivity extends AppCompatActivity
         //SeekBar
         final SeekBar seekBar = new SeekBar(v.getContext());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
                 //Set Position of Text
-                int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
+                final int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 textView.setText(String.format(Locale.US, "%d", progress));
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
 
                 if(mediaPlayer != null && mediaPlayer.isPlaying())
                 {
-                    float volume = 1 - (float)(Math.log(100-progress)/Math.log(100));
+                    final float volume = 1 - (float)(Math.log(100-progress)/Math.log(100));
                     mediaPlayer.setVolume(volume, volume);
                 }
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 textView.setVisibility(TextView.VISIBLE);
@@ -865,14 +844,12 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
                 //Set Position of Text
-                int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
+                final int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                 textView.setText(String.format(Locale.US, "%02d:%02d", TimeUnit.SECONDS.toMinutes(progress),
                                                             progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 textView.setVisibility(TextView.VISIBLE);
@@ -884,7 +861,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Start));
@@ -923,28 +899,23 @@ public class MainActivity extends AppCompatActivity
         fadeInToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
                 //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
                         //Set Position of Text
                         int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                         textView.setText(String.format(Locale.US, "%02d:%02d", TimeUnit.SECONDS.toMinutes(progress),
                                                                     progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
                     }
-
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
                         textView.setVisibility(TextView.VISIBLE);
                     }
-
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         //textView.setVisibility(TextView.GONE);
@@ -973,7 +944,6 @@ public class MainActivity extends AppCompatActivity
                         dialog.dismiss();
                     }
                 });
-
                 builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -1008,14 +978,12 @@ public class MainActivity extends AppCompatActivity
         vibrationToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
                 //TODO Let it vibrate
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
                 //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
@@ -1025,12 +993,10 @@ public class MainActivity extends AppCompatActivity
                         textView.setText(message);
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                     }
-
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
                         textView.setVisibility(TextView.VISIBLE);
                     }
-
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         //textView.setVisibility(TextView.GONE);
@@ -1050,7 +1016,6 @@ public class MainActivity extends AppCompatActivity
                         dialog.dismiss();
                     }
                 });
-
                 builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -1079,28 +1044,24 @@ public class MainActivity extends AppCompatActivity
      * SCEEN LIGHT SETTING DIALOG
      **********************************************************************************************/
     public void showScreenLightSettingDialog(View v){
-
         //GEt ToggleButton and Set On LongClickListener
         final ToggleButton screenToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_light_buttonLight);
         screenToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
                 //Seekbar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         //Set Position of Text
-                        int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
+                        final int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
                         String message = Integer.toString(progress + 1)+ "%";
                         textView.setText(message);
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                     }
-
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
                         textView.setVisibility(TextView.VISIBLE);
@@ -1114,7 +1075,6 @@ public class MainActivity extends AppCompatActivity
                 //Create new Builder
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                 builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_light_brightness));
-
                 //Set Alertdialog View
                 builder.setView(createAlertLinearLayout(v, textView, seekBar, 99, 1, getAlarm(actualAlarm).getScreenBrightness() - 1)); //We must -1 because we dont want to have zero brightness
                 builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
@@ -1126,7 +1086,6 @@ public class MainActivity extends AppCompatActivity
                         dialog.dismiss();
                     }
                 });
-
                 builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -1159,17 +1118,14 @@ public class MainActivity extends AppCompatActivity
         //Seek Bar
         final SeekBar seekBar = new SeekBar(v.getContext());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
                 //Set Position of Text
-                int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
-                String message = Integer.toString(progress) + "min";
+                final int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
+                final String message = Integer.toString(progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 textView.setVisibility(TextView.VISIBLE);
@@ -1192,7 +1148,6 @@ public class MainActivity extends AppCompatActivity
                 dialog.dismiss();
             }
         });
-
         builder.setNegativeButton(this.getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -1213,9 +1168,8 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showScreenColor1SettingDialog(View v){
 
-        final Button bColor = (Button) v;
-
         //TODO Need a better ColorPicker without 0xfffff bug
+        final Button bColor = (Button) v;
         ColorPickingDialog colorPicker = new ColorPickingDialog(v.getContext(), 0xffffff, new ColorPickingDialog.OnColorSelectedListener() {
             @Override
             public void colorSelected(Integer color) {
@@ -1228,17 +1182,15 @@ public class MainActivity extends AppCompatActivity
     }
     private void onColorSet(Button bView, int color){
 
-        AlarmConfiguration alarm = getAlarm(actualAlarm);
-
         final String color1 = this.getString(R.string.wakeup_light_screen_color1);
         final String color2 = this.getString(R.string.wakeup_light_screen_color2);
 
+        AlarmConfiguration alarm = getAlarm(actualAlarm);
         if(color1.equals(bView.getText().toString()))
             alarm.setLightColor1(color);
         else if(color2.equals(bView.getText().toString()))
             alarm.setLightColor2(color);
-        else
-            debug_assertion(true);
+        else debug_assertion(true);
 
         //save Settings
         updateChanges(alarm);
@@ -1277,17 +1229,14 @@ public class MainActivity extends AppCompatActivity
         //Seek Bar
         final SeekBar seekBar = new SeekBar(v.getContext());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
                 //Set Position of Text
-                int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
-                String message = Integer.toString(progress) + "min";
+                final int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
+                final String message = Integer.toString(progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
-
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 textView.setVisibility(TextView.VISIBLE);
@@ -1310,7 +1259,6 @@ public class MainActivity extends AppCompatActivity
                 dialog.dismiss();
             }
         });
-
         builder.setNegativeButton(this.getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -1320,7 +1268,6 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
     private void onLEDStartTimeSet(int minutes){
-
         //Save LEDSTartTime Minutes save Settings
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setLEDStartTime(minutes);

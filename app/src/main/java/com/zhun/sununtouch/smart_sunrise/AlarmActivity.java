@@ -55,8 +55,8 @@ public class AlarmActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_alarm);
         alarmHandler = new Handler();
-        musicThread      = new AlarmWorkerThread("SmartSunrise_Music");
-        ledThread        = new AlarmWorkerThread("SmartSunrise_LED");
+        musicThread  = new AlarmWorkerThread("SmartSunrise_Music");
+        ledThread    = new AlarmWorkerThread("SmartSunrise_LED");
 
         //Load Values
         final int actualAlarm = getIntent().getExtras().getInt(AlarmConstants.ALARM_ID);
@@ -90,17 +90,17 @@ public class AlarmActivity extends AppCompatActivity {
         }
         else
             startScreen(); //else start the screen
+
+        //Clear Flag
+        config.clearAlarmManagerFlag();
+        config.commit();
     }
     protected void onStop() {
-
         //Cancel or Snooze Alarm
         if(snoozed)
             config.snoozeAlarm();
-        else {
+        else
             config.cancelAlarm();
-            config.clearAlarmManagerFlag();
-            config.commit();
-        }
 
         //Remove Callbacks
         alarmHandler.removeCallbacksAndMessages(null);
