@@ -152,9 +152,6 @@ public class AlarmActivity extends AppCompatActivity {
         alarmHandler.removeCallbacksAndMessages(null);
         super.onStop();
     }
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 
     private void setRunnable(Runnable runnable, long millis){
 
@@ -259,7 +256,6 @@ public class AlarmActivity extends AppCompatActivity {
         //Check if Fading is true
         if(getConfig().getLightFade())
         {
-            final boolean isFaded = false;
             colorFade1.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animation) {
@@ -440,13 +436,13 @@ public class AlarmActivity extends AppCompatActivity {
             }
         }, TimeUnit.MINUTES.toMillis(minutes));
     }
-    private void setVibrationStart(int _repeat){
+    private void setVibrationStart(int repeat){
         //Start without delay,
         //Vibrate fpr milliseconds
         //Sleep for milliseconds
         if(m_Vibrator == null)
             m_Vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        m_Vibrator.vibrate(new long[]{0, 8 * getConfig().getVibrationStrength() + 350, (4000 / (long) Math.sqrt(getConfig().getVibrationStrength() + 1))}, _repeat);
+        m_Vibrator.vibrate(new long[]{0, 8 * getConfig().getVibrationStrength() + 350, (4000 / (long) Math.sqrt(getConfig().getVibrationStrength() + 1))}, repeat);
     }
     private void setVibrationStop(){
 

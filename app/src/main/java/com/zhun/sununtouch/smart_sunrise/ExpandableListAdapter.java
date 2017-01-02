@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 class ExpandableListAdapter extends BaseExpandableListAdapter {
 
-    private Context context;
+    private final Context context;
     private AlarmConfigurationList configuration;
 
     /***********************************************************************************************

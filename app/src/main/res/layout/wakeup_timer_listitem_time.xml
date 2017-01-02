@@ -3,8 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:id="@+id/wakeup_timer_layout_time"
-    android:background="@color/backgroundColor">
+    android:id="@+id/wakeup_timer_layout_time">
 
     <TextView
         android:id="@+id/wakeup_timer_time_textview"

@@ -57,7 +57,7 @@ abstract class AlarmConstants {
     final static String ALARM_LIGHT_LED_START_TEMP    = "Alarm_LEDStartTemp";
 
     //StartValues
-    private static Calendar calendar = Calendar.getInstance();
+    private final static Calendar calendar = Calendar.getInstance();
 
     //AlarmSet
     final static boolean ACTUAL_ONESHOT   = false;

@@ -14,6 +14,8 @@
     <string name="wakeup_set_alarm_name">Benenne Alarm</string>
     <string name="wakeup_set_alarm_minutes">Wähle Minuten</string>
     <string name="wakeup_set_alarm_song_menu">Wähle Alarmart</string>
+    <string name="wakeup_set_alarm_artist">Wähle Artist</string>
+    <string name="wakeup_set_alarm_album">Wähle Album</string>
     <string name="wakeup_set_alarm_song">Wähle Alarmton</string>
     <string name="wakeup_set_alarm_song_Volume">Lautstärke</string>
     <string name="wakeup_set_alarm_song_Start">Startzeit</string>

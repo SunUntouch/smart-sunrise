@@ -1197,7 +1197,7 @@ public class MainActivity extends AppCompatActivity
 
         //TODO Need a better ColorPicker without 0xfffff bug
         final Button bColor = (Button) v;
-        ColorPickingDialog colorPicker = new ColorPickingDialog(v.getContext(), 0xffffff, new ColorPickingDialog.OnColorSelectedListener() {
+        ColorPickingDialog colorPicker = new ColorPickingDialog(v.getContext(), (v.getId() == R.id.wakeup_timer_light_buttonColor1) ? getAlarm(actualAlarm).getLightColor1() : getAlarm(actualAlarm).getLightColor2(), new ColorPickingDialog.OnColorSelectedListener() {
             @Override
             public void colorSelected(Integer color) {
                 bColor.getBackground().setColorFilter(color, PorterDuff.Mode.MULTIPLY);

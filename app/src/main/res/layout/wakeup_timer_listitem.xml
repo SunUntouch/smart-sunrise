@@ -2,8 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/backgroundColor">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/wakeup_timer_listItem"
@@ -14,5 +13,7 @@
         android:textColorHighlight="@color/textColorSecondary"
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
-        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"/>
+        android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingRight"/>
+
 </LinearLayout>

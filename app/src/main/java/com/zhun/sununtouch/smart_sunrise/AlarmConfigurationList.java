@@ -11,12 +11,12 @@ import java.util.Vector;
  * Created by Sunny on 28.12.2016.
  */
 
-public class AlarmConfigurationList {
+class AlarmConfigurationList {
 
-    int m_Amount;
-    List<AlarmConfiguration> m_Alarms;
+    private int m_Amount;
+    private final List<AlarmConfiguration> m_Alarms;
 
-    Context m_Context;
+    private final Context m_Context;
 
     //Constructor
     AlarmConfigurationList(Context context){

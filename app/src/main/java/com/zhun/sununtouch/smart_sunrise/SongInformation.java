@@ -4,11 +4,11 @@ package com.zhun.sununtouch.smart_sunrise;
  * Created by Sunny on 20.12.2015.
  */
 class SongInformation {
-    private long id;
-    private String title;
-    private String artist;
-    private String album;
-    private String path;
+    private final long id;
+    private final String title;
+    private final String artist;
+    private final String album;
+    private final String path;
 
     SongInformation(long songID, String songTitle, String songArtist, String songAlbum, String songPath){
 

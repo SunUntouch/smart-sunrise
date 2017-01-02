@@ -19,7 +19,7 @@ public class AlarmManage extends AppCompatActivity {
 
     private final Context context;
     private AlarmManager alarmManager;
-    private AlarmConfiguration config;
+    private final AlarmConfiguration config;
 
     AlarmManage(Context alarmContext, AlarmConfiguration alarmConfig){
         context = alarmContext;
@@ -146,9 +146,9 @@ public class AlarmManage extends AppCompatActivity {
         intent.cancel();
         return checkPendingIntent();
     }
-    public boolean refresh(){
+    public void refresh(){
         cancelAlarm();
-        return setAlarm(false);
+        setAlarm(false);
     }
 
     //Getter

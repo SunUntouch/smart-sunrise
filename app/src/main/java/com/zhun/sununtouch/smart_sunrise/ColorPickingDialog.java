@@ -18,7 +18,7 @@ import android.widget.RelativeLayout;
 /**
  * Created by Sunny on 26.12.2015.
  */
-public class ColorPickingDialog extends AlertDialog{
+class ColorPickingDialog extends AlertDialog{
 
     private static final int PADDING_DP = 20;
 
@@ -33,7 +33,7 @@ public class ColorPickingDialog extends AlertDialog{
     interface OnColorSelectedListener {
         /**
          * @param color The color code selected, or null if no color. No color is only
-         * possible if {@link HSVColorPickerDialog#setNoColorButton(int) setNoColorButton()}
+         * possible if {HSVColorPickerDialog#setNoColorButton(int) setNoColorButton()}
          * has been called on the dialog before showing it
          */
         void colorSelected(Integer color);
@@ -44,7 +44,7 @@ public class ColorPickingDialog extends AlertDialog{
         this.selectedColor = initialColor;
         this.listener = listener;
 
-        colorWheel = new HSVColorWheel( context );
+        HSVColorWheel colorWheel = new HSVColorWheel( context );
         valueSlider = new HSVValueSlider( context );
         int padding = (int) (context.getResources().getDisplayMetrics().density * PADDING_DP);
         int borderSize = (int) (context.getResources().getDisplayMetrics().density * BORDER_DP);
@@ -99,7 +99,7 @@ public class ColorPickingDialog extends AlertDialog{
         setView( layout, padding, padding, padding, padding );
     }
 
-    private OnClickListener clickListener = new DialogInterface.OnClickListener() {
+    private final OnClickListener clickListener = new DialogInterface.OnClickListener() {
         public void onClick(DialogInterface dialog, int which) {
             switch ( which ) {
                 case BUTTON_NEGATIVE:
@@ -116,9 +116,7 @@ public class ColorPickingDialog extends AlertDialog{
         }
     };
 
-    private HSVColorWheel colorWheel;
-    private HSVValueSlider valueSlider;
-
+    private final HSVValueSlider valueSlider;
     private View selectedColorView;
 
     /**
@@ -163,7 +161,7 @@ public class ColorPickingDialog extends AlertDialog{
         private int scale;
         private int pointerLength;
         private int innerPadding;
-        private Paint pointerPaint = new Paint();
+        private final Paint pointerPaint = new Paint();
         private void init() {
             float density = context.getResources().getDisplayMetrics().density;
             scale = (int) (density * SCALE);
@@ -176,7 +174,7 @@ public class ColorPickingDialog extends AlertDialog{
             this.listener = listener;
         }
 
-        float[] colorHsv = { 0f, 0f, 1f };
+        final float[] colorHsv = { 0f, 0f, 1f };
         public void setColor( int color ) {
             Color.colorToHSV(color, colorHsv);
             invalidate();
@@ -214,7 +212,7 @@ public class ColorPickingDialog extends AlertDialog{
         private float scaledFullCircleRadius;
         private float scaledFadeOutSize;
 
-        private Point selectedPoint = new Point();
+        private final Point selectedPoint = new Point();
 
         @Override
         protected void onSizeChanged(int w, int h, int oldw, int oldh) {
@@ -242,7 +240,7 @@ public class ColorPickingDialog extends AlertDialog{
             int h = rect.height();
 
             float[] hsv = new float[] { 0f, 0f, 1f };
-            int alpha = 255;
+            int alpha;
 
             int x = (int) -scaledFullCircleRadius, y = (int) -scaledFullCircleRadius;
             for ( int i = 0; i < scaledPixels.length; i++ ) {
@@ -343,7 +341,7 @@ public class ColorPickingDialog extends AlertDialog{
             this.listener = listener;
         }
 
-        float[] colorHsv = { 0f, 0f, 1f };
+        final float[] colorHsv = { 0f, 0f, 1f };
         public void setColor( int color, boolean keepValue ) {
             float oldValue = colorHsv[2];
             Color.colorToHSV(color, colorHsv);

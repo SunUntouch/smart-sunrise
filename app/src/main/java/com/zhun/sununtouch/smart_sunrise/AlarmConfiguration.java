@@ -169,14 +169,14 @@ class AlarmConfiguration {
     boolean cancelAlarm(){
         return createAlarmManager().cancelAlarm();
     }
-    boolean snoozeAlarm(){
-        return createAlarmManager().setAlarm(true);
+    void snoozeAlarm(){
+        createAlarmManager().setAlarm(true);
     }
     boolean activateAlarm(){
         return createAlarmManager().setAlarm(false);
     }
-    boolean refreshAlarm(){
-        return createAlarmManager().refresh();
+    void refreshAlarm(){
+        createAlarmManager().refresh();
     }
 
     //Enums

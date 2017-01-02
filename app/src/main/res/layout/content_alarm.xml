@@ -14,7 +14,7 @@
 
     <Button
         android:text="WAKE UP"
-        android:textSize="50dp"
+        android:textSize="50sp"
         android:textColor="#80000000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
             android:text="Friday, 14.12.2016"
             android:textColor="#80000000"
             android:textAlignment="center"
-            android:textSize="30dp"
+            android:textSize="30sp"
             android:layout_width="match_parent"
             android:layout_height="40dp"/>
 
@@ -68,7 +68,7 @@
 
     <Button
         android:text="SNOOZE"
-        android:textSize="50dp"
+        android:textSize="50sp"
         android:textColor="#80000000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

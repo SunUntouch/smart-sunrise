@@ -8,7 +8,7 @@
 
     <Button
         android:text="@string/wakeup_time_wakeup"
-        android:textSize="50dp"
+        android:textSize="50sp"
         android:textColor="#80000000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
 
     <Button
         android:text="@string/wakeup_time_snooze"
-        android:textSize="50dp"
+        android:textSize="50sp"
         android:textColor="#80000000"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
