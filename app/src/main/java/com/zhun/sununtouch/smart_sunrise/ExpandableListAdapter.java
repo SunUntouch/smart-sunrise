@@ -33,13 +33,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     /***********************************************************************************************
      * VIEWS
      **********************************************************************************************/
-    private View createTimeView(int ID){
+    private View createTimeView(ViewGroup v, int ID){
 
         AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.wakeup_timer_listitem_time, null);
+        View view = inflater.inflate(R.layout.wakeup_timer_listitem_time, v, false);
 
         //Get TextChild from View
         TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_time_textview);
@@ -53,14 +53,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         return view;
     }
-    private View createDayView(int ID){
+    private View createDayView(ViewGroup v,int ID){
 
         AlarmConfiguration config = configuration.getAlarm(ID);
-        config.clearAlarmManagerFlag();
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.wakeup_timer_listitem_days, null);
+        View view = inflater.inflate(R.layout.wakeup_timer_listitem_days, v, false);
 
         //Get TextChild from View
         TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_days_textview);
@@ -74,24 +73,23 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         ToggleButton setSaturday  = (ToggleButton) view.findViewById(R.id.wakeup_saturday);
         ToggleButton setSunday    = (ToggleButton) view.findViewById(R.id.wakeup_sunday);
 
-        setMonday   .setChecked(config.Monday());
-        setTuesday  .setChecked(config.Tuesday());
-        setWednesday.setChecked(config.Wednesday());
-        setThursday .setChecked(config.Thursday());
-        setFriday   .setChecked(config.Friday());
-        setSaturday .setChecked(config.Saturday());
-        setSunday   .setChecked(config.Sunday());
+        setMonday   .setChecked(config.isMonday());
+        setTuesday  .setChecked(config.isTuesday());
+        setWednesday.setChecked(config.isWednesday());
+        setThursday .setChecked(config.isThursday());
+        setFriday   .setChecked(config.isFriday());
+        setSaturday .setChecked(config.isSaturday());
+        setSunday   .setChecked(config.isSunday());
 
         return view;
     }
-    private View createMusicView(int ID){
+    private View createMusicView(ViewGroup v, int ID){
 
         AlarmConfiguration config = configuration.getAlarm(ID);
-        config.clearAlarmManagerFlag();
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.wakeup_timer_listitem_music, null);
+        View view = inflater.inflate(R.layout.wakeup_timer_listitem_music, v, false);
 
         //Get TextChild from View
         TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_music_textview);
@@ -122,22 +120,22 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         ToggleButton setFadeIn = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleFadeIn);
         setFadeIn.setTextOn(String.format(Locale.US, "%02d:%02d", minutes, seconds));
         setFadeIn.setTextOff(view.getContext().getString(R.string.wakeup_music_fadeOff));
-        setFadeIn.setChecked(config.useFadeIn());
+        setFadeIn.setChecked(config.getFadeIn());
 
         //Set Vibration ToggleButton
         ToggleButton setVibrationButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleVibration);
         setVibrationButton.setTextOn(config.getVibrationStrength() + "%");
         setVibrationButton.setTextOff(view.getContext().getString(R.string.wakeup_music_vibraOff));
-        setVibrationButton.setChecked(config.useVibration());
+        setVibrationButton.setChecked(config.getVibration());
         return view;
     }
-    private View createLightView(int ID){
+    private View createLightView(ViewGroup v, int ID){
 
         AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.wakeup_timer_listitem_light, null);
+        View view = inflater.inflate(R.layout.wakeup_timer_listitem_light, v, false);
 
         //Get TextChild from View
         TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_light_textview);
@@ -147,7 +145,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         ToggleButton setLightButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonLight);
         setLightButton.setTextOn(view.getContext().getString( R.string.wakeup_light_screen_brightness) + " " +  config.getScreenBrightness() + "%");
         setLightButton.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_brightness_off));
-        setLightButton.setChecked(config.getScreen() == 1);
+        setLightButton.setChecked(config.getScreen());
 
         //Set Start Time Button
         Button setStartTime = (Button) view.findViewById(R.id.wakeup_timer_light_buttonStart);
@@ -167,13 +165,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         ToggleButton setFade = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonScreenFade);
         setFade.setTextOn(view.getContext().getString(R.string.wakeup_light_screen_fadingOn));
         setFade.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_fadingOff));
-        setFade.setChecked(config.getLightFade() == 1);
+        setFade.setChecked(config.getLightFade());
 
         //Toggle LED
         ToggleButton setLEDButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonLED);
         setLEDButton.setTextOn(view.getContext().getString(R.string.wakeup_light_screen_LEDOn));
         setLEDButton.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_LEDOff));
-        setLEDButton.setChecked(config.getLED() == 1);
+        setLEDButton.setChecked(config.getLED());
 
         //Set LED Start Time
         Button setLEDStartTime = (Button) view.findViewById(R.id.wakeup_timer_light_buttonLEDStart);
@@ -181,13 +179,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         return view;
     }
-    private View createDeleteView(int ID){
+    private View createDeleteView(ViewGroup v, int ID){
 
         AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.wakeup_timer_listitem_delete, null);
+        View view = inflater.inflate(R.layout.wakeup_timer_listitem_delete, v, false);
 
         //Get TextChild from View
         TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_delete_textview);
@@ -198,7 +196,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Check for Alarm and Set Button to boolean value
         ToggleButton setNewAlarm = (ToggleButton) view.findViewById(R.id.wakeup_timer_setAlarmButton);
-        setNewAlarm.setChecked(config.checkForPendingIntent());
+        setNewAlarm.setChecked(config.isAlarmSet());
 
         return view;
     }
@@ -227,7 +225,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         if(convertView == null){
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, null);
+            convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, parent, false);
         }
 
         AlarmConfiguration config = configuration.getAlarm(groupPosition);
@@ -244,13 +242,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         //Day Text
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
         txtListDays.setText(String.format("%s %s %s %s %s %s %s",
-                (config.Monday())    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
-                (config.Tuesday())   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
-                (config.Wednesday()) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
-                (config.Thursday())  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
-                (config.Friday())    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
-                (config.Saturday())  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
-                (config.Sunday())    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
+                (config.isMonday())    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
+                (config.isTuesday())   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
+                (config.isWednesday()) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
+                (config.isThursday())  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
+                (config.isFriday())    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
+                (config.isSaturday())  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
+                (config.isSunday())    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
         return convertView;
     }
     /***********************************************************************************************
@@ -277,11 +275,11 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         switch ((AlarmConfiguration.childItem) getChild(groupPosition, childPosition))
         {
-            case WAKEUP_TIME  : return createTimeView  (groupPosition);
-            case WAKEUP_DAYS  : return createDayView   (groupPosition);
-            case WAKEUP_MUSIC : return createMusicView (groupPosition);
-            case WAKEUP_LIGHT : return createLightView (groupPosition);
-            case WAKEUP_DELETE: return createDeleteView(groupPosition);
+            case WAKEUP_TIME  : return createTimeView  (parent, groupPosition);
+            case WAKEUP_DAYS  : return createDayView   (parent, groupPosition);
+            case WAKEUP_MUSIC : return createMusicView (parent, groupPosition);
+            case WAKEUP_LIGHT : return createLightView (parent, groupPosition);
+            case WAKEUP_DELETE: return createDeleteView(parent, groupPosition);
             default: return null;
         }
     }

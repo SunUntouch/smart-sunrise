@@ -51,7 +51,7 @@ public class AlarmManage extends AppCompatActivity {
     }
 
     //Alarm Methods
-    private void setNewAlarm(boolean snooze){
+    public boolean setAlarm(boolean snooze){
 
         //create Alarm, PendingIntent inherit the actual Alarm ID
         createAlarmManager();
@@ -77,8 +77,10 @@ public class AlarmManage extends AppCompatActivity {
             alarmTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(conf.getSnooze()); //+ Snooze
 
         //Check if the complete start time is in the past, if so change light to better suiting values
-        long lightStart = getTimeBeforeMusic();
-        final long alarmTimeWithLight = alarmTime - lightStart;
+        long timeBeforeMusic = (getBeforeScreenTime() >= getBeforeLEDTime()) ? getBeforeScreenTime() : getBeforeLEDTime();
+
+        final long alarmTimeWithLight = alarmTime - timeBeforeMusic;
+        boolean changed = false;
         if(alarmTimeWithLight < currentTime)
         {
             //Calculate Times
@@ -87,28 +89,35 @@ public class AlarmManage extends AppCompatActivity {
 
             //Add 20 Seconds to Delta Time
             final long deltaTime  = currentTime - alarmTimeWithLight + TimeUnit.SECONDS.toMillis(20);
-            lightStart = (screenTime > ledTime)? screenTime - deltaTime : ledTime - deltaTime;
+            timeBeforeMusic = (screenTime > ledTime)? screenTime - deltaTime : ledTime - deltaTime;
 
             //Safe newly set Values
-            conf.setFromAlarmManager();
-            if(lightStart < ledTime )
-                conf.setScreenStartTime((!snooze) ? (int)TimeUnit.MILLISECONDS.toMinutes(lightStart) : 0);
+            if(timeBeforeMusic < screenTime )
+            {
+                changed = true;
+                conf.setTemporaryTimes(true);
+                conf.setScreenStartTemp((!snooze) ? (int)TimeUnit.MILLISECONDS.toMinutes(timeBeforeMusic) : 0);
+            }
 
-            if(lightStart < screenTime)
-                conf.setLEDStartTime((!snooze) ? (int)TimeUnit.MILLISECONDS.toMinutes(lightStart) : 0);
-            conf.commit();
+            if(timeBeforeMusic < ledTime)
+            {
+                changed = true;
+                conf.setTemporaryTimes(true);
+                conf.setLEDStartTemp((!snooze) ? (int)TimeUnit.MILLISECONDS.toMinutes(timeBeforeMusic) : 0);
+            }
         }
-        else if(conf.hasAlarmmanagerValues()){
-            conf.clearAlarmManagerFlag();
-            conf.commit();
+
+        if(!conf.isDaySet())
+        {
+            changed = true;
+            conf.setAlarmOneShot(true);
         }
 
-        alarmTime -= lightStart ;
-
-        //For Testing
-        alarmTime = (DEBUG) ? System.currentTimeMillis() : alarmTime;
+        if(changed)
+            conf.commit();
 
         //Check for SDK Version and Use different AlarmManager Functions
+        alarmTime = (DEBUG) ? System.currentTimeMillis() : alarmTime - timeBeforeMusic; //For Testing
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             //Newer API Level provides a Symbol when Alarm is active
             AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(alarmTime, pendingIntent);
@@ -118,63 +127,35 @@ public class AlarmManage extends AppCompatActivity {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
 
         //Show Toast when Set
-        if(checkPendingIntent())
+        boolean checked = checkPendingIntent();
+        if(checked)
         {
-            //TODO More elegant solution
+            //TODO More elegant solution then a toast
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(alarmTime);
             Toast.makeText(context, SimpleDateFormat.getDateTimeInstance().format(cal.getTime()), Toast.LENGTH_SHORT).show();
         }
+        return checked;
     }
-    public void setNewAlarm(){
-        setNewAlarm(false);
-    }
-    public void snoozeAlarm(){
-            setNewAlarm(true);
-    }
-    public void cancelAlarm(){
+    public boolean cancelAlarm(){
 
         //get Days till Next Alarm
-        if(isAlarmRepeat())
-            setNewAlarm();
-        else
-        {
-            config.clearAlarmManagerFlag();
-            config.setAlarm(false,false);
-            config.commit();
-
-            createAlarmManager();
-            alarmManager.cancel(getPendingIntent());
-            getPendingIntent().cancel();
-        }
-    }
-
-    public void cancelAlarmwithButton(){
-
         createAlarmManager();
-        if(checkPendingIntent())
-        {
-            alarmManager.cancel(getPendingIntent());
-            getPendingIntent().cancel();
-        }
+        final PendingIntent intent = getPendingIntent();
+        alarmManager.cancel(intent);
+        intent.cancel();
+        return checkPendingIntent();
+    }
+    public boolean refresh(){
+        cancelAlarm();
+        return setAlarm(false);
     }
 
     //Getter
-    private boolean isAlarmRepeat(){
-        return getConfig().isDaySet();
-    }
-    private long getTimeAlarmStarts(int hours, int minutes){
-        return TimeUnit.HOURS.toMinutes(hours) + minutes ;
-    }
-
-    private long getTimeBeforeMusic(){
-        //Screen Max Minutes
-        return (getBeforeScreenTime() >= getBeforeLEDTime()) ? getBeforeScreenTime() : getBeforeLEDTime();
-    }
     private long getBeforeScreenTime(){
-        return (getConfig().useScreen()) ? TimeUnit.MINUTES.toMillis(getConfig().getScreenStartTime()) : 0;
+        return (getConfig().getScreen()) ? TimeUnit.MINUTES.toMillis(getConfig().getScreenStartTime()) : 0;
     }
     private long getBeforeLEDTime(){
-        return (getConfig().useLED()) ? TimeUnit.MINUTES.toMillis(getConfig().getLEDStartTime()) : 0;
+        return (getConfig().getLED()) ? TimeUnit.MINUTES.toMillis(getConfig().getLEDStartTime()) : 0;
     }
 }

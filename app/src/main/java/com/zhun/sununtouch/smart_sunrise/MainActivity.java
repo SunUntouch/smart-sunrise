@@ -269,10 +269,8 @@ public class MainActivity extends AppCompatActivity
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        if(activeAlarmToggle.isChecked() && alarm.checkForPendingIntent())
-            return;
-
-        activeAlarmToggle.setChecked(alarm.setAlarm(activeAlarmToggle.isChecked(), true));
+        boolean alarmSet = (activeAlarmToggle.isChecked()) ? alarm.activateAlarm() : alarm.cancelAlarm();
+        activeAlarmToggle.setChecked(alarmSet);
         updateChanges(alarm);
     }
 
@@ -339,20 +337,21 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         ToggleButton toggle = (ToggleButton) v;
         switch(v.getId()){
-            case R.id.wakeup_monday   : alarm.setMonday   ((toggle.isChecked()) ? 1 : 0); break;
-            case R.id.wakeup_tuesday  : alarm.setTuesday  ((toggle.isChecked()) ? 1 : 0); break;
-            case R.id.wakeup_wednesday: alarm.setWednesday((toggle.isChecked()) ? 1 : 0); break;
-            case R.id.wakeup_thursday : alarm.setThursday ((toggle.isChecked()) ? 1 : 0); break;
-            case R.id.wakeup_friday   : alarm.setFriday   ((toggle.isChecked()) ? 1 : 0); break;
-            case R.id.wakeup_saturday : alarm.setSaturday ((toggle.isChecked()) ? 1 : 0); break;
-            case R.id.wakeup_sunday   : alarm.setSunday   ((toggle.isChecked()) ? 1 : 0); break;
+            case R.id.wakeup_monday   : alarm.setMonday   (toggle.isChecked()); break;
+            case R.id.wakeup_tuesday  : alarm.setTuesday  (toggle.isChecked()); break;
+            case R.id.wakeup_wednesday: alarm.setWednesday(toggle.isChecked()); break;
+            case R.id.wakeup_thursday : alarm.setThursday (toggle.isChecked()); break;
+            case R.id.wakeup_friday   : alarm.setFriday   (toggle.isChecked()); break;
+            case R.id.wakeup_saturday : alarm.setSaturday (toggle.isChecked()); break;
+            case R.id.wakeup_sunday   : alarm.setSunday   (toggle.isChecked()); break;
             default: debug_assertion(true); break;
         }
         //save Settings and reactivate Alarm
         updateChanges(alarm);
 
         //refresh Alarm separate only for some Key Values
-        alarm.setNewAlarm();
+        if(alarm.isAlarmSet())
+            alarm.refreshAlarm();
     }
     /***********************************************************************************************
      * TIME SETTING DIALOG
@@ -372,7 +371,8 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
 
         //refresh Alarm separate only for some Key Values
-        alarm.setNewAlarm();
+        if(alarm.isAlarmSet())
+            alarm.refreshAlarm();
     }
     /***********************************************************************************************
      * MINUTE SETTING DIALOG
@@ -576,19 +576,6 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
     }
 
-    private void searchMusic(){
-
-        if(checkMusicPermission(false))
-        {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    searchMusic(1, false, false);
-                }
-            };
-            setRunnable(runnable);
-        }
-    }
     private void searchMusic(int modeID){
         searchMusic(modeID, true, true);
     }
@@ -725,7 +712,7 @@ public class MainActivity extends AppCompatActivity
             return true; //Granted
 
         if(askPermission && ActivityCompat.shouldShowRequestPermissionRationale(this, READ_EXTERNAL_STORAGE))
-        {/*we will jump to the Handler if the user accepts or declines th permission and start there our Dialog*/}
+        {/*we will jump to the Handler if the user accepts or declines the permission and start there our Dialog*/}
         else if(askPermission)
             ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
 
@@ -962,7 +949,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set Vibration Checked
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setFadeIn((fadeInToggle.isChecked())? 1 : 0);
+        alarm.setFadeIn(fadeInToggle.isChecked());
         updateChanges(alarm,false);
     }
     private void onFadeInTimeSet(int seconds){
@@ -970,7 +957,7 @@ public class MainActivity extends AppCompatActivity
         //Save Snooze Minutes
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setFadeInTime(seconds);
-        alarm.setFadeIn(1); //true
+        alarm.setFadeIn(true);
         updateChanges(alarm);
     }
     /***********************************************************************************************
@@ -1040,7 +1027,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set Vibration Checked
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setVibration((vibrationToggle.isChecked())? 1 : 0);
+        alarm.setVibration(vibrationToggle.isChecked());
         updateChanges(alarm, false);
     }
     private void onVibrationStrengthSet(int strength){
@@ -1048,7 +1035,7 @@ public class MainActivity extends AppCompatActivity
         //Save Vibration Values and save Settings
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setVibrationStrength(strength);
-        alarm.setVibration(1); //true
+        alarm.setVibration(true);
         updateChanges(alarm);
     }
 
@@ -1135,7 +1122,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set Screen Checked
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setScreen((screenToggle.isChecked())? 1 : 0);
+        alarm.setScreen(screenToggle.isChecked());
         updateChanges(alarm, false);
     }
     private void onScreenBrightnessSet(int brightness){
@@ -1198,6 +1185,10 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setScreenStartTime(minutes);  //we Start with 1 minute
         updateChanges(alarm);
+
+        //refresh Alarm separate only for some Key Values
+        if(alarm.isAlarmSet())
+            alarm.refreshAlarm();
     }
     /***********************************************************************************************
      * SCREEN COLOR SETTING DIALOG
@@ -1241,7 +1232,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set Vibration Checked
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setLightFade((screenFadeToggle.isChecked())? 1 : 0);
+        alarm.setLightFade(screenFadeToggle.isChecked());
         updateChanges(alarm);
     }
     /***********************************************************************************************
@@ -1254,7 +1245,7 @@ public class MainActivity extends AppCompatActivity
 
         //Set LED Checked and save Settings
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setLED((LEDToggle.isChecked())? 1 : 0);
+        alarm.setLED(LEDToggle.isChecked());
         updateChanges(alarm);
     }
     public void showLEDLightStartSettingDialog(View v){
@@ -1308,6 +1299,10 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setLEDStartTime(minutes);
         updateChanges(alarm);
+
+        //refresh Alarm separate only for some Key Values
+        if(alarm.isAlarmSet())
+            alarm.refreshAlarm();
     }
     /***********************************************************************************************
      * OPTIONSMENU

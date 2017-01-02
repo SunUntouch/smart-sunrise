@@ -36,8 +36,7 @@ public class AlarmConfigurationList {
     }
 
     //Getter and Setter
-    public void addAlarm(AlarmConfiguration alarm)
-    {
+    void addAlarm(AlarmConfiguration alarm){
         alarm.setAlarmID(m_Amount);
         alarm.commit();
 
@@ -46,7 +45,7 @@ public class AlarmConfigurationList {
 
         AlarmSharedPreferences.getSharedPreferenceEditor(m_Context).putInt(AlarmConstants.ALARM_VALUE, m_Amount).apply();
     }
-    public boolean removeAlarm(int alarmID){
+    boolean removeAlarm(int alarmID){
 
         try {
             m_Alarms.remove(alarmID);
@@ -94,38 +93,27 @@ public class AlarmConfigurationList {
         AlarmSharedPreferences.getSharedPreferenceEditor(m_Context).putInt(AlarmConstants.ALARM_VALUE, m_Amount).apply();
     }
 
-    public AlarmConfiguration getAlarm(int alarmID){
+    AlarmConfiguration getAlarm(int alarmID){
         return m_Alarms.get(alarmID);
     }
-    public boolean setAlarm(AlarmConfiguration alarm){
-
+    boolean setAlarm(AlarmConfiguration alarm){
         try {
             m_Alarms.set(alarm.getAlarmID(), alarm);
         }catch (IndexOutOfBoundsException e){
             //TODO: Logging and Catch the other possible Cases
             return false;
         }
-
         alarm.commit();
         return true;
     }
 
-    public void refresh(){
-
-        //Refresh List
-        for(int alarmID = 0; alarmID < m_Amount; ++alarmID)
-            m_Alarms.set(alarmID, new AlarmConfiguration(m_Context, alarmID));
-    }
-
-    public int size(){
+    int size(){
         return m_Amount;
     }
-
-    public boolean contains(int alarmID){
+    boolean contains(int alarmID){
         return m_Alarms.size() > alarmID;
     }
-
-    public boolean isEmpty(){
+    boolean isEmpty(){
         return m_Alarms.isEmpty();
     }
 }
