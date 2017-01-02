@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -13,6 +14,7 @@ import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -64,6 +66,9 @@ public class MainActivity extends AppCompatActivity
 
     //Media Player
     private MediaPlayer mediaPlayer;
+
+    //Vibrator
+    private Vibrator m_Vibrator;
 
     //Thread
     private AlarmWorkerThread mThread;
@@ -129,7 +134,6 @@ public class MainActivity extends AppCompatActivity
         switchAlarmView(!m_AlarmConfigurations.isEmpty());
     }
     protected void onDestroy() {
-
         mThread.quit();
         super.onDestroy();
     }
@@ -158,7 +162,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int max, int increment, int progress){
-
         //LinearLayout
         LinearLayout linearLayout = new LinearLayout(v.getContext());
         linearLayout.setOrientation(LinearLayout.VERTICAL);
@@ -167,7 +170,7 @@ public class MainActivity extends AppCompatActivity
         textView.setVisibility(TextView.INVISIBLE);
         linearLayout.addView(textView);
 
-        //Seek Bar
+        ///SeekBar
         seekBar.setMax(max);
         seekBar.setKeyProgressIncrement(increment);
         seekBar.setProgress(progress);
@@ -551,7 +554,8 @@ public class MainActivity extends AppCompatActivity
 
                     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
-                        startMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true, false, getAlarm(actualAlarm).getVolume());
+                        AlarmConfiguration alarm = getAlarm(actualAlarm);
+                        startMusic(Uri.parse(sortedSongs.get(position).getPath()), true, true, false, alarm.getVolume(), 0);
                         return true;
                     }
                 });
@@ -651,19 +655,7 @@ public class MainActivity extends AppCompatActivity
             Toast.makeText(MainActivity.this, R.string.wakeup_music_no_music, Toast.LENGTH_SHORT).show();
     }
 
-    private void startMusic(final Uri uri) {
-        startMusic(uri, false);
-    }
-    private void startMusic(final Uri uri, boolean start) {
-        startMusic(uri, start, false);
-    }
-    private void startMusic(final Uri uri, final boolean start, final boolean stop){
-        startMusic(uri, start, stop, -1);
-    }
-    private void startMusic(final Uri uri, final boolean start, final boolean stop, final int volume){
-        startMusic(uri, start, stop, false, volume);
-    }
-    private void startMusic(final Uri uri, final boolean start, final boolean stop, final boolean looping, final int volume){
+    private void startMusic(final Uri uri, final boolean start, final boolean stop, final boolean looping, final int volume, final int startTime){
         //Set Runnable to play Music
         setRunnable(
                 new Runnable()
@@ -689,6 +681,8 @@ public class MainActivity extends AppCompatActivity
                         } catch (IOException e) {
                             Log.e("Exception: ", e.getMessage());
                         }
+
+                        mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(startTime));
 
                         if(start)
                             mediaPlayer.start();
@@ -764,7 +758,7 @@ public class MainActivity extends AppCompatActivity
     public void showMusicVolumeSettingDialog(View v){
 
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        startMusic(Uri.parse(alarm.getSongURI()), true, true, true, alarm.getVolume());
+        startMusic(Uri.parse(alarm.getSongURI()), true, true, true, alarm.getVolume(), alarm.getSongStart());
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
@@ -836,6 +830,9 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showMusicStartSettingDialog(View v){
 
+        final AlarmConfiguration alarm = getAlarm(actualAlarm);
+        startMusic(Uri.parse(alarm.getSongURI()), true, true, true, alarm.getVolume(), alarm.getSongStart());
+
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
         //SeekBar
@@ -857,10 +854,11 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //textView.setVisibility(TextView.GONE);
+                if(mediaPlayer != null && mediaPlayer.isPlaying())
+                    mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(seekBar.getProgress()));
             }
         });
 
-        AlarmConfiguration alarm = getAlarm(actualAlarm);
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Start));
@@ -878,6 +876,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
+            }
+        });
+        //Show Builder
+        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                stopMusic(true);
             }
         });
         builder.show();
@@ -985,13 +990,13 @@ public class MainActivity extends AppCompatActivity
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    public void onProgressChanged(SeekBar Bar, int progress, boolean fromUser) {
 
                         //Set Position of Text
-                        int val = getSeekBarPosition(progress, 4, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
+                        int val = getSeekBarPosition(progress, 4, Bar.getWidth(), Bar.getThumbOffset(), Bar.getMax());
                         String message = Integer.toString(progress) + "%";
                         textView.setText(message);
-                        textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
+                        textView.setX(Bar.getX() + val + Bar.getThumbOffset() / 2);
                     }
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -1000,8 +1005,10 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         //textView.setVisibility(TextView.GONE);
+                        setVibrationStart(seekBar.getProgress());
                     }
                 });
+
 
                 //Create new Builder
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
@@ -1013,16 +1020,20 @@ public class MainActivity extends AppCompatActivity
                         //Set and Save Vibration Strength
                         onVibrationStrengthSet(seekBar.getProgress());
                         vibrationToggle.setChecked(true);
+                        setVibrationStop();
                         dialog.dismiss();
                     }
                 });
                 builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+                        setVibrationStop();
                         dialog.dismiss();
                     }
                 });
+
                 builder.show();
+                setVibrationStart(getAlarm(actualAlarm).getVibrationStrength());
                 return false;
             }
         });
@@ -1039,6 +1050,31 @@ public class MainActivity extends AppCompatActivity
         alarm.setVibrationStrength(strength);
         alarm.setVibration(1); //true
         updateChanges(alarm);
+    }
+
+    private void setVibrationStart(final int _intensity){
+
+        setRunnable(new Runnable() {
+            @Override
+            public void run() {
+                //Start without delay,
+                //Vibrate fpr milliseconds
+                //Sleep for milliseconds
+                if(m_Vibrator == null)
+                    m_Vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+                m_Vibrator.vibrate(new long[]{0, 8 * _intensity + 350, (4000 / (long) Math.sqrt(_intensity + 1))}, 0);
+            }
+        });
+    }
+    private void setVibrationStop(){
+
+        //Cancel and Release Vibrator
+        if(m_Vibrator != null)
+        {
+            m_Vibrator.cancel();
+            m_Vibrator = null;
+        }
     }
     /***********************************************************************************************
      * SCEEN LIGHT SETTING DIALOG

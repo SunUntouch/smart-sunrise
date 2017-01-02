@@ -75,7 +75,7 @@ class AlarmConfiguration {
         m_Context = context;
 
         //save Settings
-        SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(context, AlarmConstants.ALARM, ID);
+        SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.ALARM, ID);
 
         //ID, name, AlarmSet
         this.setAlarmID(ID);
@@ -218,7 +218,7 @@ class AlarmConfiguration {
     private boolean activateAlarm(){
 
         //Get new Alarm and Set
-        if(alarmSet && !checkForPendingIntent())
+        if(isAlarmSet() && !checkForPendingIntent())
             return setNewAlarm();
         else if(checkForPendingIntent())
             return cancelAlarmwithButton();
@@ -326,14 +326,13 @@ class AlarmConfiguration {
     int getTimeToNextDay(){
 
         //No Repeat Days set, return zero
-        if(!isDaySet())
-            return 0;
-
         int currentDay = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-        currentDay = (currentDay++ == Calendar.SATURDAY) ? Calendar.SUNDAY : currentDay;
+        if(!isDaySet() || isDaySet(currentDay))
+            return 0;
 
         //Count Days
         int nextDay = 1;
+        currentDay = (currentDay++ == Calendar.SATURDAY) ? Calendar.SUNDAY : currentDay;
         while (!isDaySet(currentDay))
         {
             if(nextDay++ == 7)
@@ -647,5 +646,8 @@ class AlarmConfiguration {
     }
     void clearAlarmManagerFlag(){
         m_AlarmManager = false;
+    }
+    boolean hasAlarmmanagerValues(){
+        return m_AlarmManager;
     }
 }

@@ -41,11 +41,11 @@ public class AlarmActivity extends AppCompatActivity {
 
     private AlarmWorkerThread ledThread;
     private AlarmWorkerThread musicThread;
+    private AlarmWorkerThread vibrationThread;
 
     private boolean snoozed = false;
 
     private static final int BRIGHTNESS_STEPS = 100;
-    private static final int VIBRATION_LENGTH = 10000;
 
     /***********************************************************************************************
      * ONCREATE AND HELPER
@@ -55,8 +55,6 @@ public class AlarmActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_alarm);
         alarmHandler = new Handler();
-        musicThread  = new AlarmWorkerThread("SmartSunrise_Music");
-        ledThread    = new AlarmWorkerThread("SmartSunrise_LED");
 
         //Load Values
         final int actualAlarm = getIntent().getExtras().getInt(AlarmConstants.ALARM_ID);
@@ -74,8 +72,8 @@ public class AlarmActivity extends AppCompatActivity {
         doPlayMusic(minutesMax);
 
         //Vibration
-//        if(getConfig().useVibration())
-//            doVibrate(minutesMax);
+        if(getConfig().useVibration())
+            doVibrate(minutesMax);
 
         //LED
         if(getConfig().useLED())
@@ -90,10 +88,6 @@ public class AlarmActivity extends AppCompatActivity {
         }
         else
             startScreen(); //else start the screen
-
-        //Clear Flag
-        config.clearAlarmManagerFlag();
-        config.commit();
     }
     protected void onStop() {
         //Cancel or Snooze Alarm
@@ -104,9 +98,15 @@ public class AlarmActivity extends AppCompatActivity {
 
         //Remove Callbacks
         alarmHandler.removeCallbacksAndMessages(null);
-        ledThread.removeCallBacks(null);
-        musicThread.removeCallBacks(null);
 
+        if(ledThread != null)
+            ledThread.removeCallBacks(null);
+
+        if(musicThread != null)
+            musicThread.removeCallBacks(null);
+
+        if(vibrationThread != null)
+            vibrationThread.removeCallBacks(null);
 
         //Stop Stuff
         stopLED();
@@ -116,8 +116,15 @@ public class AlarmActivity extends AppCompatActivity {
     }
     protected void onDestroy() {
 
-        ledThread.quit();
-        musicThread.quit();
+        if(ledThread != null)
+            ledThread.quit();
+
+        if(musicThread != null)
+            musicThread.quit();
+
+        if(vibrationThread != null)
+            vibrationThread.quit();
+
         super.onDestroy();
     }
 
@@ -316,6 +323,8 @@ public class AlarmActivity extends AppCompatActivity {
     private int currentVolume;
     private void doPlayMusic(int minutes){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
 
+        musicThread  = new AlarmWorkerThread("SmartSunrise_Music");
+
         try { prepareMusic(getConfig().getSongURI()); }
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
 
@@ -337,7 +346,7 @@ public class AlarmActivity extends AppCompatActivity {
                     if(!mediaPlayer.isPlaying())
                         mediaPlayer.start();
 
-                    final int musicVolume = config.getVolume();
+                    final int musicVolume = getConfig().getVolume();
                     if( currentVolume <= musicVolume){
                         //Set AudioManager
                         final float volume = 1 - (float)(Math.log(100 - currentVolume++)/Math.log(100));
@@ -354,7 +363,7 @@ public class AlarmActivity extends AppCompatActivity {
             setRunnable(musicThread, new Runnable() {
                 @Override
                 public void run() {
-                    final int musicVolume = config.getVolume();
+                    final int musicVolume = getConfig().getVolume();
                     float volume= 1 - (float)(Math.log(0)/Math.log(musicVolume));
                     mediaPlayer.setVolume(volume, volume);
                     mediaPlayer.start();
@@ -393,40 +402,23 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     private void doVibrate(int minutes){
 
+        vibrationThread = new AlarmWorkerThread("SmartSunrise_Vibration");
         //Set new Handler
-        setRunnable(new Runnable() {
+        setRunnable(vibrationThread, new Runnable() {
             @Override
             public void run() {
-                setVibrationStart(VIBRATION_LENGTH);
+                setVibrationStart(0);
             }
         }, TimeUnit.MINUTES.toMillis(minutes));
     }
-    private void setVibrationStart(){
-        setVibrationStart(new long[]{ 0, 100, 200, 300, 400 }, 0);
-    }
-    private void setVibrationStart(long _duration){
-        setVibrationStart(generateVibratorPattern(getConfig().getVibrationStrength(), _duration), 0);
-    }
-    private void setVibrationStart(long[] _pattern, int _repeat){
-        m_Vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        m_Vibrator.vibrate(_pattern, _repeat);
-    }
-    private long[] generateVibratorPattern(int _intensity, long duration){
+    private void setVibrationStart(int _repeat){
 
-        float intensity =  ((float) _intensity) / 100.0f;
-        float dutyCycle = Math.abs( (intensity * 2.0f) - 1.0f );
-
-        long hWidth = (long) (dutyCycle * ( duration - 1 )) + 1;
-        long lWidth = (dutyCycle == 1.0f)? 0 : 1;
-
-        int pulseCount = (int) (2.0f * ((float) duration / (float) (hWidth + lWidth)));
-
-        long[] pattern = new long[pulseCount];
-        for(int i = 0; i < pulseCount; ++i){
-            pattern[i] = (intensity < 0.5f) ?
-                    ((i % 2 == 0) ? hWidth : lWidth) : ( (i % 2 == 0) ? lWidth : hWidth );
-        }
-        return pattern;
+        //Start without delay,
+        //Vibrate fpr milliseconds
+        //Sleep for milliseconds
+        if(m_Vibrator == null)
+            m_Vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        m_Vibrator.vibrate(new long[]{0, 8 * getConfig().getVibrationStrength() + 350, (4000 / (long) Math.sqrt(getConfig().getVibrationStrength() + 1))}, _repeat);
     }
     private void setVibrationStop(){
 
@@ -441,6 +433,8 @@ public class AlarmActivity extends AppCompatActivity {
      * LED
      **********************************************************************************************/
     private void doLED(int minutes){
+
+        ledThread    = new AlarmWorkerThread("SmartSunrise_LED");
 
         //New Handler for Waiting Till Time to show LED
         setRunnable(ledThread, new Runnable() {

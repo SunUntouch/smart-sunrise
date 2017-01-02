@@ -15,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 
 public class AlarmManage extends AppCompatActivity {
 
+    private static final boolean DEBUG = false;
+
     private final Context context;
     private AlarmManager alarmManager;
     private AlarmConfiguration config;
@@ -56,61 +58,55 @@ public class AlarmManage extends AppCompatActivity {
         PendingIntent pendingIntent = getPendingIntent();
         alarmManager.cancel(pendingIntent);
 
-        //Get Days to next Alarm
+        AlarmConfiguration conf = getConfig();
+
+        //Get Days to next Alarm and Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
         long alarmTime;
+        final long currentTime = System.currentTimeMillis();
         if(!snooze)
         {
-            AlarmConfiguration conf = getConfig();
-            Calendar calendar = Calendar.getInstance();
-
             //Add all necessary values to alarm time
+            Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.HOUR_OF_DAY, conf.getHour());
             calendar.set(Calendar.MINUTE     , conf.getMinute());
+
             alarmTime = calendar.getTimeInMillis() + TimeUnit.DAYS.toMillis(conf.getTimeToNextDay());
-
-            //Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
-            final long currentTime = System.currentTimeMillis();
             alarmTime = (alarmTime < currentTime) ? alarmTime + TimeUnit.DAYS.toMillis(1) : alarmTime;
-
-            //Check if the complete start time is in the past, if so change light to better suiting values
-            long lightStart = getTimeBeforeMusic();
-            final long alarmTimeWithLight = alarmTime - getTimeBeforeMusic();
-            if(alarmTimeWithLight < currentTime)
-            {
-                //Calculate Times
-                final long screenTime = getBeforeScreenTime();
-                final long ledTime    = getBeforeLEDTime();
-
-                //Add 20 Seconds to Delta Time
-                final long deltaTime  = currentTime - alarmTimeWithLight + TimeUnit.SECONDS.toMillis(20);
-                lightStart = (screenTime > ledTime)? screenTime - deltaTime : ledTime - deltaTime;
-
-                //Safe newly set Values
-                conf.setFromAlarmManager();
-                if(lightStart < ledTime )
-                    conf.setScreenStartTime((int)TimeUnit.MILLISECONDS.toMinutes(lightStart));
-
-                if(lightStart < screenTime)
-                    conf.setLEDStartTime((int)TimeUnit.MILLISECONDS.toMinutes(lightStart));
-                conf.commit();
-            }
-            else{
-                conf.clearAlarmManagerFlag();
-                conf.commit();
-            }
-            alarmTime -= lightStart ;
         }
-        else{ //Snooze
-
-            //Set Light and LED to zero
-            AlarmConfiguration conf = getConfig();
-            conf.setFromAlarmManager();
-            conf.setScreenStartTime(0);
-            conf.setLEDStartTime(0);
-            conf.commit();
-
+        else //Snooze
             alarmTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(conf.getSnooze()); //+ Snooze
+
+        //Check if the complete start time is in the past, if so change light to better suiting values
+        long lightStart = getTimeBeforeMusic();
+        final long alarmTimeWithLight = alarmTime - lightStart;
+        if(alarmTimeWithLight < currentTime)
+        {
+            //Calculate Times
+            final long screenTime = getBeforeScreenTime();
+            final long ledTime    = getBeforeLEDTime();
+
+            //Add 20 Seconds to Delta Time
+            final long deltaTime  = currentTime - alarmTimeWithLight + TimeUnit.SECONDS.toMillis(20);
+            lightStart = (screenTime > ledTime)? screenTime - deltaTime : ledTime - deltaTime;
+
+            //Safe newly set Values
+            conf.setFromAlarmManager();
+            if(lightStart < ledTime )
+                conf.setScreenStartTime((!snooze) ? (int)TimeUnit.MILLISECONDS.toMinutes(lightStart) : 0);
+
+            if(lightStart < screenTime)
+                conf.setLEDStartTime((!snooze) ? (int)TimeUnit.MILLISECONDS.toMinutes(lightStart) : 0);
+            conf.commit();
         }
+        else if(conf.hasAlarmmanagerValues()){
+            conf.clearAlarmManagerFlag();
+            conf.commit();
+        }
+
+        alarmTime -= lightStart ;
+
+        //For Testing
+        alarmTime = (DEBUG) ? System.currentTimeMillis() : alarmTime;
 
         //Check for SDK Version and Use different AlarmManager Functions
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
@@ -143,6 +139,10 @@ public class AlarmManage extends AppCompatActivity {
             setNewAlarm();
         else
         {
+            config.clearAlarmManagerFlag();
+            config.setAlarm(false,false);
+            config.commit();
+
             createAlarmManager();
             alarmManager.cancel(getPendingIntent());
             getPendingIntent().cancel();
