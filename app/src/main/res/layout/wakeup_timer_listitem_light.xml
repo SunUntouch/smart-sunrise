@@ -18,9 +18,10 @@
         android:background="@drawable/custom_textview"/>
     
     <GridLayout
+        android:id="@+id/wakeup_timer_light_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="3"
+        android:columnCount="6"
         android:orientation="horizontal">
 
         <ToggleButton
@@ -29,7 +30,7 @@
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="0"
-            android:layout_columnSpan="3"
+            android:layout_columnSpan="6"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="fill"
@@ -42,7 +43,7 @@
             android:textColor="@color/textColorPrimary"
             android:textColorHighlight="@color/textColorSecondary"
             android:layout_column="0"
-            android:layout_columnSpan="2"
+            android:layout_columnSpan="3"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center"/>
@@ -52,7 +53,8 @@
             android:text="0 Minutes"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:layout_column="2"
+            android:layout_column="3"
+            android:layout_columnSpan="3"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="fill"
@@ -60,31 +62,50 @@
             android:onClick="showScreenLightStartSettingDialog"
             android:background="@drawable/custom_button"/>
 
-        <Button
-            android:id="@+id/wakeup_timer_light_buttonColor1"
-            android:text="Choose Color"
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_column="0"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="fill"
-            android:onClick="showScreenColor1SettingDialog" />
+            android:layout_columnSpan="3"
+            android:padding="0dp"
+            android:layout_gravity="fill">
+            <Button
+                android:id="@+id/wakeup_timer_light_buttonColor1"
+                android:text="Color1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="fill"
+                android:onClick="showScreenColor1SettingDialog"
+                android:padding="0dp"
+                android:layout_margin="@dimen/button_margin"/>
 
-        <Button
-            android:id="@+id/wakeup_timer_light_buttonColor2"
-            android:text="Choose Color"
-            android:layout_column="1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_gravity="fill"
-            android:onClick="showScreenColor1SettingDialog"
-            android:layout_margin="2dp"/>
+            <ImageView
+                android:id="@+id/wakeup_timer_light_gradient"
+                android:layout_gravity="center_vertical"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:padding="0dp"
+                android:layout_margin="@dimen/button_margin"/>
+
+            <Button
+                android:id="@+id/wakeup_timer_light_buttonColor2"
+                android:text="Color2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="fill"
+                android:onClick="showScreenColor1SettingDialog"
+                android:padding="0dp"
+                android:layout_margin="@dimen/button_margin"/>
+        </LinearLayout>
+
 
         <ToggleButton
             android:id="@+id/wakeup_timer_light_buttonScreenFade"
             android:textOff="Off"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:layout_column="2"
+            android:layout_column="3"
+            android:layout_columnSpan="3"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="fill"
@@ -96,7 +117,7 @@
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_column="0"
-            android:layout_columnSpan="3"
+            android:layout_columnSpan="6"
             android:background="@color/colorPrimary"/>
 
         <ToggleButton
@@ -105,7 +126,7 @@
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="0"
-            android:layout_columnSpan="3"
+            android:layout_columnSpan="6"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="fill"
@@ -118,7 +139,7 @@
             android:textColor="@color/textColorPrimary"
             android:textColorHighlight="@color/textColorSecondary"
             android:layout_column="0"
-            android:layout_columnSpan="2"
+            android:layout_columnSpan="3"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center"/>
@@ -128,7 +149,8 @@
             android:text="0 Minutes"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:layout_column="2"
+            android:layout_column="3"
+            android:layout_columnSpan="3"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="fill"

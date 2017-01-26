@@ -1,7 +1,9 @@
 package com.zhun.sununtouch.smart_sunrise;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -151,6 +153,12 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         Button setStartTime = (Button) view.findViewById(R.id.wakeup_timer_light_buttonStart);
         setStartTime.setText(config.getScreenStartTime() + " " + view.getContext().getString(R.string.wakeup_time_minutes));
 
+        //Toggle Fading
+        ToggleButton setFade = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonScreenFade);
+        setFade.setTextOn(view.getContext().getString(R.string.wakeup_light_screen_fadingOn));
+        setFade.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_fadingOff));
+        setFade.setChecked(config.getLightFade());
+
         //First Color
         Button setColorButton1 = (Button) view.findViewById(R.id.wakeup_timer_light_buttonColor1);
         setColorButton1.setText(view.getContext().getString(R.string.wakeup_light_screen_color1));
@@ -159,13 +167,26 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         //Second Color
         Button setColorButton2 = (Button) view.findViewById(R.id.wakeup_timer_light_buttonColor2);
         setColorButton2.setText(view.getContext().getString(R.string.wakeup_light_screen_color2));
-        setColorButton2.getBackground().setColorFilter(config.getLightColor2(), PorterDuff.Mode.MULTIPLY);
+        setColorButton2.setEnabled(config.getLightFade());
 
-        //Toggle Fading
-        ToggleButton setFade = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonScreenFade);
-        setFade.setTextOn(view.getContext().getString(R.string.wakeup_light_screen_fadingOn));
-        setFade.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_fadingOff));
-        setFade.setChecked(config.getLightFade());
+        //Gradient View
+        View gradient = view.findViewById(R.id.wakeup_timer_light_gradient);
+        if(config.getLightFade())
+        {
+            //Set Color Filter to second Button
+            setColorButton2.getBackground().setColorFilter(config.getLightColor2(), PorterDuff.Mode.MULTIPLY);
+
+            //Get ViewGradient
+            GradientDrawable gd = new GradientDrawable(
+                    GradientDrawable.Orientation.LEFT_RIGHT,
+                    new int[] {config.getLightColor1(),config.getLightColor2()});
+            gd.setCornerRadius(0f);
+            gradient.setBackground(gd);
+        }
+        else{
+            gradient.setBackgroundColor(Color.WHITE);
+            gradient.getBackground().setColorFilter(config.getLightColor1(), PorterDuff.Mode.MULTIPLY);
+        }
 
         //Toggle LED
         ToggleButton setLEDButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonLED);

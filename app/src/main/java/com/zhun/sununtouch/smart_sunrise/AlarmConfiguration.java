@@ -120,8 +120,8 @@ class AlarmConfiguration {
         editor.putString(AlarmConstants.ALARM_NAME, getAlarmName());
 
         //Alarm is Set
-        editor.putBoolean(AlarmConstants.ALARM_ONESHOT, getTemporaryTimes());
-        editor.putBoolean(AlarmConstants.ALARM_TEMPORARY, getAlarmOneShot());
+        editor.putBoolean(AlarmConstants.ALARM_ONESHOT, getAlarmOneShot());
+        editor.putBoolean(AlarmConstants.ALARM_TEMPORARY,  getTemporaryTimes());
 
         //Time
         editor.putInt(AlarmConstants.ALARM_TIME_MINUTES  , getMinute());

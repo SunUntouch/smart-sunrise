@@ -61,6 +61,9 @@ public class AlarmActivity extends AppCompatActivity {
         final int actualAlarm = getIntent().getExtras().getInt(AlarmConstants.ALARM_ID);
         config = new AlarmConfiguration(getApplicationContext(), actualAlarm);
 
+        //Open Screen
+        startScreen(true);
+
         //Boolean Values
         boolean changed = false;
 
@@ -96,10 +99,10 @@ public class AlarmActivity extends AppCompatActivity {
         //SCREEN VIEWS//////////////////////////////////////////////////////////////////////////////
         doViews();
 
-        //Start with Basic parameters
+        //MUSIC
         doPlayMusic(minutesMax);
 
-        //Vibration
+        //VIBRATION
         if(getConfig().getVibration())
             doVibrate(minutesMax);
 
@@ -108,14 +111,13 @@ public class AlarmActivity extends AppCompatActivity {
             doLED(minutesMax - minuteLED); // ledStartTime
 
         //SCREEN
-        if(getConfig().getScreen())
-        {
+        if(getConfig().getScreen()) {
             final int screenStartTime = minutesMax - minuteScreen;
-            doBrightness (screenStartTime, minuteScreen);
+            doBrightness(screenStartTime, minuteScreen);
             doColorFading(screenStartTime, minuteScreen);
         }
         else
-            startScreen(); //else start the screen
+            startScreen(false);
     }
     protected void onStop() {
         //Cancel or Snooze Alarm
@@ -284,21 +286,35 @@ public class AlarmActivity extends AppCompatActivity {
                 }
             });
         }
-        colorFade1.setStartDelay(TimeUnit.MINUTES.toMillis(minutes));
+
+        colorFade1.setStartDelay(TimeUnit.MINUTES.toMillis(minutes) + 1);
         colorFade1.start();
     }
 
     /***********************************************************************************************
      * BRIGHTNESS
      **********************************************************************************************/
-    private void startScreen(){
+    private void startScreen(boolean initial){
+
+        int params;
+        if(!initial) {
+            params = WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                     WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                     WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                     WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                     WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                     WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+        }
+        else {
+            params = WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                     WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                     WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                     WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                     WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+        }
+
         //Show Window
-        final Window win = getWindow();
-        win.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+        getWindow().addFlags(params);
     }
     private void doBrightness(final int minuteScreenStart, final int screenstart){
 
@@ -311,90 +327,76 @@ public class AlarmActivity extends AppCompatActivity {
     }
     private void setBrightness(final int start){
 
-        //Start The Screen
-        startScreen();
+        startScreen(false);
 
         //GetCurrent Layout and Set new Brightness
+        final float brightness = (float) getConfig().getScreenBrightness() / 100f;
+
         final Window window = getWindow();
-        window.getAttributes().screenBrightness = 0.0F;
+        window.getAttributes().screenBrightness = (start > 0) ? 0.0F : brightness;
         window.setAttributes(window.getAttributes());
 
-        //time for each step ti illuminate
+        if(start == 0)
+            return;
 
-        final long  millis = (start > 0) ? (TimeUnit.MINUTES.toMillis(start) / BRIGHTNESS_STEPS) : 0;  //divide milliseconds with 100 because we have 100 steps till full illumination
+        //time for each step ti illuminate
+        final long  millis = TimeUnit.MINUTES.toMillis(start) / BRIGHTNESS_STEPS;  //divide milliseconds with 100 because we have 100 steps till full illumination
 
         //New Time Handler
-        Runnable screenLightRunnable = new Runnable() {
-
-            final float brightness = (float) getConfig().getScreenBrightness() / 100f;
-            final float brightnessStep = brightness / BRIGHTNESS_STEPS;
-
+        setRunnable(new Runnable() {
             @Override
             public void run() {
                 //get Layout and Update LightValue till Max
                 if(window.getAttributes().screenBrightness < brightness){
 
-                    window.getAttributes().screenBrightness += brightnessStep;
+                    window.getAttributes().screenBrightness += brightness / BRIGHTNESS_STEPS;
                     window.setAttributes(window.getAttributes());
                     setRunnable(this, millis);
                 }
             }
-        };
-        setRunnable(screenLightRunnable, millis + 100);  //All 10 Seconds more Light
+        }, millis + 100);  //All 10 Seconds more Light
     }
     /***********************************************************************************************
      * MUSIC
      **********************************************************************************************/
-    private int currentVolume;
+    private int currentVolume = 0;
     private void doPlayMusic(int minutes){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
-
-        musicThread  = new AlarmWorkerThread("SmartSunrise_Music");
 
         try { prepareMusic(getConfig().getSongURI()); }
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
 
-        final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        Runnable musicRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if(!mediaPlayer.isPlaying()){
 
-        //Get MaxVolume of Music
-        final int maxVolumeAndroid = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxVolumeAndroid, 0);
+                    //Get MaxVolume of Music
+                    final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
 
-        mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(getConfig().getSongStart()));
-        if(getConfig().getFadeIn())
-        {
-            currentVolume = 0;
-            mediaPlayer.setVolume(currentVolume, currentVolume);
-            Runnable musicFadeInRunnable = new Runnable() {
-                @Override
-                public void run() {
-
-                    if(!mediaPlayer.isPlaying())
-                        mediaPlayer.start();
-
-                    final int musicVolume = getConfig().getVolume();
-                    if( currentVolume <= musicVolume){
-                        //Set AudioManager
-                        final float volume = 1 - (float)(Math.log(100 - currentVolume++)/Math.log(100));
-                        mediaPlayer.setVolume(volume, volume);
-                        //Set new Runnable
-                        setRunnable(musicThread, this, TimeUnit.SECONDS.toMillis(getConfig().getFadeInTime()) / musicVolume);
-                    }
-                }
-            };
-            setRunnable(musicThread, musicFadeInRunnable, TimeUnit.MINUTES.toMillis(minutes) + 1);
-        }
-        else
-        {
-            setRunnable(musicThread, new Runnable() {
-                @Override
-                public void run() {
-                    final int musicVolume = getConfig().getVolume();
-                    float volume= 1 - (float)(Math.log(0)/Math.log(musicVolume));
-                    mediaPlayer.setVolume(volume, volume);
+                    mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(getConfig().getSongStart()));
+                    mediaPlayer.setVolume(currentVolume, currentVolume);
                     mediaPlayer.start();
                 }
-            }, TimeUnit.MINUTES.toMillis(minutes));
-        }
+
+                final int musicVolume = getConfig().getVolume();
+                final boolean fadeIn  = getConfig().getFadeIn();
+                if( currentVolume <= musicVolume || !fadeIn){
+                    //Set AudioManager
+                    float volume = (fadeIn) ?
+                            1 - (float)(Math.log(100 - currentVolume++)/Math.log(100)) :
+                            1 - (float)(Math.log(100 - musicVolume    )/Math.log(100));
+                    mediaPlayer.setVolume(volume, volume);
+                    //Set new Runnable
+                    if(fadeIn)
+                        setRunnable(musicThread, this, TimeUnit.SECONDS.toMillis(getConfig().getFadeInTime()) / musicVolume);
+                }
+            }
+        };
+
+        //Start Runnable and Thread
+        musicThread  = new AlarmWorkerThread("SmartSunrise_Music");
+        setRunnable(musicThread, musicRunnable, TimeUnit.MINUTES.toMillis(minutes) + 1);
     }
     private void prepareMusic(String _SongUri) throws IOException {
 
