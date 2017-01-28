@@ -275,7 +275,6 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
     }
     public void setNewAlarm(View v){
-
         //Get Toggle Button
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 

@@ -22,7 +22,6 @@ import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -148,7 +147,7 @@ public class AlarmActivity extends AppCompatActivity {
     /***********************************************************************************************
      * AsyncTasks and Threads
      **********************************************************************************************/
-    private class BrightnessAsyncTask extends AsyncTask<Void, Float, Float>{
+    private class BrightnessAsyncTask extends AsyncTask<Void, Float, Void>{
 
         final long screenFadeTime;
         final float brightness;
@@ -159,7 +158,7 @@ public class AlarmActivity extends AppCompatActivity {
             brightness = (float)screenBrightness / 100f;
         }
         @Override
-        protected Float doInBackground(Void... params) {
+        protected Void doInBackground(Void... params) {
 
             float currentBrightness =  brightness;
             if(screenFadeTime > 0)
@@ -169,24 +168,21 @@ public class AlarmActivity extends AppCompatActivity {
 
                 //get Layout and Update LightValue till Max
                 currentBrightness = 0f;
-                while(currentBrightness < brightness)
+                while(currentBrightness <= brightness)
                 {
                     publishProgress(currentBrightness);
                     currentBrightness += brightness / BRIGHTNESS_STEPS;
                     SystemClock.sleep(millis);
                 }
             }
-            return currentBrightness;
+            else
+                publishProgress(currentBrightness);
+            return null;
         }
         @Override
         protected void onProgressUpdate(Float... values) {
             super.onProgressUpdate(values);
             setBrightness(values[0]);
-        }
-        @Override
-        protected void onPostExecute(Float brightness) {
-            super.onPostExecute(brightness);
-            setBrightness(brightness);
         }
     }
     private class LEDAsyncTask extends AsyncTask<Void, Void, Void>{
@@ -199,23 +195,24 @@ public class AlarmActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
 
-            SystemClock.sleep(ledDelay);
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void end) {
-            super.onPostExecute(end);
+            if(ledDelay > 0)
+                SystemClock.sleep(ledDelay);
             startLED();
+            return null;
         }
     }
 
-    private void startAsyncTaskParallel(BrightnessAsyncTask task){
-        //task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        AsyncTaskCompat.executeParallel(task);
+    private void startAsyncTask(BrightnessAsyncTask task, boolean parallel){
+        if(parallel)
+            AsyncTaskCompat.executeParallel(task); //task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else
+            task.execute();
     }
-    private void startAsyncTaskParallel(LEDAsyncTask task){
-        //task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        AsyncTaskCompat.executeParallel(task);
+    private void startAsyncTask(LEDAsyncTask task, boolean parallel){
+        if(parallel)
+            AsyncTaskCompat.executeParallel(task); //task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        else
+            task.execute();
     }
 
     BrightnessAsyncTask brightnessAsyncTask;
@@ -339,8 +336,7 @@ public class AlarmActivity extends AppCompatActivity {
                         }
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            doPlayMusic(0);
-                            doVibrate(0);
+                            startAction();
                         }
                         @Override
                         public void onAnimationCancel(Animator animation) {
@@ -353,10 +349,7 @@ public class AlarmActivity extends AppCompatActivity {
                     fadeObject.start();
                 }
                 else
-                {
-                    doPlayMusic(0);
-                    doVibrate(0);
-                }
+                    startAction();
             }
             @Override
             public void onAnimationCancel(Animator animation) {
@@ -375,18 +368,25 @@ public class AlarmActivity extends AppCompatActivity {
         if(getConfig().getLED())
             doLED(minutes - ledTime);
     }
+    void startAction(){
+        doPlayMusic(0);
+        doVibrate(0);
+    }
 
     /***********************************************************************************************
      * BRIGHTNESS
      **********************************************************************************************/
     private void startScreen(boolean initial){
         if(!initial)
+        {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
-                                 WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                                 WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-                                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                                 WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
+        }
+
         else
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
                                  WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
@@ -395,17 +395,16 @@ public class AlarmActivity extends AppCompatActivity {
                                  WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
     }
     private void setBrightness(final float brightness){
-
-        Window window = getWindow();
-        window.getAttributes().screenBrightness = brightness;
-        getWindow().setAttributes(window.getAttributes());
+        WindowManager.LayoutParams layout = getWindow().getAttributes();
+        layout.screenBrightness = brightness;
+        getWindow().setAttributes(layout);
     }
     private void doBrightness(final long screenStart){
 
         brightnessAsyncTask = new BrightnessAsyncTask(
                 getConfig().getScreenBrightness(),
                 screenStart);
-        startAsyncTaskParallel(brightnessAsyncTask);
+        startAsyncTask(brightnessAsyncTask, true);
     }
 
     /***********************************************************************************************
@@ -514,7 +513,7 @@ public class AlarmActivity extends AppCompatActivity {
     private void doLED(int minutes){
         //New Handler for Waiting Till Time to show LED
         ledAsyncTask = new LEDAsyncTask(TimeUnit.MINUTES.toMillis(minutes));
-        startAsyncTaskParallel(ledAsyncTask);
+        startAsyncTask(ledAsyncTask, true);
     }
     private void startLED(){
 
