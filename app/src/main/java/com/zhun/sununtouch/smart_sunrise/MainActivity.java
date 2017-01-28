@@ -44,6 +44,7 @@ import android.widget.ToggleButton;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
@@ -263,16 +264,17 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * Set New Alarm
      **********************************************************************************************/
-//    public void fakeAlarm(){
-//        Calendar c = Calendar.getInstance();
-//        AlarmConfiguration alarm = getAlarm(actualAlarm);
-//        alarm.setTemporaryTimes(false);
-//        alarm.setHour(c.get(Calendar.HOUR_OF_DAY));
-//        alarm.setMinute(c.get(Calendar.MINUTE) + alarm.getScreenStartTime() + alarm.getLEDStartTime());
-//        alarm.activateAlarm();
-//        updateChanges(alarm);
-//    }
+    public void fakeAlarm(){
+        Calendar c = Calendar.getInstance();
+        AlarmConfiguration alarm = getAlarm(actualAlarm);
+        alarm.setTemporaryTimes(false);
+        alarm.setHour(c.get(Calendar.HOUR_OF_DAY));
+        alarm.setMinute(c.get(Calendar.MINUTE) + alarm.getScreenStartTime() + alarm.getLEDStartTime());
+        alarm.activateAlarm();
+        updateChanges(alarm);
+    }
     public void setNewAlarm(View v){
+
         //Get Toggle Button
         ToggleButton activeAlarmToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_setAlarmButton);
 
