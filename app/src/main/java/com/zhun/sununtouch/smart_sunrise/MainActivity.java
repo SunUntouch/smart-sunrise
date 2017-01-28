@@ -27,6 +27,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -931,11 +932,11 @@ public class MainActivity extends AppCompatActivity
                 //Set AlertDialog View
                 builder.setView(
                         createAlertLinearLayout(
-                            v,
-                            textView,
-                            seekBar,
+                                v,
+                                textView,
+                                seekBar,
                                 getAlarm(actualAlarm).getSongLength(),
-                            1,
+                                1,
                                 getAlarm(actualAlarm).getSongStart()));
                 builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
                     @Override
@@ -1087,6 +1088,8 @@ public class MainActivity extends AppCompatActivity
                 //Seekbar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+                    boolean changeBrightness = false;
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         //Set Position of Text
@@ -1094,18 +1097,25 @@ public class MainActivity extends AppCompatActivity
                         String message = Integer.toString(progress + 1)+ "%";
                         textView.setText(message);
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
+
+                        //Show User Brightness
+                        if(changeBrightness)
+                            setBrightness((float)progress /100);
                     }
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
                         textView.setVisibility(TextView.VISIBLE);
+                        changeBrightness = true;
                     }
                     @Override
                     public void onStopTrackingTouch(SeekBar seekBar) {
                         //textView.setVisibility(TextView.GONE);
+                        changeBrightness = false;
                     }
                 });
 
                 //Create new Builder
+                final float currentBrightness = getWindow().getAttributes().screenBrightness;
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                 builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_light_brightness));
                 //Set Alertdialog View
@@ -1113,6 +1123,10 @@ public class MainActivity extends AppCompatActivity
                 builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        //Set Brightness Back to current
+                        setBrightness(currentBrightness);
+
                         //Set and Save Vibration Strength
                         onScreenBrightnessSet(seekBar.getProgress() + 1);  //+1 because we don't want to have zero brightness set
                         screenToggle.setChecked(true);
@@ -1122,6 +1136,9 @@ public class MainActivity extends AppCompatActivity
                 builder.setNegativeButton(v.getContext().getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
+
+                        //Set Brightness Back to current
+                        setBrightness(currentBrightness);
                         dialog.dismiss();
                     }
                 });
@@ -1143,6 +1160,12 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
     }
 
+    private void setBrightness (float brightness){
+        //Set Brightness Back to current
+        Window win = getWindow();
+        win.getAttributes().screenBrightness = brightness;
+        getWindow().setAttributes(win.getAttributes());
+    }
     public void showScreenLightStartSettingDialog(View v){
 
         //TextView to show Value of SeekBar

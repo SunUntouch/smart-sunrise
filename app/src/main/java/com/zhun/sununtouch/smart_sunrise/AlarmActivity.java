@@ -45,7 +45,7 @@ public class AlarmActivity extends AppCompatActivity {
     PowerManager.WakeLock lock;
 
     private boolean snoozed = false;
-    private static final int BRIGHTNESS_STEPS = 100;
+    private static final int BRIGHTNESS_STEPS = 100;  //TODO add to Options
 
     /***********************************************************************************************
      * ONCREATE AND HELPER
