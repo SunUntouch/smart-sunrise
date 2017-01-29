@@ -34,14 +34,15 @@ public class AlarmActivity extends AppCompatActivity {
 
     private AlarmConfiguration config;
 
-    //Private camera Values
+    //Private camera Values, suppress Warnings because we handle the deprecation
+    @SuppressWarnings("deprecation")
     private android.hardware.Camera m_Cam;
     private MediaPlayer mediaPlayer;
     private Vibrator m_Vibrator;
 
     //API Level 23
     private Handler alarmHandler;
-    PowerManager.WakeLock lock;
+    private PowerManager.WakeLock lock;
 
     private boolean snoozed = false;
     private static final int BRIGHTNESS_STEPS = 100;  //TODO add to Options
@@ -195,8 +196,7 @@ public class AlarmActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
 
-            if(ledDelay > 0)
-                SystemClock.sleep(ledDelay);
+            SystemClock.sleep((ledDelay == 0) ? 1000 : ledDelay);
             startLED();
             return null;
         }
@@ -214,9 +214,6 @@ public class AlarmActivity extends AppCompatActivity {
         else
             task.execute();
     }
-
-    BrightnessAsyncTask brightnessAsyncTask;
-    LEDAsyncTask ledAsyncTask;
 
     private AlarmWorkerThread musicThread;
     private AlarmWorkerThread vibrationThread;
@@ -237,9 +234,11 @@ public class AlarmActivity extends AppCompatActivity {
     /***********************************************************************************************
      * WAKEUP AND SNOOZE BUTTON
      **********************************************************************************************/
+    @SuppressWarnings("UnusedParameters")
     public void onWakeUpClick(View v){
         this.finish();
     }
+    @SuppressWarnings("UnusedParameters")
     public void onSnoozeClick(View v){
         snoozed = true;
         this.finish();
@@ -262,9 +261,9 @@ public class AlarmActivity extends AppCompatActivity {
         //TextClock
         //final TextClock txtClock = (TextClock) findViewById(R.id.wakeup_timer_wakescreen_clock);
     }
-    private String getDayName(Calendar _calendar){
+    private String getDayName(final Calendar calendar){
         String dayName = "";
-        switch(_calendar.get(Calendar.DAY_OF_WEEK)){
+        switch(calendar.get(Calendar.DAY_OF_WEEK)){
             case Calendar.MONDAY:
                 dayName = this.getString(R.string.wakeup_day_monday);
                 break;
@@ -368,7 +367,7 @@ public class AlarmActivity extends AppCompatActivity {
         if(getConfig().getLED())
             doLED(minutes - ledTime);
     }
-    void startAction(){
+    private void startAction(){
         doPlayMusic(0);
         doVibrate(0);
     }
@@ -400,11 +399,10 @@ public class AlarmActivity extends AppCompatActivity {
         getWindow().setAttributes(layout);
     }
     private void doBrightness(final long screenStart){
-
-        brightnessAsyncTask = new BrightnessAsyncTask(
-                getConfig().getScreenBrightness(),
-                screenStart);
-        startAsyncTask(brightnessAsyncTask, true);
+        //New Handler for Waiting Till Time to Screen and Brightness
+        startAsyncTask( new BrightnessAsyncTask(
+                                getConfig().getScreenBrightness(),
+                                screenStart), true);
     }
 
     /***********************************************************************************************
@@ -512,39 +510,42 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     private void doLED(int minutes){
         //New Handler for Waiting Till Time to show LED
-        ledAsyncTask = new LEDAsyncTask(TimeUnit.MINUTES.toMillis(minutes));
-        startAsyncTask(ledAsyncTask, true);
+        startAsyncTask(new LEDAsyncTask(TimeUnit.MINUTES.toMillis(minutes)), true);
     }
+    @SuppressWarnings("deprecation")
     private void startLED(){
 
         if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
         {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            {  //TODO Test with new Version when available
-                CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 try
                 {
+                    CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
                     String[] cameraIds = cameraManager.getCameraIdList();
                     for(String cameraID : cameraIds)
                     {
                         CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
-                        if(cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE))
+
+                       if(cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE))
                             cameraManager.setTorchMode(cameraID, true);
                     }
                 }
-                catch (Exception e){/*TODO Catch Exception*/ }
+                catch (final Exception e){
+                    runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        AlarmToast.showToastShort(getApplicationContext(),  "Error: " + e.getMessage());
+                    }});
+                }
             }
             else
             {
                 //Start new Cam
                 m_Cam = android.hardware.Camera.open();
-
                 //Load Parameters and Set Parameters
                 android.hardware.Camera.Parameters p = m_Cam.getParameters();
                 p.setFlashMode(android.hardware.Camera.Parameters.FLASH_MODE_TORCH);
                 m_Cam.setParameters(p);
-
                 //Start LED
                 m_Cam.startPreview();
             }
@@ -554,18 +555,16 @@ public class AlarmActivity extends AppCompatActivity {
 
         //Newer API
         if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {  //TODO Test with new Version when available
-                CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 try {
+                    CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
                     String[] cameraIds = cameraManager.getCameraIdList();
-
                     for (String cameraID : cameraIds) {
                         CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
-                        if (cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE))
+                        if (cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) != null)
                             cameraManager.setTorchMode(cameraID, false);
                     }
-                } catch (Exception e) {/*TODO Catch Exception*/ }
+                } catch (Exception e) {AlarmToast.showToastShort(getApplicationContext(),  "Error: " + e.getMessage());}
             }
         }
 

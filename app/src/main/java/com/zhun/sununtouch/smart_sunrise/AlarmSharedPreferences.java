@@ -6,7 +6,9 @@ import android.preference.PreferenceManager;
 
 /**
  * Created by Sunny on 22.01.2016.
+ * Helper Class to Read and Write to Shared Preferences
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 class AlarmSharedPreferences {
     static SharedPreferences getSharedPreference(Context context, String settingName){
         return context.getSharedPreferences(settingName, Context.MODE_PRIVATE);

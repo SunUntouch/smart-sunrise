@@ -5,6 +5,11 @@ import android.provider.Settings;
 
 import java.util.Calendar;
 
+/**
+ * Created by Sunny
+ * Model Class to provide Constant Values
+ */
+
 abstract class AlarmConstants {
 
     //Shared Pref Settings

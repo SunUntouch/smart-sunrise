@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 
 /**
  * Created by Sunny on 26.12.2015.
+ * TODO: This Color Picker must be removed and switched with a own solution
  */
 class ColorPickingDialog extends AlertDialog{
 

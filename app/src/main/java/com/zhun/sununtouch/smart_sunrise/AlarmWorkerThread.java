@@ -4,9 +4,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 
-
 /**
  * Created by Sunny on 02.10.2016.
+ * Helper Class for setting and removing HandlerThreads
  */
 
 class AlarmWorkerThread extends HandlerThread{

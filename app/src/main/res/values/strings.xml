@@ -122,4 +122,6 @@
     <string name="toast_AlarmScreenBrightness_positive">Brightness set to %d.</string>
     <string name="toast_AlarmScreenBrightness_negative">Brightness set to %d.\r\nAlarm is inactive</string>
 
+    <!-- image Description -->
+    <string name="image_color_gradient_listView">This is the Gradient seen in the Brightness List Child</string>
 </resources>

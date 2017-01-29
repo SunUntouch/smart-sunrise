@@ -10,7 +10,8 @@
     tools:context="com.zhun.sununtouch.smart_sunrise.AlarmActivity"
     tools:showIn="@layout/activity_alarm"
     android:orientation="vertical"
-    android:id="@+id/wakeup_wakescreen_layout">
+    android:id="@+id/wakeup_wakescreen_layout"
+    android:background="@drawable/custom_alarm_view">
 
     <Button
         android:text="WAKE UP"
@@ -44,7 +45,7 @@
             android:textAlignment="center"
             android:textSize="30sp"
             android:layout_width="match_parent"
-            android:layout_height="40dp"/>
+            android:layout_height="40dp" />
 
         <TextClock
             android:id="@+id/wakeup_timer_wakescreen_clock"

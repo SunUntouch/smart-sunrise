@@ -4,11 +4,12 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
 /**
  * Created by Sunny on 02.10.2016.
+ * Helper Class to get Song Information from Device
  */
 
+@SuppressWarnings("unused")
 class SongDatabase {
 
     private LinkedHashMap<String, LinkedHashMap<String, HashSet<SongInformation>>> mDatabase = null;

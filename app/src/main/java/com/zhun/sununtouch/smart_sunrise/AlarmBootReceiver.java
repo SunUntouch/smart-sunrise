@@ -6,10 +6,10 @@ import android.content.Intent;
 
 /**
  * Created by Sunny on 02.01.2017.
+ * Receives On Boot Intent to set Alarm New
  */
 
 public class AlarmBootReceiver extends BroadcastReceiver {
-
     @Override
     public void onReceive(Context context, Intent intent) {
 

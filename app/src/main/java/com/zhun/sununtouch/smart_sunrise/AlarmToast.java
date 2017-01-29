@@ -5,7 +5,9 @@ import android.widget.Toast;
 
 /**
  * Created by Sunny on 22.01.2016.
+ * Helper Class to show a Toast
  */
+@SuppressWarnings({"WeakerAccess", "unused"})
 class AlarmToast {
 
     static void showToast(Context context, boolean longToast, String toastShortText, String toastLongText){

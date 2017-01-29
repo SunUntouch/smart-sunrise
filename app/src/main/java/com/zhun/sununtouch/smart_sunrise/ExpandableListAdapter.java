@@ -15,6 +15,11 @@ import android.widget.ToggleButton;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Created by Sunny
+ * Expandable Lis6 View to Set Up Alarm values
+ */
+
 class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private final Context context;
@@ -37,7 +42,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
      **********************************************************************************************/
     private View createTimeView(ViewGroup v, int ID){
 
-        AlarmConfiguration config = configuration.getAlarm(ID);
+        final AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -57,7 +62,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createDayView(ViewGroup v,int ID){
 
-        AlarmConfiguration config = configuration.getAlarm(ID);
+        final AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -87,7 +92,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createMusicView(ViewGroup v, int ID){
 
-        AlarmConfiguration config = configuration.getAlarm(ID);
+        final AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -98,9 +103,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         txtListChild.setText(view.getContext().getString(R.string.wakeup_music));
 
         //Choosing Music Button
-        String newMusicText = config.getSongName();
-        if(newMusicText.indexOf('.') != -1)
-            newMusicText = newMusicText.substring(0, newMusicText.lastIndexOf('.'));
+        final String newMusicText = (config.getSongName().indexOf('.') == -1) ?  config.getSongName() : config.getSongName().substring(0, config.getSongName().lastIndexOf('.'));
         Button setMusicButton = (Button) view.findViewById(R.id.wakeup_timer_music_buttonMusic);
         setMusicButton.setText(newMusicText);
 
@@ -109,8 +112,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         setMusicVolumeButton.setText(String.format(Locale.US, "%d%s", config.getVolume(), "%"));
 
         //Set Start Time Button
-        long seconds   = config.getSongStart();
-        long minutes   = TimeUnit.SECONDS.toMinutes(seconds);
+        long seconds  = config.getSongStart();
+        long minutes = TimeUnit.SECONDS.toMinutes(seconds);
         seconds -= TimeUnit.MINUTES.toSeconds(minutes);
         Button setMusicStartTime = (Button) view.findViewById(R.id.wakeup_timer_music_SongStart);
         setMusicStartTime.setText(String.format(Locale.US,"%02d:%02d", minutes, seconds));
@@ -133,7 +136,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createLightView(ViewGroup v, int ID){
 
-        AlarmConfiguration config = configuration.getAlarm(ID);
+        final AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -202,7 +205,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
     private View createDeleteView(ViewGroup v, int ID){
 
-        AlarmConfiguration config = configuration.getAlarm(ID);
+        final AlarmConfiguration config = configuration.getAlarm(ID);
 
         //Create new Layout Inflater
         LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -249,7 +252,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, parent, false);
         }
 
-        AlarmConfiguration config = configuration.getAlarm(groupPosition);
+        final AlarmConfiguration config = configuration.getAlarm(groupPosition);
 
         //Set Group Title
         TextView txtListHeader = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);

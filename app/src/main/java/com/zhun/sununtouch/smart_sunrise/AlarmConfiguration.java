@@ -7,13 +7,17 @@ import java.util.Calendar;
 
 /**
  * Created by Sunny on 18.09.2016.
+ * Model Class to represent a Alarm
  */
+@SuppressWarnings("WeakerAccess")
 class AlarmConfiguration {
 
     private Context m_Context;
 
     //Actual Alarm Values
     private int actualAlarm    = 0;
+
+    private String actualAlarmname = AlarmConstants.ALARM;
 
     //Actual Alarm Set
     private boolean tempTimes    = false;
@@ -187,13 +191,13 @@ class AlarmConfiguration {
         WAKEUP_MUSIC,
         WAKEUP_LIGHT
     }
-    private final int childItems = childItem.values().length;
+    private static final int childItems = childItem.values().length;
     int getChildItemSize(){
         return childItems;
     }
 
     //Name
-    private String actualAlarmname = AlarmConstants.ALARM;
+
     String getAlarmName(){
         return actualAlarmname;
     }

@@ -9,8 +9,10 @@ import java.util.Vector;
 
 /**
  * Created by Sunny on 28.12.2016.
+ * Model Class to represent a Array of Alarm Configurations
  */
 
+@SuppressWarnings("unused")
 class AlarmConfigurationList {
 
     private int m_Amount;
@@ -45,18 +47,13 @@ class AlarmConfigurationList {
 
         AlarmSharedPreferences.getSharedPreferenceEditor(m_Context).putInt(AlarmConstants.ALARM_VALUE, m_Amount).apply();
     }
+    @SuppressWarnings("UnusedReturnValue")
     boolean removeAlarm(int alarmID){
 
-        try {
-            m_Alarms.remove(alarmID);
-
-        }catch (IndexOutOfBoundsException e){
-            //TODO: Logging
-            return false;
-        }catch(UnsupportedOperationException e){
-            return false;
-        }
-
+        try { m_Alarms.remove(alarmID); }
+        catch(Exception e){
+            AlarmToast.showToastShort(m_Context,  "Error: " + e.getMessage());
+            return false; }
         removeSharedPreference(alarmID);
         return true;
     }
@@ -67,7 +64,7 @@ class AlarmConfigurationList {
         if( m_Amount > 0) {
             m_Amount = m_Alarms.size();
             for (int id = alarmID; id < m_Amount; ++id) {
-                SharedPreferences sharedPrefs = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.ALARM, id++); //TODO check if thats right whith double ++id
+                SharedPreferences sharedPrefs = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.ALARM, id++);
                 SharedPreferences.Editor editorNew = sharedPrefs.edit();
                 SharedPreferences settingsOld = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.ALARM, id);
 
@@ -96,11 +93,12 @@ class AlarmConfigurationList {
     AlarmConfiguration getAlarm(int alarmID){
         return m_Alarms.get(alarmID);
     }
+    @SuppressWarnings("UnusedReturnValue")
     boolean setAlarm(AlarmConfiguration alarm){
         try {
             m_Alarms.set(alarm.getAlarmID(), alarm);
-        }catch (IndexOutOfBoundsException e){
-            //TODO: Logging and Catch the other possible Cases
+        }catch (Exception e){
+            AlarmToast.showToastShort(m_Context,  "Error: " + e.getMessage());
             return false;
         }
         alarm.commit();

@@ -2,7 +2,9 @@ package com.zhun.sununtouch.smart_sunrise;
 
 /**
  * Created by Sunny on 20.12.2015.
+ * Model to represent a Song
  */
+
 class SongInformation {
     private final long id;
     private final String title;

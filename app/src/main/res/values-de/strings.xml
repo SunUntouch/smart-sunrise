@@ -113,4 +113,6 @@
     <string name="toast_AlarmScreenBrightness_positive">Helligkeit auf %d gesetzt.</string>
     <string name="toast_AlarmScreenBrightness_negative">Helligkeit auf %d gesetzt.\r\nAlarm ist inaktiv</string>
 
+    <!-- image Description -->
+    <string name="image_color_gradient_listView">Der, in der Listenansicht verwendete, Farbgradient</string>
 </resources>

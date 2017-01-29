@@ -80,6 +80,7 @@
                 android:layout_margin="@dimen/button_margin"/>
 
             <ImageView
+                android:contentDescription="@string/image_color_gradient_listView"
                 android:id="@+id/wakeup_timer_light_gradient"
                 android:layout_gravity="center_vertical"
                 android:layout_width="80dp"

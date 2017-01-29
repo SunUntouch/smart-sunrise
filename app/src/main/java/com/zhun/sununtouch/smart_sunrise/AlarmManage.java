@@ -13,9 +13,12 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
-public class AlarmManage extends AppCompatActivity {
+/**
+ * Created by Sunny
+ * Starts and Cancels Alarms, manages Intenets and so on
+ */
 
-    private static final boolean DEBUG = false;
+public /*abstract*/ class AlarmManage extends AppCompatActivity {
 
     private final Context context;
     private AlarmManager alarmManager;
@@ -55,7 +58,7 @@ public class AlarmManage extends AppCompatActivity {
 
         //create Alarm, PendingIntent inherit the actual Alarm ID
         createAlarmManager();
-        PendingIntent pendingIntent = getPendingIntent();
+        final PendingIntent pendingIntent = getPendingIntent();
         alarmManager.cancel(pendingIntent);
 
         AlarmConfiguration conf = getConfig();
@@ -118,7 +121,7 @@ public class AlarmManage extends AppCompatActivity {
             conf.commit();
 
         //Check for SDK Version and Use different AlarmManager Functions
-        alarmTime = (DEBUG) ? System.currentTimeMillis() : alarmTime - timeBeforeMusic; //For Testing
+        alarmTime = alarmTime - timeBeforeMusic;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             //Newer API Level provides a Symbol when Alarm is active
             AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(alarmTime, pendingIntent);
@@ -128,7 +131,7 @@ public class AlarmManage extends AppCompatActivity {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
 
         //Show Toast when Set
-        boolean checked = checkPendingIntent();
+        final boolean checked = checkPendingIntent();
         if(checked)
         {
             //TODO More elegant solution then a toast

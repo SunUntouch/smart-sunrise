@@ -54,6 +54,11 @@ import java.util.concurrent.TimeUnit;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 
+/**
+ * Created by Sunny
+ * Main Alarm Activity
+ */
+
 public class MainActivity extends AppCompatActivity
                     implements TimePickerDialog.OnTimeSetListener{
     //ExpendableList
@@ -265,6 +270,7 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * Set New Alarm
      **********************************************************************************************/
+    @SuppressWarnings("unused")
     public void fakeAlarm(){
         Calendar c = Calendar.getInstance();
         AlarmConfiguration alarm = getAlarm(actualAlarm);
@@ -322,12 +328,12 @@ public class MainActivity extends AppCompatActivity
         AlertDialog AlarmNameAlert = builder.create();
         try
         {
-            AlarmNameAlert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE); //TODO
+            if(AlarmNameAlert.getWindow() == null)
+                throw new NullPointerException("AlarmNameAlert.getWindow() == null");
+            AlarmNameAlert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
         catch (NullPointerException e)
-        {
-            AlarmToast.showToastShort(getApplicationContext(), getAlarm(actualAlarm).isAlarmSet(), "Error: " + e.getMessage(), getString(R.string.toast_negative_alarm));
-        }
+        {   AlarmToast.showToastShort(getApplicationContext(), getAlarm(actualAlarm).isAlarmSet(), "Error: " + e.getMessage(), getString(R.string.toast_negative_alarm)); }
 
         AlarmNameAlert.show();
     }
@@ -366,10 +372,16 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * TIME SETTING DIALOG
      **********************************************************************************************/
+    @SuppressWarnings("UnusedParameters")
     public void showTimeSettingsDialog(View v){
+
+        Bundle bundle = new Bundle();
+        bundle.putInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, getAlarm(actualAlarm).getScreenStartTime());
+        bundle.putInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME   , getAlarm(actualAlarm).getLEDStartTime());
 
         //Open TimePicker Dialog
         DialogFragment newFragment = new SettingTimeFragment();
+        newFragment.setArguments(bundle);
         newFragment.show(getFragmentManager(), "timePicker");
     }
     public void onTimeSet(TimePicker view, int hourOfDay, int minute){
@@ -448,6 +460,7 @@ public class MainActivity extends AppCompatActivity
      * MUSIC SET DIALOG
      **********************************************************************************************/
     private final Vector<AlertDialog> mDialogs = new Vector<>();
+    @SuppressWarnings("UnusedParameters")
     public void showMusicSettingDialog(View v){
         //Builder List view
         ListView listView = new ListView(this);
@@ -716,6 +729,7 @@ public class MainActivity extends AppCompatActivity
     private boolean checkMusicPermission(){
         return  checkMusicPermission(true);
     }
+    @SuppressWarnings("StatementWithEmptyBody")
     private boolean checkMusicPermission(boolean askPermission){
 
         if(ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
@@ -980,7 +994,6 @@ public class MainActivity extends AppCompatActivity
         vibrationToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                //TODO Let it vibrate
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
                 //SeekBar
@@ -1227,7 +1240,6 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     public void showScreenColor1SettingDialog(View v){
 
-        //TODO Need a better ColorPicker without 0xfffff bug
         final Button bColor = (Button) v;
         ColorPickingDialog colorPicker = new ColorPickingDialog(v.getContext(), (v.getId() == R.id.wakeup_timer_light_buttonColor1) ? getAlarm(actualAlarm).getLightColor1() : getAlarm(actualAlarm).getLightColor2(), new ColorPickingDialog.OnColorSelectedListener() {
             @Override
