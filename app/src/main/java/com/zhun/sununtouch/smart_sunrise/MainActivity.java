@@ -554,12 +554,12 @@ public class MainActivity extends AppCompatActivity
 
         //Create new Builder and Get Song Name Array and set it for Alarm Dialog Builder
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song)); //TODO
+        builder.setTitle(this.getString(R.string.wakeup_set_alarm_song));
         builder.setItems(namedSongs.toArray(new String[namedSongs.size()]), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
 
-                //Get Song Lengh
+                //Get Song Length
                 saveSongLength(sortedSongs.get(which).getPath());
                 for(AlertDialog dia : mDialogs)
                     dia.dismiss();

@@ -120,6 +120,11 @@ public class AlarmActivity extends AppCompatActivity {
         stopMusic();
 
         //Kill Threads
+        if(dateThread != null)
+        {
+            dateThread.removeCallBacks(null);
+            dateThread.quit();
+        }
         if(musicThread != null)
         {
             musicThread.removeCallBacks(null);
@@ -215,6 +220,7 @@ public class AlarmActivity extends AppCompatActivity {
             task.execute();
     }
 
+    private AlarmWorkerThread dateThread;
     private AlarmWorkerThread musicThread;
     private AlarmWorkerThread vibrationThread;
     private void setRunnable(AlarmWorkerThread thread, Runnable runnable, long millis){
@@ -247,16 +253,29 @@ public class AlarmActivity extends AppCompatActivity {
      * CONSTRUCT VIEWS
      **********************************************************************************************/
     private void doViews(){
-        //SetViews
         //Date
-        //TODO Set Runnable to Update Date
-        Calendar calendar = Calendar.getInstance();
+        dateThread  = new AlarmWorkerThread(AlarmConstants.ACTIVITY_DATE_THREAD);
         final TextView dateText = (TextView) findViewById(R.id.wakeup_wakescreen_date);
-        dateText.setText(
-                getDayName(calendar) + ", " +
-                Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)) + "." +
-                Integer.toString(calendar.get(Calendar.MONTH) + 1)    + "." +
-                Integer.toString(calendar.get(Calendar.YEAR)));
+        setRunnable(dateThread, new Runnable() {
+            @Override
+            public void run() {
+
+                SystemClock.sleep(1000);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        final Calendar calendar = Calendar.getInstance();
+                        dateText.setText(
+                                getDayName(calendar) + ", " +
+                                        Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)) + "." +
+                                        Integer.toString(calendar.get(Calendar.MONTH) + 1)    + "." +
+                                        Integer.toString(calendar.get(Calendar.YEAR)));
+
+                        setRunnable(dateThread, this, 1000);
+                    }
+                });
+            }
+        }, 1000);
 
         //TextClock
         //final TextClock txtClock = (TextClock) findViewById(R.id.wakeup_timer_wakescreen_clock);
@@ -415,7 +434,7 @@ public class AlarmActivity extends AppCompatActivity {
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
 
         //Start Runnable and Thread
-        musicThread  = new AlarmWorkerThread("SmartSunrise_Music");
+        musicThread  = new AlarmWorkerThread(AlarmConstants.ACTIVITY_MUSIC_THREAD);
         setRunnable(musicThread, new Runnable() {
             @Override
             public void run() {
@@ -478,7 +497,7 @@ public class AlarmActivity extends AppCompatActivity {
 
         if(getConfig().getVibration())
         {
-            vibrationThread = new AlarmWorkerThread("SmartSunrise_Vibration");
+            vibrationThread = new AlarmWorkerThread(AlarmConstants.ACTIVITY_VIBRATION_THREAD);
             //Set new Handler
             setRunnable(vibrationThread, new Runnable() {
                 @Override

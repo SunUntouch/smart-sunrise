@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -134,10 +133,9 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         final boolean checked = checkPendingIntent();
         if(checked)
         {
-            //TODO More elegant solution then a toast
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(alarmTime);
-            Toast.makeText(context, SimpleDateFormat.getDateTimeInstance().format(cal.getTime()), Toast.LENGTH_SHORT).show();
+            AlarmToast.showToastShort(context,  SimpleDateFormat.getDateTimeInstance().format(cal.getTime()));
         }
         return checked;
     }

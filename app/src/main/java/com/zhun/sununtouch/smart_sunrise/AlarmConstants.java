@@ -15,6 +15,11 @@ abstract class AlarmConstants {
     //Shared Pref Settings
     final static String WAKEUP_TIMER            = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
 
+    //Threads
+    final static String ACTIVITY_DATE_THREAD      = "com.zhun.sununtouch.smart_sunrise.AlarmActivity.DATE_THREAD";
+    final static String ACTIVITY_MUSIC_THREAD     = "com.zhun.sununtouch.smart_sunrise.AlarmActivity.MUSIC_THREAD";
+    final static String ACTIVITY_VIBRATION_THREAD = "com.zhun.sununtouch.smart_sunrise.AlarmActivity.VIBRATION_THREAD";
+
     //Alarm
     final static String ALARM                      = "Alarm";
     final static String ALARM_ID                   = "Alarm_ID";
