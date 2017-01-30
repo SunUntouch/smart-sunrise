@@ -20,19 +20,6 @@ public /*static*/ class SettingTimeFragment extends DialogFragment{ //no need of
     private Activity mActivity;
     private TimePickerDialog.OnTimeSetListener mListener;
     private int screenTime, ledTime;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        screenTime = getArguments().getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, 0);
-        ledTime = getArguments().getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME, 0);
-    }
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        initialize();
-    }
     private void initialize(){
 
         mActivity = getActivity();
@@ -48,14 +35,24 @@ public /*static*/ class SettingTimeFragment extends DialogFragment{ //no need of
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        screenTime = getArguments().getInt(AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME, 0);
+        ledTime = getArguments().getInt(AlarmConstants.ALARM_LIGHT_LED_START_TIME, 0);
+    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        initialize();
+    }
+    @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         //Use Current Time as Default Value for Picker
         final int currentTime = (ledTime < screenTime) ? screenTime : ledTime;
         final Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(calendar.getTimeInMillis() + TimeUnit.MINUTES.toMillis(currentTime));
-
-
         return new TimePickerDialog(
                 mActivity,
                 mListener,

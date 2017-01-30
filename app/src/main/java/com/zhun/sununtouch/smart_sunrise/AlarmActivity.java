@@ -115,7 +115,7 @@ public class AlarmActivity extends AppCompatActivity {
             config.cancelAlarm();
 
         //Stop Stuff
-        stopLED();
+        enableLED(false);
         setVibrationStop();
         stopMusic();
 
@@ -197,7 +197,7 @@ public class AlarmActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
 
             SystemClock.sleep((ledDelay == 0) ? 1000 : ledDelay);
-            startLED();
+            enableLED(true);
             return null;
         }
     }
@@ -513,34 +513,33 @@ public class AlarmActivity extends AppCompatActivity {
         startAsyncTask(new LEDAsyncTask(TimeUnit.MINUTES.toMillis(minutes)), true);
     }
     @SuppressWarnings("deprecation")
-    private void startLED(){
+    private void enableLED(final boolean enable){
 
+        //Check if Device has a LED
         if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
         {
+            //Check for Build Version
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                try
-                {
+                try{
                     CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-                    String[] cameraIds = cameraManager.getCameraIdList();
+                    final String[] cameraIds = cameraManager.getCameraIdList();
                     for(String cameraID : cameraIds)
                     {
-                        CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
-
-                       if(cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE))
-                            cameraManager.setTorchMode(cameraID, true);
+                        final CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
+                        final Boolean hasTorch = cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
+                        if(hasTorch != null && hasTorch)
+                            cameraManager.setTorchMode(cameraID, enable);
                     }
                 }
                 catch (final Exception e){
                     runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        AlarmToast.showToastShort(getApplicationContext(),  "Error: " + e.getMessage());
-                    }});
+                        @Override
+                        public void run() {
+                            AlarmToast.showToastShort(getApplicationContext(),  "Error: " + e.getMessage());
+                        }});
                 }
             }
-            else
-            {
-                //Start new Cam
+            else if(enable) { //Start new Cam
                 m_Cam = android.hardware.Camera.open();
                 //Load Parameters and Set Parameters
                 android.hardware.Camera.Parameters p = m_Cam.getParameters();
@@ -549,31 +548,11 @@ public class AlarmActivity extends AppCompatActivity {
                 //Start LED
                 m_Cam.startPreview();
             }
-        }
-    }
-    private void stopLED(){
-
-        //Newer API
-        if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                try {
-                    CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-                    String[] cameraIds = cameraManager.getCameraIdList();
-                    for (String cameraID : cameraIds) {
-                        CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
-                        if (cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE) != null)
-                            cameraManager.setTorchMode(cameraID, false);
-                    }
-                } catch (Exception e) {AlarmToast.showToastShort(getApplicationContext(),  "Error: " + e.getMessage());}
+            else if(m_Cam != null) { //Stop and Release LED
+                m_Cam.stopPreview();
+                m_Cam.release();
+                m_Cam = null;
             }
-        }
-
-        //Stop and Release LED
-        if(m_Cam != null)
-        {
-            m_Cam.stopPreview();
-            m_Cam.release();
-            m_Cam = null;
         }
     }
 }
