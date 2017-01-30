@@ -3,6 +3,7 @@ package com.zhun.sununtouch.smart_sunrise;
 import android.graphics.Color;
 import android.provider.Settings;
 
+import java.text.DateFormatSymbols;
 import java.util.Calendar;
 
 /**
@@ -44,35 +45,38 @@ abstract class AlarmConstants {
     final static String ALARM_DAY_SUNDAY           = "Alarm_Sunday";
 
     //Alarm Music
-    final static String ALARM_MUSIC_SONGID         = "Alarm_SongID";
-    static final String ALARM_MUSIC_SONGLENGTH     = "Alarm_SongLength";
-    final static String ALARM_MUSIC_SONGSTART      = "Alarm_SongStart";
+    final static String ALARM_MUSIC_SONG_ID        = "Alarm_SongID";
+    static final String ALARM_MUSIC_SONG_LENGTH    = "Alarm_SongLength";
+    final static String ALARM_MUSIC_SONG_START     = "Alarm_SongStart";
     final static String ALARM_MUSIC_VOLUME         = "Alarm_Volume";
-    final static String ALARM_MUSIC_FADEIN         = "Alarm_FadeIn";
-    final static String ALARM_MUSIC_FADEINTIME     = "Alarm_FadeTime";
+    final static String ALARM_MUSIC_FADE_IN        = "Alarm_FadeIn";
+    final static String ALARM_MUSIC_FADE_IN_TIME   = "Alarm_FadeTime";
 
-    final static String ALARM_MUSIC_VIBRATION_ACTIV= "Alarm_Vibration_Activ";
-    final static String ALARM_MUSIC_VIBRATION_VALUE= "Alarm_Vibration_Value";
+    final static String ALARM_MUSIC_VIBRATION_ACTIVE = "Alarm_Vibration_Active";
+    final static String ALARM_MUSIC_VIBRATION_VALUE  = "Alarm_Vibration_Value";
 
     //Alarm Light
     final static String ALARM_LIGHT_SCREEN            = "Alarm_Screen";
-    final static String ALARM_LIGHT_SCREEN_BRIGTHNESS = "Alarm_ScreenBrigthness";
+    final static String ALARM_LIGHT_SCREEN_BRIGHTNESS = "Alarm_ScreenBrightness";
     final static String ALARM_LIGHT_SCREEN_START_TIME = "Alarm_ScreenStartTime";
     final static String ALARM_LIGHT_SCREEN_START_TEMP = "Alarm_ScreenStartTemp";
     final static String ALARM_LIGHT_COLOR1            = "Alarm_ScreenColor1";
     final static String ALARM_LIGHT_COLOR2            = "Alarm_ScreenColor2";
-    final static String ALARM_LIGHT_FADECOLOR         = "Alarm_FadeColor";
-    final static String ALARM_LIGHT_USELED            = "Alarm_UseLED";
+    final static String ALARM_LIGHT_FADE_COLOR        = "Alarm_FadeColor";
+    final static String ALARM_LIGHT_USE_LED           = "Alarm_UseLED";
     final static String ALARM_LIGHT_LED_START_TIME    = "Alarm_LEDStartTime";
     final static String ALARM_LIGHT_LED_START_TEMP    = "Alarm_LEDStartTemp";
 
     //StartValues
-    private final static Calendar calendar = Calendar.getInstance();
+    final static String[] SHORT_DAYS = DateFormatSymbols.getInstance().getShortWeekdays();
+    final static String[] LONG_DAYS  = DateFormatSymbols.getInstance().getWeekdays();
 
     //AlarmSet
     final static boolean ACTUAL_ONESHOT   = false;
     final static boolean ACTUAL_TEMPORARY = false;
+
     //Time
+    private final static Calendar calendar = Calendar.getInstance();
     final static int ACTUAL_TIME_HOUR   = calendar.get(Calendar.HOUR_OF_DAY);
     final static int ACTUAL_TIME_MINUTE = calendar.get(Calendar.MINUTE);
     final static int ACTUAL_TIME_SNOOZE = 10;

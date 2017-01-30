@@ -6,7 +6,7 @@
     android:id="@+id/wakeup_timer_layout_days">
 
     <TextView
-        android:id="@+id/wakeup_timer_days_textview"
+        android:id="@+id/wakeup_timer_days_text_view"
         android:textColor="@color/buttonTextColorPrimary"
         android:textColorHighlight="@color/buttonTextColorSecondary"
         android:layout_width="match_parent"

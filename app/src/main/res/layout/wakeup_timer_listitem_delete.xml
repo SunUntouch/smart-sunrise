@@ -6,7 +6,7 @@
     android:id="@+id/wakeup_timer_layout_delete">
 
     <TextView
-        android:id="@+id/wakeup_timer_delete_textview"
+        android:id="@+id/wakeup_timer_delete_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="0sp"

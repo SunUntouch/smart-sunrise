@@ -48,7 +48,7 @@ public class AlarmActivity extends AppCompatActivity {
     private static final int BRIGHTNESS_STEPS = 100;  //TODO add to Options
 
     /***********************************************************************************************
-     * ONCREATE AND HELPER
+     * ON_CREATE AND HELPER
      **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,6 +106,7 @@ public class AlarmActivity extends AppCompatActivity {
         startAlarmProcedure(minutesMax, minuteScreen, minuteLED);
     }
     protected void onStop() {
+
         //Cancel or Snooze Alarm
         if(snoozed)
             config.snoozeAlarm();
@@ -118,22 +119,29 @@ public class AlarmActivity extends AppCompatActivity {
         enableLED(false);
         setVibrationStop();
         stopMusic();
+        stopAnimation();
 
         //Kill Threads
         if(dateThread != null)
         {
             dateThread.removeCallBacks(null);
+            dateThread.interrupt();
             dateThread.quit();
+            dateThread = null;
         }
         if(musicThread != null)
         {
             musicThread.removeCallBacks(null);
+            musicThread.interrupt();
             musicThread.quit();
+            musicThread = null;
         }
         if(vibrationThread != null)
         {
             vibrationThread.removeCallBacks(null);
+            vibrationThread.interrupt();
             vibrationThread.quit();
+            vibrationThread = null;
         }
 
         //Remove Callbacks
@@ -158,9 +166,9 @@ public class AlarmActivity extends AppCompatActivity {
         final long screenFadeTime;
         final float brightness;
 
-        BrightnessAsyncTask(Integer screenBrightness, Long screenfade) {
+        BrightnessAsyncTask(Integer screenBrightness, Long screenFade) {
             super();
-            screenFadeTime = screenfade;
+            screenFadeTime = screenFade;
             brightness = (float)screenBrightness / 100f;
         }
         @Override
@@ -225,8 +233,13 @@ public class AlarmActivity extends AppCompatActivity {
     private AlarmWorkerThread vibrationThread;
     private void setRunnable(AlarmWorkerThread thread, Runnable runnable, long millis){
 
+        if(thread == null || runnable == null)
+            return;
+
         if(!thread.isAlive())
         {
+            if(thread.isInterrupted())
+                thread.quit();
             thread.start();
             thread.prepareHandler();
         }
@@ -255,61 +268,33 @@ public class AlarmActivity extends AppCompatActivity {
     private void doViews(){
         //Date
         dateThread  = new AlarmWorkerThread(AlarmConstants.ACTIVITY_DATE_THREAD);
-        final TextView dateText = (TextView) findViewById(R.id.wakeup_wakescreen_date);
         setRunnable(dateThread, new Runnable() {
             @Override
             public void run() {
-
-                SystemClock.sleep(1000);
-                runOnUiThread(new Runnable() {
+                final Runnable actual = this;
+                AlarmActivity.this.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         final Calendar calendar = Calendar.getInstance();
+                        TextView dateText = (TextView) findViewById(R.id.wakeup_wakescreen_date);
                         dateText.setText(
-                                getDayName(calendar) + ", " +
-                                        Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)) + "." +
-                                        Integer.toString(calendar.get(Calendar.MONTH) + 1)    + "." +
-                                        Integer.toString(calendar.get(Calendar.YEAR)));
-
-                        setRunnable(dateThread, this, 1000);
+                                getConfig().getDayName(calendar.get(Calendar.DAY_OF_WEEK), true) + ", " +
+                                Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)) + "." +
+                                Integer.toString(calendar.get(Calendar.MONTH) + 1)    + "." +
+                                Integer.toString(calendar.get(Calendar.YEAR)));
+                        setRunnable(dateThread, actual, 1000);
                     }
                 });
             }
-        }, 1000);
+        }, 0);
 
         //TextClock
         //final TextClock txtClock = (TextClock) findViewById(R.id.wakeup_timer_wakescreen_clock);
     }
-    private String getDayName(final Calendar calendar){
-        String dayName = "";
-        switch(calendar.get(Calendar.DAY_OF_WEEK)){
-            case Calendar.MONDAY:
-                dayName = this.getString(R.string.wakeup_day_monday);
-                break;
-            case Calendar.TUESDAY:
-                dayName = this.getString(R.string.wakeup_day_tuesday);
-                break;
-            case Calendar.WEDNESDAY:
-                dayName = this.getString(R.string.wakeup_day_wednesday);
-                break;
-            case Calendar.THURSDAY:
-                dayName = this.getString(R.string.wakeup_day_thursday);
-                break;
-            case Calendar.FRIDAY:
-                dayName = this.getString(R.string.wakeup_day_friday);
-                break;
-            case Calendar.SATURDAY:
-                dayName = this.getString(R.string.wakeup_day_saturday);
-                break;
-            case Calendar.SUNDAY:
-                dayName = this.getString(R.string.wakeup_day_sunday);
-                break;
-        }
-        return dayName;
-    }
     /***********************************************************************************************
      * COLOR FADING AND BRIGHTNESS
      **********************************************************************************************/
+    private ObjectAnimator initialFadeAnimation = new ObjectAnimator();
     private void startAlarmProcedure(final int minutes, final int fadeTime, final int ledTime){
 
         //duration for StartScreen Till WakeUp
@@ -321,14 +306,16 @@ public class AlarmActivity extends AppCompatActivity {
         linearLayout.setBackgroundColor(Color.BLACK);
 
         //FadeObject starting Music and Vibration at the End of the Animation
-        ObjectAnimator colorFade1 = ObjectAnimator.ofObject(
-                                                linearLayout,
-                                                "backgroundColor",
-                                                new ArgbEvaluator(),
-                                                Color.BLACK,
-                                                getConfig().getLightColor1());
-        colorFade1.setDuration(duration);
-        colorFade1.addListener(new Animator.AnimatorListener() {
+        initialFadeAnimation = ObjectAnimator.ofObject(
+                            linearLayout,
+                            "backgroundColor",
+                            new ArgbEvaluator(),
+                            Color.BLACK,
+                            getConfig().getLightColor1());
+        initialFadeAnimation.setDuration(duration);
+        initialFadeAnimation.addListener(new Animator.AnimatorListener() {
+
+            boolean cancelled = false;
             @Override
             public void onAnimationStart(Animator animation) {
                 startScreen(false);
@@ -340,37 +327,41 @@ public class AlarmActivity extends AppCompatActivity {
                 //Check if Fading is true
                 if(getConfig().getLightFade())
                 {
-                    ObjectAnimator fadeObject  = ObjectAnimator.ofObject(
-                                        linearLayout,
-                                        "backgroundColor",
-                                        new ArgbEvaluator(),
-                                        getConfig().getLightColor1(),
-                                        getConfig().getLightColor2());
-                    fadeObject.setDuration(duration);
-                    fadeObject.addListener(new Animator.AnimatorListener() {
+                    initialFadeAnimation = ObjectAnimator.ofObject(
+                                                            linearLayout,
+                                                            "backgroundColor",
+                                                            new ArgbEvaluator(),
+                                                            getConfig().getLightColor1(),
+                                                            getConfig().getLightColor2());
+                    initialFadeAnimation.setDuration(duration);
+                    initialFadeAnimation.addListener(new Animator.AnimatorListener() {
+
+                        boolean cancelled = false;
                         @Override
                         public void onAnimationStart(Animator animation) {
 
                         }
                         @Override
                         public void onAnimationEnd(Animator animation) {
-                            startAction();
+                            if(!cancelled)
+                                startAction();
                         }
                         @Override
                         public void onAnimationCancel(Animator animation) {
-
+                            cancelled = true;
                         }
                         @Override
                         public void onAnimationRepeat(Animator animation) {
                         }
                     });
-                    fadeObject.start();
+                    initialFadeAnimation.start();
                 }
-                else
+                else if(!cancelled)
                     startAction();
             }
             @Override
             public void onAnimationCancel(Animator animation) {
+                cancelled = true;
             }
             @Override
             public void onAnimationRepeat(Animator animation) {
@@ -379,9 +370,8 @@ public class AlarmActivity extends AppCompatActivity {
 
         final int screenStartTime = minutes - fadeTime;
         if(screenStartTime > 0)
-            colorFade1.setStartDelay(TimeUnit.MINUTES.toMillis(screenStartTime) + 1);
-        colorFade1.start();
-
+            initialFadeAnimation.setStartDelay(TimeUnit.MINUTES.toMillis(screenStartTime) + 1);
+        initialFadeAnimation.start();
         //LED
         if(getConfig().getLED())
             doLED(minutes - ledTime);
@@ -389,6 +379,11 @@ public class AlarmActivity extends AppCompatActivity {
     private void startAction(){
         doPlayMusic(0);
         doVibrate(0);
+    }
+    private void stopAnimation(){
+
+        if(initialFadeAnimation != null && ( initialFadeAnimation.isStarted() || initialFadeAnimation.isRunning()))
+            initialFadeAnimation.cancel();
     }
 
     /***********************************************************************************************
@@ -428,7 +423,7 @@ public class AlarmActivity extends AppCompatActivity {
      * MUSIC
      **********************************************************************************************/
     private int currentVolume = 0;
-    private void doPlayMusic(int minutes){ // StartTime, Volume, FadeIn, FadeInTime, Vibration Aktiv, Vibration Strength
+    private void doPlayMusic(int minutes){
 
         try { prepareMusic(getConfig().getSongURI()); }
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }

@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +50,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_time, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_time_textview);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_time_text_view);
         txtListChild.setText(view.getContext().getString(R.string.wakeup_time));
 
         Button setTimeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonTime);
@@ -69,27 +70,26 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_days, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_days_textview);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_days_text_view);
         txtListChild.setText(view.getContext().getString(R.string.wakeup_day));
-
-        ToggleButton setMonday    = (ToggleButton) view.findViewById(R.id.wakeup_monday);
-        ToggleButton setTuesday   = (ToggleButton) view.findViewById(R.id.wakeup_tuesday);
-        ToggleButton setWednesday = (ToggleButton) view.findViewById(R.id.wakeup_wednesday);
-        ToggleButton setThursday  = (ToggleButton) view.findViewById(R.id.wakeup_thursday);
-        ToggleButton setFriday    = (ToggleButton) view.findViewById(R.id.wakeup_friday);
-        ToggleButton setSaturday  = (ToggleButton) view.findViewById(R.id.wakeup_saturday);
-        ToggleButton setSunday    = (ToggleButton) view.findViewById(R.id.wakeup_sunday);
-
-        setMonday   .setChecked(config.isMonday());
-        setTuesday  .setChecked(config.isTuesday());
-        setWednesday.setChecked(config.isWednesday());
-        setThursday .setChecked(config.isThursday());
-        setFriday   .setChecked(config.isFriday());
-        setSaturday .setChecked(config.isSaturday());
-        setSunday   .setChecked(config.isSunday());
-
+        createButton(view, R.id.wakeup_monday   , config.getDayName(Calendar.MONDAY   , false), config.isMonday());
+        createButton(view, R.id.wakeup_tuesday  , config.getDayName(Calendar.TUESDAY  , false), config.isTuesday());
+        createButton(view, R.id.wakeup_wednesday, config.getDayName(Calendar.WEDNESDAY, false), config.isWednesday());
+        createButton(view, R.id.wakeup_thursday , config.getDayName(Calendar.THURSDAY , false), config.isThursday());
+        createButton(view, R.id.wakeup_friday   , config.getDayName(Calendar.FRIDAY   , false), config.isFriday());
+        createButton(view, R.id.wakeup_saturday , config.getDayName(Calendar.SATURDAY , false), config.isSaturday());
+        createButton(view, R.id.wakeup_sunday   , config.getDayName(Calendar.SUNDAY   , false), config.isSunday());
         return view;
     }
+    @SuppressWarnings("UnusedReturnValue")
+    private ToggleButton createButton(View view, int id, String text, boolean checked){
+        ToggleButton button = (ToggleButton) view.findViewById(id);
+        button.setTextOn(text);
+        button.setTextOff(text);
+        button.setChecked(checked);
+        return button;
+    }
+
     private View createMusicView(ViewGroup v, int ID){
 
         final AlarmConfiguration config = configuration.getAlarm(ID);
@@ -99,7 +99,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_music, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_music_textview);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_music_text_view);
         txtListChild.setText(view.getContext().getString(R.string.wakeup_music));
 
         //Choosing Music Button
@@ -143,7 +143,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_light, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_light_textview);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_light_text_view);
         txtListChild.setText(view.getContext().getString(R.string.wakeup_light));
 
         //Toggle Screen light
@@ -212,7 +212,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_delete, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_delete_textview);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_delete_text_view);
         txtListChild.setVisibility(TextView.GONE);
 
         Button deleteAlarm = (Button) view.findViewById(R.id.wakeup_timer_deleteButton);
@@ -266,17 +266,17 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         //Day Text
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
         txtListDays.setText(String.format("%s %s %s %s %s %s %s",
-                (config.isMonday())    ? convertView.getContext().getString(R.string.wakeup_day_monday_short) : "",
-                (config.isTuesday())   ? convertView.getContext().getString(R.string.wakeup_day_tuesday_short) : "",
-                (config.isWednesday()) ? convertView.getContext().getString(R.string.wakeup_day_wednesday_short) : "",
-                (config.isThursday())  ? convertView.getContext().getString(R.string.wakeup_day_thursday_short) : "",
-                (config.isFriday())    ? convertView.getContext().getString(R.string.wakeup_day_friday_short) : "",
-                (config.isSaturday())  ? convertView.getContext().getString(R.string.wakeup_day_saturday_short) : "",
-                (config.isSunday())    ? convertView.getContext().getString(R.string.wakeup_day_sunday_short) : ""));
+                (config.isMonday())    ? config.getDayName(Calendar.MONDAY   , false) : "",
+                (config.isTuesday())   ? config.getDayName(Calendar.TUESDAY  , false) : "",
+                (config.isWednesday()) ? config.getDayName(Calendar.WEDNESDAY, false) : "",
+                (config.isThursday())  ? config.getDayName(Calendar.THURSDAY , false) : "",
+                (config.isFriday())    ? config.getDayName(Calendar.FRIDAY   , false) : "",
+                (config.isSaturday())  ? config.getDayName(Calendar.SATURDAY , false) : "",
+                (config.isSunday())    ? config.getDayName(Calendar.SUNDAY   , false) : ""));
         return convertView;
     }
     /***********************************************************************************************
-     * CHILDS
+     * CHILD
      **********************************************************************************************/
     @Override
     public int getChildrenCount(int groupPosition) {

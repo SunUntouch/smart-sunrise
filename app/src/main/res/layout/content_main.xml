@@ -37,7 +37,7 @@
         </LinearLayout>
 
         <ExpandableListView
-            android:id="@+id/wakeup_timer_expendbleList"
+            android:id="@+id/wakeup_timer_expendableList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:groupIndicator="@android:drawable/arrow_down_float"

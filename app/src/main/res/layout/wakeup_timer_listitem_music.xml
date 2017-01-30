@@ -6,7 +6,7 @@
     android:id="@+id/wakeup_timer_layout_music">
 
     <TextView
-        android:id="@+id/wakeup_timer_music_textview"
+        android:id="@+id/wakeup_timer_music_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="17sp"

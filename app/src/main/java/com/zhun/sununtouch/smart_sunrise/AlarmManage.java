@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Sunny
- * Starts and Cancels Alarms, manages Intenets and so on
+ * Starts and Cancels Alarms, manages Intents and so on
  */
 
 public /*abstract*/ class AlarmManage extends AppCompatActivity {

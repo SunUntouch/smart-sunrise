@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity
     private boolean m_isVisible = false;
 
     /***********************************************************************************************
-     * ONCREATE AND HELPER
+     * ON_CREATE AND HELPER
      **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity
 
         // New com.zhun.sununtouch.smart_sunrise.Configuration and List View//////////////////////////////////////////////////////////
         AlarmViewAdapter = new ExpandableListAdapter(this, m_AlarmConfigurations);
-        AlarmGroupView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendbleList);
+        AlarmGroupView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendableList);
 
         AlarmGroupView.setAdapter(AlarmViewAdapter);
         AlarmGroupView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
@@ -906,7 +906,7 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
     }
     /***********************************************************************************************
-     * MUSIC FADEIN TIME DIALOG
+     * MUSIC FADE_IN TIME DIALOG
      **********************************************************************************************/
     public void showFadeInSettingsDialog(View v){
 
@@ -1087,7 +1087,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
     /***********************************************************************************************
-     * SCEEN LIGHT SETTING DIALOG
+     * SCREEN LIGHT SETTING DIALOG
      **********************************************************************************************/
     public void showScreenLightSettingDialog(View v){
         //GEt ToggleButton and Set On LongClickListener
@@ -1097,7 +1097,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onLongClick(View v) {
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
-                //Seekbar
+                //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
@@ -1130,8 +1130,8 @@ public class MainActivity extends AppCompatActivity
                 final float currentBrightness = getWindow().getAttributes().screenBrightness;
                 final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
                 builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_light_brightness));
-                //Set Alertdialog View
-                builder.setView(createAlertLinearLayout(v, textView, seekBar, 99, 1, getAlarm(actualAlarm).getScreenBrightness() - 1)); //We must -1 because we dont want to have zero brightness
+                //Set AlertDialog View
+                builder.setView(createAlertLinearLayout(v, textView, seekBar, 99, 1, getAlarm(actualAlarm).getScreenBrightness() - 1)); //We must -1 because we don't want to have zero brightness
                 builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -1349,7 +1349,7 @@ public class MainActivity extends AppCompatActivity
             alarm.refreshAlarm();
     }
     /***********************************************************************************************
-     * OPTIONSMENU
+     * OPTIONS_MENU
      **********************************************************************************************/
     // TODO OptionsMenu: Set Different Colors for All Elements
     @Override
