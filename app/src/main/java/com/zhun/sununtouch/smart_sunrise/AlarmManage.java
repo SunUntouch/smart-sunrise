@@ -63,26 +63,31 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         AlarmConfiguration conf = getConfig();
 
         //Get Days to next Alarm and Check if AlarmTime is smaller then the actual time, if so then set it for 1 day to the future
-        long alarmTime;
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.SECOND, 0);
+
         final long currentTime = System.currentTimeMillis();
         if(!snooze)
         {
             //Add all necessary values to alarm time
-            Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.HOUR_OF_DAY, conf.getHour());
             calendar.set(Calendar.MINUTE     , conf.getMinute());
-            calendar.set(Calendar.SECOND     , 0);
-
-            alarmTime = calendar.getTimeInMillis() + TimeUnit.DAYS.toMillis(conf.getTimeToNextDay());
-            alarmTime = (alarmTime < currentTime) ? alarmTime + TimeUnit.DAYS.toMillis(1) : alarmTime;
+            if(!conf.isDaySet())
+                calendar.setTimeInMillis(calendar.getTimeInMillis() +((calendar.getTimeInMillis() < currentTime ) ? TimeUnit.DAYS.toMillis(1) : 0));
+            else
+            {
+                final int day = calendar.get(Calendar.DAY_OF_WEEK);
+                if( !conf.isDaySet(day) || (conf.isDaySet(day) && calendar.getTimeInMillis() <= currentTime))
+                    calendar.setTimeInMillis(calendar.getTimeInMillis() + TimeUnit.DAYS.toMillis(conf.getTimeToNextDay()));
+            }
         }
         else //Snooze
-            alarmTime = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(conf.getSnooze()); //+ Snooze
+            calendar.setTimeInMillis(calendar.getTimeInMillis() + TimeUnit.MINUTES.toMillis(conf.getSnooze())); //+ Snooze
 
         //Check if the complete start time is in the past, if so change light to better suiting values
         long timeBeforeMusic = (getBeforeScreenTime() >= getBeforeLEDTime()) ? getBeforeScreenTime() : getBeforeLEDTime();
+        final long alarmTimeWithLight = calendar.getTimeInMillis() - timeBeforeMusic;
 
-        final long alarmTimeWithLight = alarmTime - timeBeforeMusic;
         boolean changed = false;
         if(alarmTimeWithLight < currentTime)
         {
@@ -120,21 +125,20 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
             conf.commit();
 
         //Check for SDK Version and Use different AlarmManager Functions
-        alarmTime = alarmTime - timeBeforeMusic;
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
             //Newer API Level provides a Symbol when Alarm is active
-            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(alarmTime, pendingIntent);
+            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis() - timeBeforeMusic, pendingIntent);
             alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
         }
         else
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmTime, pendingIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - timeBeforeMusic, pendingIntent);
 
         //Show Toast when Set
         final boolean checked = checkPendingIntent();
         if(checked)
         {
             Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(alarmTime);
+            cal.setTimeInMillis(calendar.getTimeInMillis() - timeBeforeMusic);
             AlarmToast.showToastShort(context,  SimpleDateFormat.getDateTimeInstance().format(cal.getTime()));
         }
         return checked;
