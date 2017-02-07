@@ -51,6 +51,7 @@ public class AlarmActivity extends AppCompatActivity {
     /***********************************************************************************************
      * ON_CREATE AND HELPER
      **********************************************************************************************/
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -106,7 +107,6 @@ public class AlarmActivity extends AppCompatActivity {
         //Do the Other Stuff
         startAlarmProcedure(minutesMax, minuteScreen, minuteLED);
     }
-
     @Override
     protected void onUserLeaveHint() {
         super.onUserLeaveHint();
@@ -230,7 +230,6 @@ public class AlarmActivity extends AppCompatActivity {
                 brightnessHandler.removeCallbacksAndMessages(null);
         }
     }
-
     private void startAsyncTask(BrightnessAsyncTask task, boolean parallel){
         if(parallel)
             AsyncTaskCompat.executeParallel(task); //task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -268,23 +267,16 @@ public class AlarmActivity extends AppCompatActivity {
             handler.post(runnable);
         else
             handler.postDelayed(runnable, millis);
-        return;
     }
-
     /***********************************************************************************************
      * WAKEUP AND SNOOZE BUTTON
      **********************************************************************************************/
-    boolean cancelByClick = false;
     @SuppressWarnings("UnusedParameters")
     public void onWakeUpClick(View v){
-
-        cancelByClick = true;
         this.finish();
     }
     @SuppressWarnings("UnusedParameters")
     public void onSnoozeClick(View v){
-
-        cancelByClick = true;
         snoozed = true;
         this.finish();
     }
@@ -320,12 +312,8 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     private AnimatorSet fadeAnimationSet = new AnimatorSet();
     private void startAlarmProcedure(final int minutes, final int fadeTime, final int ledTime){
-
+        //Add Animations to new Set
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.wakeup_wakescreen_layout);
-
-        //FadeObject starting Music and Vibration at the End of the Animation
-        final long fadingMillis = TimeUnit.MINUTES.toMillis(fadeTime);
-        //Vector<Animator> animations = new Vector<>();
         ObjectAnimator fadeObject = ObjectAnimator.ofObject(
                             linearLayout,
                             "backgroundColor",
@@ -333,28 +321,24 @@ public class AlarmActivity extends AppCompatActivity {
                             Color.BLACK,
                             getConfig().getLightColor1());
 
-        if(!getConfig().getLightFade())
-            fadeAnimationSet.playSequentially(fadeObject);
+        if(getConfig().getLightFade())
+            fadeAnimationSet.playSequentially(fadeObject, ObjectAnimator.ofObject(
+                                                                            linearLayout,
+                                                                            "backgroundColor",
+                                                                            new ArgbEvaluator(),
+                                                                            getConfig().getLightColor1(),
+                                                                            getConfig().getLightColor2()));
         else
-        {
-            ObjectAnimator secondFade = ObjectAnimator.ofObject(
-                    linearLayout,
-                    "backgroundColor",
-                    new ArgbEvaluator(),
-                    getConfig().getLightColor1(),
-                    getConfig().getLightColor2());
-            fadeAnimationSet.playSequentially(fadeObject, secondFade);
-        }
+            fadeAnimationSet.playSequentially(fadeObject);
 
-        final int screenStartTime = minutes - fadeTime;
+        //Set all Values, FadeObject starting Music and Vibration at the End of the Animation
+        final long fadingMillis = TimeUnit.MINUTES.toMillis(fadeTime);
         fadeAnimationSet.setTarget(linearLayout);
-        fadeAnimationSet.setStartDelay(TimeUnit.MINUTES.toMillis(screenStartTime));
+        fadeAnimationSet.setStartDelay(TimeUnit.MINUTES.toMillis(minutes - fadeTime)); //screenStartTime = minutes - fadeTime
         fadeAnimationSet.setDuration((getConfig().getLightFade()) ?  fadingMillis / 2 : fadingMillis);
         fadeAnimationSet.addListener(new Animator.AnimatorListener() {
-
             @Override
             public void onAnimationStart(Animator animation) {
-
                 //Only Called once the AnimatorSet is started
                 startScreen(false);
                 if(getConfig().getScreen())
@@ -362,7 +346,6 @@ public class AlarmActivity extends AppCompatActivity {
             }
             @Override
             public void onAnimationEnd(Animator animation) {
-
                 //Called after every Animation in the AnimatorSet
                 //Check for More Animations
                 if(fadeAnimationSet.getChildAnimations().size() == 1 && getConfig().getFadeIn())
@@ -381,7 +364,7 @@ public class AlarmActivity extends AppCompatActivity {
         });
         fadeAnimationSet.start();
 
-        //LED
+        //Start LED Timer
         if(getConfig().getLED())
             doLED(minutes - ledTime);
     }
@@ -393,7 +376,6 @@ public class AlarmActivity extends AppCompatActivity {
         if(fadeAnimationSet != null)
             fadeAnimationSet.cancel();
     }
-
     /***********************************************************************************************
      * BRIGHTNESS
      **********************************************************************************************/
@@ -420,20 +402,18 @@ public class AlarmActivity extends AppCompatActivity {
 
     private BrightnessAsyncTask brightnessTask;
     private void doBrightness(final long screenStart){
-
+        //New Handler for Waiting Till Time to Screen and Brightness
         brightnessTask = new BrightnessAsyncTask(
                                 getConfig().getScreenBrightness(),
                                 screenStart);
-        //New Handler for Waiting Till Time to Screen and Brightness
         startAsyncTask(brightnessTask, true);
     }
-
     /***********************************************************************************************
      * MUSIC
      **********************************************************************************************/
     private int currentVolume = 0;
     private void doPlayMusic(int minutes){
-
+        //Prepare Music player
         try { prepareMusic(getConfig().getSongURI()); }
         catch (IOException e) { Log.e("Exception: ", e.getMessage()); }
 
@@ -469,7 +449,6 @@ public class AlarmActivity extends AppCompatActivity {
         }, TimeUnit.MINUTES.toMillis(minutes) + 1);
     }
     private void prepareMusic(String _SongUri) throws IOException {
-
         //Prepare Music Stream
         if(mediaPlayer == null)
             mediaPlayer = new MediaPlayer();
@@ -482,34 +461,32 @@ public class AlarmActivity extends AppCompatActivity {
         mediaPlayer.prepare();
     }
     private void stopMusic(){
-
         //Stop and Release Music
-        if(mediaPlayer!=null){
+        if(mediaPlayer==null)
+            return;
 
-            if(mediaPlayer.isPlaying())
-                mediaPlayer.stop();
+        if(mediaPlayer.isPlaying())
+            mediaPlayer.stop();
 
-            mediaPlayer.reset();
-            mediaPlayer.release();
-            mediaPlayer = null;
-        }
+        mediaPlayer.reset();
+        mediaPlayer.release();
+        mediaPlayer = null;
     }
     /***********************************************************************************************
      * VIBRATION
      **********************************************************************************************/
     private void doVibrate(int minutes){
+        if(!getConfig().getVibration())
+            return;
 
-        if(getConfig().getVibration())
-        {
-            vibrationThread = new AlarmWorkerThread(AlarmConstants.ACTIVITY_VIBRATION_THREAD);
-            //Set new Handler
-            setRunnable(vibrationThread, new Runnable() {
-                @Override
-                public void run() {
-                    setVibrationStart(0);
-                }
-            }, TimeUnit.MINUTES.toMillis(minutes));
-        }
+        //Set new Handler
+        vibrationThread = new AlarmWorkerThread(AlarmConstants.ACTIVITY_VIBRATION_THREAD);
+        setRunnable(vibrationThread, new Runnable() {
+            @Override
+            public void run() {
+                setVibrationStart(0);
+            }
+        }, TimeUnit.MINUTES.toMillis(minutes));
     }
     private void setVibrationStart(int repeat){
         //Start without delay,
@@ -519,13 +496,11 @@ public class AlarmActivity extends AppCompatActivity {
         m_Vibrator.vibrate(new long[]{0, 8 * getConfig().getVibrationStrength() + 350, (4000 / (long) Math.sqrt(getConfig().getVibrationStrength() + 1))}, repeat);
     }
     private void setVibrationStop(){
-
         //Cancel and Release Vibrator
-        if(m_Vibrator != null)
-        {
-            m_Vibrator.cancel();
-            m_Vibrator = null;
-        }
+        if(m_Vibrator == null)
+            return;
+        m_Vibrator.cancel();
+        m_Vibrator = null;
     }
     /***********************************************************************************************
      * LED
@@ -540,7 +515,6 @@ public class AlarmActivity extends AppCompatActivity {
     }
     @SuppressWarnings("deprecation")
     private void enableLED(final boolean enable){
-
         //Check if Device has a LED
         if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
         {
