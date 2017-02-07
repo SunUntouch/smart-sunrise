@@ -14,7 +14,7 @@
     android:background="@drawable/custom_alarm_view">
 
     <Button
-        android:text="WAKE UP"
+        android:text="@string/wakeup_time_wakeup_big"
         android:textSize="50sp"
         android:textColor="#80000000"
         android:layout_width="match_parent"
@@ -68,7 +68,7 @@
     </LinearLayout>
 
     <Button
-        android:text="SNOOZE"
+        android:text="@string/wakeup_time_snooze_big"
         android:textSize="50sp"
         android:textColor="#80000000"
         android:layout_width="match_parent"

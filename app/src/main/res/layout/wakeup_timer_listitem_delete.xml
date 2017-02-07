@@ -27,6 +27,7 @@
             android:text="@string/wakeup_delete"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
+            android:textSize="12sp"
             android:focusable="false"
             android:onClick="deleteChild"
             android:background="@drawable/custom_button"/>
@@ -41,6 +42,7 @@
             android:textOff="@string/wakeup_AlarmNotSet"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
+            android:textSize="16sp"
             android:focusable="false"
             android:onClick="setNewAlarm"
             android:background="@drawable/custom_toggle"/>

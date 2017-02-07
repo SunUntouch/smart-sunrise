@@ -38,14 +38,14 @@ class AlarmConfiguration {
     private boolean m_SundaySet    = AlarmConstants.ACTUAL_DAY_SUNDAY;
 
     //Music
-    private String m_SongURI    = AlarmConstants.ACTUAL_MUSIC_SONG_URI;
-    private int m_SongStart     = AlarmConstants.ACTUAL_MUSIC_START;
-    private int m_SongLength    = AlarmConstants.ACTUAL_MUSIC_LENGTH;
-    private int m_Volume        = AlarmConstants.ACTUAL_MUSIC_VOLUME;
-    private boolean m_FadeInSet = AlarmConstants.ACTUAL_MUSIC_FADE_IN;
-    private int m_FadeInTime    = AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME;
-    private boolean m_VibraSet  = AlarmConstants.ACTUAL_MUSIC_VIBRATION;
-    private int m_VibraStrength = AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH;
+    private String m_SongURI        = AlarmConstants.ACTUAL_MUSIC_SONG_URI;
+    private int m_SongStart         = AlarmConstants.ACTUAL_MUSIC_START;
+    private int m_SongLength        = AlarmConstants.ACTUAL_MUSIC_LENGTH;
+    private int m_Volume            = AlarmConstants.ACTUAL_MUSIC_VOLUME;
+    private boolean m_FadeInSet     = AlarmConstants.ACTUAL_MUSIC_FADE_IN;
+    private int m_FadeInTime        = AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME;
+    private boolean m_VibrationSet  = AlarmConstants.ACTUAL_MUSIC_VIBRATION;
+    private int m_VibrationStrength = AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH;
 
     //Light
     private boolean m_ScreenSet         = AlarmConstants.ACTUAL_SCREEN;
@@ -373,17 +373,17 @@ class AlarmConfiguration {
     }
 
     boolean getVibration(){
-        return m_VibraSet;
+        return m_VibrationSet;
     }
     void setVibration(boolean vibration){
-        m_VibraSet = vibration;
+        m_VibrationSet = vibration;
     }
 
     int getVibrationStrength(){
-        return m_VibraStrength;
+        return m_VibrationStrength;
     }
     void setVibrationStrength(int strength){
-        m_VibraStrength = strength;
+        m_VibrationStrength = strength;
     }
 
     //Screen

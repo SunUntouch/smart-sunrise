@@ -37,7 +37,7 @@ public class AlarmActivity extends AppCompatActivity {
 
     //Private camera Values, suppress Warnings because we handle the deprecation
     @SuppressWarnings("deprecation")
-    private android.hardware.Camera m_Cam;
+    private android.hardware.Camera m_Cam; //For old Android
     private MediaPlayer mediaPlayer;
     private Vibrator m_Vibrator;
 
@@ -126,7 +126,6 @@ public class AlarmActivity extends AppCompatActivity {
     }
     @Override
     protected void onDestroy() {
-
         //Stop Stuff
         enableLED(false);
         setVibrationStop();
@@ -174,7 +173,6 @@ public class AlarmActivity extends AppCompatActivity {
     private AlarmConfiguration getConfig(){
         return config;
     }
-
     /***********************************************************************************************
      * AsyncTasks and Threads
      **********************************************************************************************/
@@ -183,7 +181,7 @@ public class AlarmActivity extends AppCompatActivity {
         final long screenFadeTime;
         final float brightness;
         float currentBrightness =  0.0f;
-        Handler brightnessHandler = new Handler();
+        final Handler brightnessHandler = new Handler();
 
         BrightnessAsyncTask(Integer screenBrightness, Long screenFade) {
             super();
@@ -310,7 +308,7 @@ public class AlarmActivity extends AppCompatActivity {
     /***********************************************************************************************
      * COLOR FADING AND BRIGHTNESS
      **********************************************************************************************/
-    private AnimatorSet fadeAnimationSet = new AnimatorSet();
+    private final AnimatorSet fadeAnimationSet = new AnimatorSet();
     private void startAlarmProcedure(final int minutes, final int fadeTime, final int ledTime){
         //Add Animations to new Set
         LinearLayout linearLayout = (LinearLayout) findViewById(R.id.wakeup_wakescreen_layout);
@@ -373,8 +371,7 @@ public class AlarmActivity extends AppCompatActivity {
         doVibrate(0);
     }
     private void stopAnimation(){
-        if(fadeAnimationSet != null)
-            fadeAnimationSet.cancel();
+        fadeAnimationSet.cancel();
     }
     /***********************************************************************************************
      * BRIGHTNESS

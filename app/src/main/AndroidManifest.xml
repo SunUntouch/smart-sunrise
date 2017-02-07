@@ -44,6 +44,7 @@
 
         <activity
             android:name=".AlarmActivity"
+            android:noHistory="true"
             android:label="@string/title_activity_alarm"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar"

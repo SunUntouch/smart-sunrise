@@ -50,14 +50,13 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_time, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_time_text_view);
-        txtListChild.setText(view.getContext().getString(R.string.wakeup_time));
+        //TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_time_text_view);
 
         Button setTimeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonTime);
         setTimeButton.setText(String.format(Locale.US, "%02d:%02d",config.getHour(), config.getMinute()));
 
         Button setSnoozeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonSnooze);
-        setSnoozeButton.setText( view.getContext().getString(R.string.wakeup_time_snooze) + " " + config.getSnooze() + " " + view.getContext().getString(R.string.wakeup_time_minutes));
+        setSnoozeButton.setText(view.getContext().getResources().getQuantityString(R.plurals.wakeup_time_snooze, config.getSnooze(), config.getSnooze()));
 
         return view;
     }
@@ -99,8 +98,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_music, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_music_text_view);
-        txtListChild.setText(view.getContext().getString(R.string.wakeup_music));
+        //TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_music_text_view);
 
         //Choosing Music Button
         final String newMusicText = (config.getSongName().indexOf('.') == -1) ?  config.getSongName() : config.getSongName().substring(0, config.getSongName().lastIndexOf('.'));
@@ -124,13 +122,11 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         seconds -= TimeUnit.MINUTES.toSeconds(minutes);
         ToggleButton setFadeIn = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleFadeIn);
         setFadeIn.setTextOn(String.format(Locale.US, "%02d:%02d", minutes, seconds));
-        setFadeIn.setTextOff(view.getContext().getString(R.string.wakeup_music_fadeOff));
         setFadeIn.setChecked(config.getFadeIn());
 
         //Set Vibration ToggleButton
         ToggleButton setVibrationButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleVibration);
         setVibrationButton.setTextOn(config.getVibrationStrength() + "%");
-        setVibrationButton.setTextOff(view.getContext().getString(R.string.wakeup_music_vibraOff));
         setVibrationButton.setChecked(config.getVibration());
         return view;
     }
@@ -143,33 +139,27 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_light, v, false);
 
         //Get TextChild from View
-        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_light_text_view);
-        txtListChild.setText(view.getContext().getString(R.string.wakeup_light));
+        //TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_light_text_view);
 
         //Toggle Screen light
         ToggleButton setLightButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonLight);
         setLightButton.setTextOn(view.getContext().getString( R.string.wakeup_light_screen_brightness) + " " +  config.getScreenBrightness() + "%");
-        setLightButton.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_brightness_off));
         setLightButton.setChecked(config.getScreen());
 
         //Set Start Time Button
         Button setStartTime = (Button) view.findViewById(R.id.wakeup_timer_light_buttonStart);
-        setStartTime.setText(config.getScreenStartTime() + " " + view.getContext().getString(R.string.wakeup_time_minutes));
+        setStartTime.setText(view.getContext().getResources().getQuantityString(R.plurals.wakeup_time_minutes, config.getScreenStartTime(), config.getScreenStartTime()));
 
         //Toggle Fading
         ToggleButton setFade = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonScreenFade);
-        setFade.setTextOn(view.getContext().getString(R.string.wakeup_light_screen_fadingOn));
-        setFade.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_fadingOff));
         setFade.setChecked(config.getLightFade());
 
         //First Color
         Button setColorButton1 = (Button) view.findViewById(R.id.wakeup_timer_light_buttonColor1);
-        setColorButton1.setText(view.getContext().getString(R.string.wakeup_light_screen_color1));
         setColorButton1.getBackground().setColorFilter(config.getLightColor1(), PorterDuff.Mode.MULTIPLY);
 
         //Second Color
         Button setColorButton2 = (Button) view.findViewById(R.id.wakeup_timer_light_buttonColor2);
-        setColorButton2.setText(view.getContext().getString(R.string.wakeup_light_screen_color2));
         setColorButton2.setEnabled(config.getLightFade());
 
         //Gradient View
@@ -193,13 +183,11 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Toggle LED
         ToggleButton setLEDButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonLED);
-        setLEDButton.setTextOn(view.getContext().getString(R.string.wakeup_light_screen_LEDOn));
-        setLEDButton.setTextOff(view.getContext().getString(R.string.wakeup_light_screen_LEDOff));
         setLEDButton.setChecked(config.getLED());
 
         //Set LED Start Time
         Button setLEDStartTime = (Button) view.findViewById(R.id.wakeup_timer_light_buttonLEDStart);
-        setLEDStartTime.setText(config.getLEDStartTime() + " " + view.getContext().getString(R.string.wakeup_time_minutes));
+        setLEDStartTime.setText(view.getContext().getResources().getQuantityString(R.plurals.wakeup_time_minutes, config.getLEDStartTime(), config.getLEDStartTime()));
 
         return view;
     }
@@ -215,8 +203,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_delete_text_view);
         txtListChild.setVisibility(TextView.GONE);
 
-        Button deleteAlarm = (Button) view.findViewById(R.id.wakeup_timer_deleteButton);
-        deleteAlarm.setText(view.getContext().getString(R.string.wakeup_delete));
+        //Button deleteAlarm = (Button) view.findViewById(R.id.wakeup_timer_deleteButton);
 
         //Check for Alarm and Set Button to boolean value
         ToggleButton setNewAlarm = (ToggleButton) view.findViewById(R.id.wakeup_timer_setAlarmButton);

@@ -3,6 +3,8 @@
     <string name="app_name">Smart-Sunrise</string>
     <string name="action_settings">Settings</string>
 
+    <string name="wakeup_zero_time">00:00</string>
+
     <!-- Alarm Values -->
     <string name="title_activity_alarm">Alarm</string>
 
@@ -39,10 +41,18 @@
 
     <!-- Time Text -->
     <string name="wakeup_time">Time</string>
-    <string name="wakeup_time_minutes">Minutes</string>
+    <plurals name="wakeup_time_minutes">
+        <item quantity="one">%d Minute</item>
+        <item quantity="other">%d Minutes</item>
+    </plurals>
 
     <string name="wakeup_time_wakeup">Wake Up</string>
-    <string name="wakeup_time_snooze">Snooze</string>
+    <string name="wakeup_time_wakeup_big">WAKE UP</string>
+    <string name="wakeup_time_snooze_big">SNOOZE</string>
+    <plurals name="wakeup_time_snooze">
+        <item quantity="one">Snooze %d minute.</item>
+        <item quantity="other">Snooze %d minutes.</item>
+    </plurals>
 
     <!-- Day Text -->
     <string name="wakeup_day">Days</string>
@@ -67,7 +77,10 @@
     <string name="wakeup_music_choose">Choose Music</string>
     <string name="wakeup_music_ringtone">Ringtone</string>
     <string name="wakeup_music_music">Music</string>
+
+    <string name="wakeup_music_vibraOn">ON</string>
     <string name="wakeup_music_vibraOff">OFF</string>
+    <string name="wakeup_music_fadeOn">ON</string>
     <string name="wakeup_music_fadeOff">OFF</string>
 
     <string name="wakeup_music_text_startTime">Start Time</string>
@@ -77,7 +90,7 @@
     <!-- Light Text -->
     <string name="wakeup_light">Light</string>
     <string name="wakeup_light_screen_brightness">Screen Brightness</string>
-    <string name="wakeup_light_screen_brightness_off">Screen Illumination Off</string>
+    <string name="wakeup_light_screen_brightness_off">Use System Illumination</string>
 
     <string name="wakeup_light_screen_color1">Color1</string>
     <string name="wakeup_light_screen_color2">Color2</string>
@@ -97,31 +110,63 @@
     <string name="wakeup_music_no_fadeIn">Start Time to long, No Time left for FadeIn</string>
     <string name="delete_warning">Hold Button to delete Alarm</string>
 
+    <!-- image Description -->
+    <string name="image_color_gradient_listView">This is the Gradient seen in the Brightness List Child</string>
+
+    <!-- Toast posts -->
     <string name="toast_positive_alarm">Alarm is active.\nTime: %s</string>
     <string name="toast_negative_alarm">Alarm is inactive.</string>
-    <string name="toast_AlarmName_positive">New Name set to \"%s\"</string>
+    <string name="toast_AlarmName_positive">New Name set to \"%s\."</string>
     <string name="toast_AlarmSet_negative">New Name is \"%s\".\r\nAlarm is inactive</string>
-    <string name="toast_AlarmTime_positive">Music starts at %s</string>
-    <string name="toast_AlarmTime_negative">Music Starts at %s.\r\nAlarm is inactive.</string>
-    <string name="toast_AlarmSnooze_positive">Set Snooze to %d minutes.</string>
-    <string name="toast_AlarmSnooze_negative">Set Snooze to %d minutes.\r\nAlarm is inactive</string>
+    <string name="toast_AlarmTime_positive">Music starts at %s.</string>
+    <string name="toast_AlarmTime_negative">Music Starts at %s.\r\nAlarm is inactive</string>
     <string name="toast_AlarmMusic_positive">Music set to %s.</string>
     <string name="toast_AlarmMusic_negative">Music set to %s.\r\nAlarm is inactive</string>
     <string name="toast_AlarmVolume_positive">Volume set to %d.</string>
     <string name="toast_AlarmVolume_negative">Volume set to %d.\r\nAlarm is inactive</string>
-    <string name="toast_AlarmSongStart_positive">Music starts at %d seconds.</string>
-    <string name="toast_AlarmSongStart_negative">Music starts at %d seconds.\r\nAlarm is inactive</string>
-    <string name="toast_AlarmScreenStart_positive">Screen shine %d minutes before Alarm.</string>
-    <string name="toast_AlarmScreenStart_negative">Screen shine %d minutes before Alarm.\r\nAlarm is inactive</string>
-    <string name="toast_AlarmLEDStart_positive">LED shines %d minutes before Alarm.</string>
-    <string name="toast_AlarmLEDStart_negative">LED shines %d minutes before Alarm.\r\nAlarm is inactive</string>
-    <string name="toast_AlarmFadeIn_positive">Music fades %d seconds in.</string>
-    <string name="toast_AlarmFadeIn_negative">Music fades %d seconds in.\r\nAlarm is inactive</string>
     <string name="toast_AlarmVibrationStrength_positive">Vibration strength set to %d.</string>
     <string name="toast_AlarmVibrationStrength_negative">Vibration strength set to %d.\r\nAlarm is inactive</string>
     <string name="toast_AlarmScreenBrightness_positive">Brightness set to %d.</string>
     <string name="toast_AlarmScreenBrightness_negative">Brightness set to %d.\r\nAlarm is inactive</string>
 
-    <!-- image Description -->
-    <string name="image_color_gradient_listView">This is the Gradient seen in the Brightness List Child</string>
+    <plurals name="toast_AlarmSnooze_positive">
+        <item quantity="one">Set Snooze to %d minute.</item>
+        <item quantity="other">Set Snooze to %d minutes.</item>
+    </plurals>
+    <plurals name="toast_AlarmSnooze_negative">
+        <item quantity="one">Set Snooze to %d minutes\r\nAlarm is inactive</item>
+        <item quantity="other">Set Snooze to %d minutes.\r\nAlarm is inactive</item>
+    </plurals>
+    <plurals name="toast_AlarmSongStart_positive">
+        <item quantity="one">Music starts at %d second.</item>
+        <item quantity="other">Music starts at %d seconds.</item>
+    </plurals>
+    <plurals name="toast_AlarmSongStart_negative">
+        <item quantity="one">Music starts at %d second.\r\nAlarm is inactive</item>
+        <item quantity="other">Music starts at %d seconds.\r\nAlarm is inactive</item>
+    </plurals>
+    <plurals name="toast_AlarmScreenStart_positive">
+        <item quantity="one">Screen shines %d minute before Alarm.</item>
+        <item quantity="other">Screen shines %d minutes before Alarm.</item>
+    </plurals>
+    <plurals name="toast_AlarmScreenStart_negative">
+        <item quantity="one">Screen shines %d minute before Alarm.\r\nAlarm is inactive</item>
+        <item quantity="other">Screen shines %d minutes before Alarm.\r\nAlarm is inactive</item>
+    </plurals>
+    <plurals name="toast_AlarmLEDStart_positive">
+        <item quantity="one">LED shines %d minute before Alarm.</item>
+        <item quantity="other">LED shines %d minutes before Alarm.</item>
+    </plurals>
+    <plurals name="toast_AlarmLEDStart_negative">
+        <item quantity="one">LED shines %d minute before Alarm.\r\nAlarm is inactive</item>
+        <item quantity="other">LED shines %d minutes before Alarm.\r\nAlarm is inactive</item>
+    </plurals>
+    <plurals name="toast_AlarmFadeIn_positive">
+        <item quantity="one">Music fades %d second in.</item>
+        <item quantity="other">Music fades %d seconds in.</item>
+    </plurals>
+    <plurals name="toast_AlarmFadeIn_negative">
+        <item quantity="one">Music fades %d second in.\r\nAlarm is inactive</item>
+        <item quantity="other">Music fades %d seconds in.\r\nAlarm is inactive</item>
+    </plurals>
 </resources>

@@ -9,6 +9,7 @@
         android:id="@+id/wakeup_timer_music_text_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="@string/wakeup_music"
         android:textSize="17sp"
         android:textColor="@color/buttonTextColorPrimary"
         android:gravity="center"
@@ -25,7 +26,7 @@
 
         <Button
             android:id="@+id/wakeup_timer_music_buttonMusic"
-            android:text="Choose Music"
+            android:text="@string/wakeup_music_choose"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
             android:layout_column="0"
@@ -41,6 +42,7 @@
             android:text="100%"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
+            android:textSize="12sp"
             android:layout_column="1"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -58,9 +60,10 @@
 
         <Button
             android:id="@+id/wakeup_timer_music_SongStart"
-            android:text="00:00"
+            android:text="@string/wakeup_zero_time"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
+            android:textSize="12sp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/button_margin"
@@ -77,8 +80,11 @@
 
         <ToggleButton
             android:id="@+id/wakeup_timer_music_toggleFadeIn"
+            android:textOn="@string/wakeup_music_fadeOn"
+            android:textOff="@string/wakeup_music_fadeOff"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
+            android:textSize="12sp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/button_margin"
@@ -95,8 +101,11 @@
 
         <ToggleButton
             android:id="@+id/wakeup_timer_music_toggleVibration"
+            android:textOn="@string/wakeup_music_vibraOn"
+            android:textOff="@string/wakeup_music_vibraOff"
             android:textColor="@color/buttonTextColorPrimary"
             android:textColorHighlight="@color/buttonTextColorSecondary"
+            android:textSize="12sp"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/button_margin"

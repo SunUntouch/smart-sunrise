@@ -14,6 +14,7 @@ import java.util.Calendar;
 abstract class AlarmConstants {
 
     //Shared Pref Settings
+    @SuppressWarnings("unused")
     final static String WAKEUP_TIMER            = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
 
     //Threads
