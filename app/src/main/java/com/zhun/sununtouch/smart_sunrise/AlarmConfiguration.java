@@ -408,7 +408,7 @@ class AlarmConfiguration {
         m_ScreenStartTime = time;
     }
     int getScreenStartTemp(){
-        return m_ScreenStartTimeTemp;
+        return (m_ScreenStartTimeTemp < 0) ? 0 : m_ScreenStartTimeTemp ;
     }
     void setScreenStartTemp(int time){
         m_ScreenStartTimeTemp = time;
@@ -451,7 +451,7 @@ class AlarmConfiguration {
         m_LightLEDStartTime = time;
     }
     int getLEDStartTemp(){
-        return m_LightLEDStartTimeTemp;
+        return (m_LightLEDStartTimeTemp < 0) ? 0 : m_LightLEDStartTimeTemp ;
     }
     void setLEDStartTemp(int time){
         m_LightLEDStartTimeTemp = time;

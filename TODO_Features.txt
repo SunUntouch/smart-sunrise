@@ -1,21 +1,21 @@
-smart-sunrise Todos
+smart-sunrise Todo
 =======================================
 - wake up function
-	- multiple Times
-	- set Days
+	- multiple Times            --check
+	- set Days                  --check
 - Set Music
-	- Android Ringtones
-	- own Music
-		- set starting Point
-	- vibration
-- set Light
+	- Android Ringtone          --check
+	- own Music                 --check
+		- set starting Point    --check
+	- vibration                 --check
+- set Light                     --check
 	- Display
-		- color
+		- color                 --check
 		- image
-		- fading
-	- LED
-- set message/name
+		- fading                --check
+	- LED                       --check
+- set message/name              --check (name, no Message)
 
 - set options
 	- Layout Colors
-	- Textsize of all Items
+	- TextSize of all Items

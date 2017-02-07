@@ -5,6 +5,7 @@ import android.animation.AnimatorSet;
 import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.camera2.CameraCharacteristics;
@@ -106,61 +107,68 @@ public class AlarmActivity extends AppCompatActivity {
         startAlarmProcedure(minutesMax, minuteScreen, minuteLED);
     }
 
-    boolean initialStop = true;
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        this.finish();
+    }
+    @Override
     protected void onStop() {
         super.onStop();
 
-        //Activity calls onStop when its called from Intent
-        if(!initialStop) {
+        //Cancel or Snooze Alarm
+        if(snoozed)
+            config.snoozeAlarm();
+        else if(getConfig().isDaySet())
+            config.refreshAlarm();
+        else
+            config.cancelAlarm();
+    }
+    @Override
+    protected void onDestroy() {
 
-            //Cancel or Snooze Alarm
-            if(snoozed)
-                config.snoozeAlarm();
-            else if(getConfig().isDaySet())
-                config.refreshAlarm();
-            else
-                config.cancelAlarm();
+        //Stop Stuff
+        enableLED(false);
+        setVibrationStop();
+        stopMusic();
+        stopAnimation();
 
-            //Stop Stuff
-            enableLED(false);
-            setVibrationStop();
-            stopMusic();
-            stopAnimation();
-
-            //Kill Threads
-            if(dateThread != null)
-            {
-                dateThread.removeCallBacks(null);
-                dateThread.interrupt();
-                dateThread.quit();
-                dateThread = null;
-            }
-            if(musicThread != null)
-            {
-                musicThread.removeCallBacks(null);
-                musicThread.interrupt();
-                musicThread.quit();
-                musicThread = null;
-            }
-            if(vibrationThread != null)
-            {
-                vibrationThread.removeCallBacks(null);
-                vibrationThread.interrupt();
-                vibrationThread.quit();
-                vibrationThread = null;
-            }
-
-            if(brightnessTask != null)
-                brightnessTask.cancel(true);
-
-            //Remove Callbacks
-            alarmHandler.removeCallbacksAndMessages(null);
-
-            //release Activity
-            if(lock.isHeld())
-                lock.release();
+        //Kill Threads
+        if(dateThread != null)
+        {
+            dateThread.removeCallBacks(null);
+            dateThread.interrupt();
+            dateThread.quit();
+            dateThread = null;
         }
-        initialStop = false;
+        if(musicThread != null)
+        {
+            musicThread.removeCallBacks(null);
+            musicThread.interrupt();
+            musicThread.quit();
+            musicThread = null;
+        }
+        if(vibrationThread != null)
+        {
+            vibrationThread.removeCallBacks(null);
+            vibrationThread.interrupt();
+            vibrationThread.quit();
+            vibrationThread = null;
+        }
+
+        if(brightnessTask != null)
+            brightnessTask.cancel(true);
+
+        //Remove Callbacks
+        alarmHandler.removeCallbacksAndMessages(null);
+
+        //release Activity
+        if(lock.isHeld())
+            lock.release();
+
+        stopService(new Intent(getApplicationContext(), AlarmIntentService.class));
+
+        super.onDestroy();
     }
 
     private AlarmConfiguration getConfig(){
@@ -266,12 +274,17 @@ public class AlarmActivity extends AppCompatActivity {
     /***********************************************************************************************
      * WAKEUP AND SNOOZE BUTTON
      **********************************************************************************************/
+    boolean cancelByClick = false;
     @SuppressWarnings("UnusedParameters")
     public void onWakeUpClick(View v){
+
+        cancelByClick = true;
         this.finish();
     }
     @SuppressWarnings("UnusedParameters")
     public void onSnoozeClick(View v){
+
+        cancelByClick = true;
         snoozed = true;
         this.finish();
     }
@@ -523,7 +536,7 @@ public class AlarmActivity extends AppCompatActivity {
             public void run() {
                 enableLED(true);
             }
-        }, TimeUnit.MINUTES.toMillis(minutes));
+        }, (minutes != 0) ?  TimeUnit.MINUTES.toMillis(minutes) : 1000);
     }
     @SuppressWarnings("deprecation")
     private void enableLED(final boolean enable){
