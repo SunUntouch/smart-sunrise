@@ -33,7 +33,6 @@
 
     <!-- Time Text -->
     <string name="wakeup_time">Zeit</string>
-    <string name="wakeup_time_minutes">Minuten</string>
     <plurals name="wakeup_time_minutes">
         <item quantity="one">%d Minute</item>
         <item quantity="other">%d Minuten</item>

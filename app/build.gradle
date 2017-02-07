@@ -2,8 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "23.0.2"
-
+    buildToolsVersion '25.0.2'
     defaultConfig {
         applicationId "com.zhun.sununtouch.smart_sunrise"
         minSdkVersion 19
@@ -17,7 +16,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def file = output.outputFile

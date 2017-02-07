@@ -186,7 +186,7 @@ public class AlarmActivity extends AppCompatActivity {
         BrightnessAsyncTask(Integer screenBrightness, Long screenFade) {
             super();
             screenFadeTime = screenFade;
-            brightness = (float)screenBrightness / 100f;
+            brightness = (screenBrightness >= 100) ? 0.99f : (float)screenBrightness / 100f;
         }
         @Override
         protected Void doInBackground(Void... params) {

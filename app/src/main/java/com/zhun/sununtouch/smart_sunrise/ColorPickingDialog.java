@@ -40,6 +40,7 @@ class ColorPickingDialog extends AlertDialog{
         void colorSelected(Integer color);
     }
 
+    @SuppressWarnings("ResourceType")
     ColorPickingDialog(Context context, int initialColor, final OnColorSelectedListener listener) {
         super(context);
         this.selectedColor = initialColor;
