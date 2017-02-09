@@ -46,7 +46,7 @@ public class AlarmActivity extends AppCompatActivity {
     private PowerManager.WakeLock lock;
 
     private boolean snoozed = false;
-    private static final int BRIGHTNESS_STEPS = 100;  //TODO add to Options
+    private static final int BRIGHTNESS_STEPS = 100;  //TODO add to Options, add Option to Configure Black on Start
 
     /***********************************************************************************************
      * ON_CREATE AND HELPER
@@ -115,6 +115,9 @@ public class AlarmActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
+    }
+    @Override
+    protected void onDestroy() {
 
         //Cancel or Snooze Alarm
         if(snoozed)
@@ -123,9 +126,7 @@ public class AlarmActivity extends AppCompatActivity {
             config.refreshAlarm();
         else
             config.cancelAlarm();
-    }
-    @Override
-    protected void onDestroy() {
+
         //Stop Stuff
         enableLED(false);
         setVibrationStop();
@@ -166,7 +167,6 @@ public class AlarmActivity extends AppCompatActivity {
             lock.release();
 
         stopService(new Intent(getApplicationContext(), AlarmIntentService.class));
-
         super.onDestroy();
     }
 
@@ -335,6 +335,9 @@ public class AlarmActivity extends AppCompatActivity {
         fadeAnimationSet.setStartDelay(TimeUnit.MINUTES.toMillis(minutes - fadeTime)); //screenStartTime = minutes - fadeTime
         fadeAnimationSet.setDuration((getConfig().getLightFade()) ?  fadingMillis / 2 : fadingMillis);
         fadeAnimationSet.addListener(new Animator.AnimatorListener() {
+
+            boolean cancelled = false;
+
             @Override
             public void onAnimationStart(Animator animation) {
                 //Only Called once the AnimatorSet is started
@@ -346,7 +349,7 @@ public class AlarmActivity extends AppCompatActivity {
             public void onAnimationEnd(Animator animation) {
                 //Called after every Animation in the AnimatorSet
                 //Check for More Animations
-                if(fadeAnimationSet.getChildAnimations().size() == 1 && getConfig().getFadeIn())
+                if(cancelled || fadeAnimationSet.getChildAnimations().size() == 1 && getConfig().getFadeIn())
                     return;
 
                 startAction();
@@ -354,6 +357,7 @@ public class AlarmActivity extends AppCompatActivity {
             }
             @Override
             public void onAnimationCancel(Animator animation) {
+                cancelled = true;
                 animation.removeAllListeners();
             }
             @Override
