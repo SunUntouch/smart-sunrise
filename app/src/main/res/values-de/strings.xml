@@ -161,4 +161,16 @@
         <item quantity="one">Musik blendet %d Sekunde ein.\r\nAlarm ist inaktiv</item>
         <item quantity="other">Musik blendet %d Sekunden ein.\r\nAlarm ist inaktiv</item>
     </plurals>
+
+    <!-- Option Text -->
+    <string name="options_LightSteps">Beleuchtungsabstufung</string>
+    <string name="options_LightSteps_short">Beleuchtungsabst.</string>
+    <string name="options_Logging">Aktiviere Logging</string>
+    <string name="options_Theme">Ändere Theme</string>
+
+    <!-- Themes -->
+    <string name="options_theme_light">Light</string>
+    <string name="options_theme_dark">Dark</string>
+    <string name="options_theme_default">Default</string>
+
 </resources>

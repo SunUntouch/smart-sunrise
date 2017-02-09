@@ -169,8 +169,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int max, int increment, int progress){
+        return createAlertLinearLayout(v.getContext(), textView, seekBar, max, increment, progress);
+    }
+    private LinearLayout createAlertLinearLayout(Context context, TextView textView, SeekBar seekBar, int max, int increment, int progress){
         //LinearLayout
-        LinearLayout linearLayout = new LinearLayout(v.getContext());
+        LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
 
         //TextView to show Value of SeekBar
@@ -1363,13 +1366,64 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(item.getItemId()){
+            case R.id.options_brightness_steps: showScreenLightStepOptionsDialog(item);break;
+            case R.id.options_theme: break;
+            case R.id.options_logging: break;
+            default: break;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void showScreenLightStepOptionsDialog(final MenuItem item){
+
+        //TextView to show Value of SeekBar
+        final TextView textView = new TextView(this);
+
+        //Seek Bar
+        final SeekBar seekBar = new SeekBar(this);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                //Set Position of Text
+                final int val = getSeekBarPosition(progress, 3, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
+                final String message = Integer.toString(progress);
+                textView.setText(message);
+                textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                textView.setVisibility(TextView.VISIBLE);
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //textView.setVisibility(TextView.GONE);
+            }
+        });
+
+        //Create new Builder
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.options_LightSteps));
+
+        //Set AlertDialog View
+        builder.setView(createAlertLinearLayout(this, textView, seekBar, 100, 5, 100)); //TODO need options for this
+        builder.setPositiveButton(getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                item.setTitle(getString(R.string.options_LightSteps_short) + " " + seekBar.getProgress());
+                //invalidateOptionsMenu();
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton(getString(R.string.wakeup_Cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+
+        //TODO need options for saving
     }
 }

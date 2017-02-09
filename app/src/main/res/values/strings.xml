@@ -169,4 +169,15 @@
         <item quantity="one">Music fades %d second in.\r\nAlarm is inactive</item>
         <item quantity="other">Music fades %d seconds in.\r\nAlarm is inactive</item>
     </plurals>
+
+    <!-- Option Text -->
+    <string name="options_LightSteps">Brightness Steps</string>
+    <string name="options_LightSteps_short">B. Steps</string>
+    <string name="options_Logging">Enable Logging</string>
+    <string name="options_Theme">Change Theme</string>
+
+    <!-- Themes -->
+    <string name="options_theme_light">Light</string>
+    <string name="options_theme_dark">Dark</string>
+    <string name="options_theme_default">Default</string>
 </resources>
