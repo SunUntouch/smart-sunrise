@@ -177,7 +177,7 @@
     <string name="options_Theme">Change Theme</string>
 
     <!-- Themes -->
-    <string name="options_theme_light">Light</string>
-    <string name="options_theme_dark">Dark</string>
-    <string name="options_theme_default">Default</string>
+    <string name="options_theme_light">Light Theme</string>
+    <string name="options_theme_dark">Dark Theme</string>
+    <string name="options_theme_default">Default Theme</string>
 </resources>

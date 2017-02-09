@@ -930,6 +930,7 @@ public class MainActivity extends AppCompatActivity
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                         textView.setText(String.format(Locale.US, "%02d:%02d", TimeUnit.SECONDS.toMinutes(progress),
                                                                     progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
+                        //TODO Play Music for the User
                     }
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {
@@ -1368,15 +1369,16 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         switch(item.getItemId()){
             case R.id.options_brightness_steps: showScreenLightStepOptionsDialog(item);break;
-            case R.id.options_theme: break;
-            case R.id.options_logging: break;
+            case R.id.options_theme: chooseThemeOptionsDialog(item);break;
+            case R.id.options_logging: if(item.isCheckable()){
+                item.setChecked(!item.isChecked());//TODO save to options
+            } break;
             default: break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
-    public void showScreenLightStepOptionsDialog(final MenuItem item){
+    private void showScreenLightStepOptionsDialog(final MenuItem item){
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(this);
@@ -1412,7 +1414,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 item.setTitle(getString(R.string.options_LightSteps_short) + " " + seekBar.getProgress());
-                //invalidateOptionsMenu();
                 dialog.dismiss();
             }
         });
@@ -1425,5 +1426,27 @@ public class MainActivity extends AppCompatActivity
         builder.show();
 
         //TODO need options for saving
+    }
+    private void chooseThemeOptionsDialog(final MenuItem item){
+
+        final ArrayList<String> themes = new ArrayList<>();
+        themes.add(getString(R.string.options_theme_default));
+        themes.add(getString(R.string.options_theme_light));
+        themes.add(getString(R.string.options_theme_dark));
+
+        //Create new Builder and Get Song Name Array and set it for Alarm Dialog Builder
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(this.getString(R.string.options_Theme));
+        builder.setItems(themes.toArray(new String[themes.size()]), new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+                item.setTitle(themes.get(which));
+                //TODO Set Theme
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+
+        //TODO Save Theme
     }
 }
