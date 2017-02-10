@@ -15,7 +15,11 @@ abstract class AlarmConstants {
 
     //Shared Pref Settings
     @SuppressWarnings("unused")
-    final static String WAKEUP_TIMER            = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
+    final static String WAKEUP_TIMER                   = "com.zhun.sununtouch.smart_sunrise.WAKEUP_SETTINGS";
+    final static String WAKEUP_OPTIONS                 = "com.zhun.sununtouch.smart_sunrise.WAKEUP_OPTIONS";
+    final static String WAKEUP_OPTIONS_BRIGHTNESSSTEPS = "WAKEUP_OPTIONS_BRIGHTNESSSTEPS";
+    final static String WAKEUP_OPTIONS_THEME           = "WAKEUP_OPTIONS_THEME";
+    final static String WAKEUP_OPTIONS_LOGGING         = "WAKEUP_OPTIONS_LOGGING";
 
     //Threads
     final static String ACTIVITY_DATE_THREAD      = "com.zhun.sununtouch.smart_sunrise.AlarmActivity.DATE_THREAD";
@@ -116,4 +120,9 @@ abstract class AlarmConstants {
     final static int ACTUAL_LED_START         = 0;
 
     final static int ALARM_PERMISSION_MUSIC = 0;
+
+    //Options
+    final static int BRIGHTNESS_STEPS_MINIMUM = 5;
+    final static int BRIGHTNESS_STEPS  = 100;
+    final static boolean ALARM_LOGGING = false;
 }

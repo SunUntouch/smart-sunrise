@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class AlarmActivity extends AppCompatActivity {
 
     private AlarmConfiguration config;
+    private AlarmSystemConfiguration systemconfig;
 
     //Private camera Values, suppress Warnings because we handle the deprecation
     @SuppressWarnings("deprecation")
@@ -46,7 +47,6 @@ public class AlarmActivity extends AppCompatActivity {
     private PowerManager.WakeLock lock;
 
     private boolean snoozed = false;
-    private static final int BRIGHTNESS_STEPS = 100;  //TODO add to Options, add Option to Configure Black on Start
 
     /***********************************************************************************************
      * ON_CREATE AND HELPER
@@ -61,6 +61,7 @@ public class AlarmActivity extends AppCompatActivity {
         //Load Values
         final int actualAlarm = getIntent().getExtras().getInt(AlarmConstants.ALARM_ID);
         config = new AlarmConfiguration(getApplicationContext(), actualAlarm);
+        systemconfig = new AlarmSystemConfiguration(getApplicationContext());
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AlarmActivity_WakeLock");
@@ -186,7 +187,7 @@ public class AlarmActivity extends AppCompatActivity {
         BrightnessAsyncTask(Integer screenBrightness, Long screenFade) {
             super();
             screenFadeTime = screenFade;
-            brightness = (screenBrightness >= 100) ? 0.99f : (float)screenBrightness / 100f;
+            brightness = (screenBrightness >= 100) ? 1f : (float)screenBrightness / 100f;
         }
         @Override
         protected Void doInBackground(Void... params) {
@@ -194,18 +195,16 @@ public class AlarmActivity extends AppCompatActivity {
             if(screenFadeTime > 0)
             {
                 //time for each step ti illuminate
-                final long  millis = screenFadeTime / BRIGHTNESS_STEPS;  //divide milliseconds with 100 because we have 100 steps till full illumination
-
+                final long  millis = screenFadeTime / systemconfig.getBrightnessSteps();  //divide milliseconds with 100 because we have 100 steps till full illumination
+                final float brightnessSteps = brightness / systemconfig.getBrightnessSteps();
                 //get Layout and Update LightValue till Max
                 currentBrightness = 0f;
                 publishProgress(currentBrightness);
-
                 setRunnable(brightnessHandler, new Runnable() {
                     @Override
                     public void run() {
-                        currentBrightness += brightness / BRIGHTNESS_STEPS;
-                        publishProgress(currentBrightness);
-
+                        currentBrightness += brightnessSteps;
+                        publishProgress((currentBrightness > brightness)? brightness : currentBrightness);
                         if(currentBrightness < brightness)
                             setRunnable(brightnessHandler, this, millis);
                     }

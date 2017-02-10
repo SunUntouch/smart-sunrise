@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity
 
     //Actual Alarm Values
     private AlarmConfigurationList m_AlarmConfigurations;
+    private AlarmSystemConfiguration m_SystemConfiguration;
 
     //Last Clicked AlarmGroup
     private int actualAlarm    =-1;
@@ -90,6 +91,7 @@ public class MainActivity extends AppCompatActivity
 
         mThread = new AlarmWorkerThread("Smart_Sunrise_Main_Worker");
         m_AlarmConfigurations = new AlarmConfigurationList(getApplicationContext());
+        m_SystemConfiguration = new AlarmSystemConfiguration(getApplicationContext());
 
         //Set MainView//////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
@@ -1360,6 +1362,11 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        final String brightness = getString(R.string.options_LightSteps_short) + " " + m_SystemConfiguration.getBrightnessSteps();
+        menu.findItem(R.id.options_brightness_steps).setTitle(brightness);
+        menu.findItem(R.id.options_theme           ).setTitle(m_SystemConfiguration.getAlarmTheme());
+        menu.findItem(R.id.options_logging         ).setChecked(m_SystemConfiguration.loggingEnabled());
         return true;
     }
     @Override
@@ -1370,8 +1377,12 @@ public class MainActivity extends AppCompatActivity
         switch(item.getItemId()){
             case R.id.options_brightness_steps: showScreenLightStepOptionsDialog(item);break;
             case R.id.options_theme: chooseThemeOptionsDialog(item);break;
-            case R.id.options_logging: if(item.isCheckable()){
-                item.setChecked(!item.isChecked());//TODO save to options
+            case R.id.options_logging: {
+                if(!item.isCheckable())
+                    break;
+
+                item.setChecked(!item.isChecked());
+                m_SystemConfiguration.enableLogging(item.isChecked()); //Commit the Values in the set Method
             } break;
             default: break;
         }
@@ -1379,7 +1390,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showScreenLightStepOptionsDialog(final MenuItem item){
-
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(this);
 
@@ -1390,7 +1400,7 @@ public class MainActivity extends AppCompatActivity
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 //Set Position of Text
                 final int val = getSeekBarPosition(progress, 3, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
-                final String message = Integer.toString(progress);
+                final String message = Integer.toString(progress + AlarmConstants.BRIGHTNESS_STEPS_MINIMUM);
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
@@ -1409,11 +1419,13 @@ public class MainActivity extends AppCompatActivity
         builder.setTitle(getString(R.string.options_LightSteps));
 
         //Set AlertDialog View
-        builder.setView(createAlertLinearLayout(this, textView, seekBar, 100, 5, 100)); //TODO need options for this
+        builder.setView(createAlertLinearLayout(this, textView, seekBar, 95, 1, m_SystemConfiguration.getBrightnessSteps()));
         builder.setPositiveButton(getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                item.setTitle(getString(R.string.options_LightSteps_short) + " " + seekBar.getProgress());
+                final int steps = seekBar.getProgress() + AlarmConstants.BRIGHTNESS_STEPS_MINIMUM;
+                item.setTitle(getString(R.string.options_LightSteps_short) + " " + steps);
+                m_SystemConfiguration.setBrightnessSteps(steps); //Commit the Values in the set Method
                 dialog.dismiss();
             }
         });
@@ -1424,8 +1436,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
         builder.show();
-
-        //TODO need options for saving
     }
     private void chooseThemeOptionsDialog(final MenuItem item){
 
@@ -1441,12 +1451,10 @@ public class MainActivity extends AppCompatActivity
 
             public void onClick(DialogInterface dialog, int which) {
                 item.setTitle(themes.get(which));
-                //TODO Set Theme
+                m_SystemConfiguration.setAlarmTheme(themes.get(which)); //Commit the Values in the set Method
                 dialog.dismiss();
             }
         });
         builder.show();
-
-        //TODO Save Theme
     }
 }
