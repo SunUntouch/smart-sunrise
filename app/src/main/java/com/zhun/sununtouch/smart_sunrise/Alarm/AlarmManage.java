@@ -9,8 +9,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
 import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfiguration;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmLogging;
 import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
 import com.zhun.sununtouch.smart_sunrise.Information.AlarmToast;
+import com.zhun.sununtouch.smart_sunrise.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -26,10 +28,13 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
     private final Context context;
     private AlarmManager alarmManager;
     private final AlarmConfiguration config;
+    private AlarmLogging m_Log;
+    private final String TAG = "AlarmManager";
 
     public AlarmManage(Context alarmContext, AlarmConfiguration alarmConfig){
         context = alarmContext;
         config  = alarmConfig;
+        m_Log = new AlarmLogging(context);
         createAlarmManager();
     }
     private void createAlarmManager(){
@@ -142,12 +147,13 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
 
         //Show Toast when Set
         final boolean checked = checkPendingIntent();
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(calendar.getTimeInMillis() - timeBeforeMusic);
+        final String date = SimpleDateFormat.getDateTimeInstance().format(cal.getTime());
         if(checked)
-        {
-            Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(calendar.getTimeInMillis() - timeBeforeMusic);
-            AlarmToast.showToastShort(context, SimpleDateFormat.getDateTimeInstance().format(cal.getTime()));
-        }
+            AlarmToast.showToastShort(context, date);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_set, checked, date));
         return checked;
     }
     public boolean cancelAlarm(){
@@ -157,9 +163,13 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         final PendingIntent intent = getPendingIntent();
         alarmManager.cancel(intent);
         intent.cancel();
-        return checkPendingIntent();
+
+        final boolean checked = checkPendingIntent();
+        m_Log.i(TAG, getString(R.string.logging_alarm_cancelled, checked));
+        return checked;
     }
     public void refresh(){
+        m_Log.i(TAG, getString(R.string.logging_alarm_refresh));
         cancelAlarm();
         setAlarm(false);
     }

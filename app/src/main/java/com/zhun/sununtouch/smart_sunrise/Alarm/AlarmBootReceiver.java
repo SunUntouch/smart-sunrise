@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfiguration;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmLogging;
 import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
+import com.zhun.sununtouch.smart_sunrise.R;
 
 /**
  * Created by Sunny on 02.01.2017.
@@ -22,6 +24,9 @@ public class AlarmBootReceiver extends BroadcastReceiver {
             AlarmConfiguration alarm = new AlarmConfiguration(context, intent.getExtras().getInt(AlarmConstants.ALARM_ID));
             if(alarm.isDaySet() || alarm.getAlarmOneShot())
                 alarm.activateAlarm();
+
+            AlarmLogging log = new AlarmLogging(context);
+            log.i("AlarmBootReceiver", context.getString(R.string.logging_alarm_boot));
         }
     }
 }

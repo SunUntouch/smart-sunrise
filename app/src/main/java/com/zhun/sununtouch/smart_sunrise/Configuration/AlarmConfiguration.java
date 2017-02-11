@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.zhun.sununtouch.smart_sunrise.Alarm.AlarmManage;
 import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
+import com.zhun.sununtouch.smart_sunrise.R;
 
 import java.util.Calendar;
 
@@ -16,6 +17,8 @@ import java.util.Calendar;
 public class AlarmConfiguration {
 
     private Context m_Context;
+    private AlarmLogging m_Log;
+    private final String TAG = "AlarmConfiguration";
 
     //Actual Alarm Values
     private int actualAlarm    = 0;
@@ -64,9 +67,11 @@ public class AlarmConfiguration {
 
     public AlarmConfiguration(Context context){
         m_Context = context;
+        m_Log = new AlarmLogging(context);
     }
     public AlarmConfiguration(Context context, int ID){
         init(context,ID);
+        m_Log = new AlarmLogging(context);
     }
 
     private void init(Context context,int ID){
@@ -168,6 +173,8 @@ public class AlarmConfiguration {
 
         //apply Values to settings
         editor.apply();
+
+        m_Log.i(TAG, m_Context.getString(R.string.logging_config_saved, AlarmConstants.ALARM + getAlarmID()));
     }
 
     private AlarmManage createAlarmManager(){

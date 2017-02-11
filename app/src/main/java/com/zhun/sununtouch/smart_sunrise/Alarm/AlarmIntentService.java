@@ -4,6 +4,8 @@ import android.app.IntentService;
 import android.content.Intent;
 
 import com.zhun.sununtouch.smart_sunrise.AlarmActivity;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmLogging;
+import com.zhun.sununtouch.smart_sunrise.R;
 
 /**
  * Created by Sunny
@@ -22,5 +24,8 @@ public class AlarmIntentService extends IntentService {
                                 .putExtras(intent)
                                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
         AlarmReceiver.completeWakefulIntent(intent);
+
+        AlarmLogging log = new AlarmLogging(this);
+        log.i("AlarmIntentService", getString(R.string.logging_alarm_intent));
     }
 }

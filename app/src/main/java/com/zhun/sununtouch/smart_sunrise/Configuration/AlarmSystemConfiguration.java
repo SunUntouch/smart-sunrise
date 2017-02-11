@@ -19,8 +19,12 @@ public class AlarmSystemConfiguration {
     private String currentTheme;
     private boolean enableLogging = false;
 
+    private AlarmLogging m_Logs;
+    private String TAG = "AlarmSystemConfiguration";
+
     public AlarmSystemConfiguration(final Context context){
         m_Context = context;
+        m_Logs = new AlarmLogging(context);
         init();
     }
 
@@ -38,6 +42,8 @@ public class AlarmSystemConfiguration {
         editor.putString(AlarmConstants.WAKEUP_OPTIONS_THEME       , getAlarmTheme());
         editor.putBoolean(AlarmConstants.WAKEUP_OPTIONS_LOGGING    , loggingEnabled());
         editor.apply();
+
+        m_Logs.i(TAG, m_Context.getString(R.string.logging_config_saved, AlarmConstants.WAKEUP_OPTIONS));
     }
 
     //Getter and Setter

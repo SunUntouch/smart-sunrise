@@ -174,7 +174,7 @@
     <string name="logging_activity_creating">==============================================================\nCreating Activity</string>
     <string name="logging_activity_created">Activity created</string>
     <string name="logging_activity_stopped">Activity stopped</string>
-    <string name="logging_activity_destroyed">Activity destroyed\n==============================================================</string>
+    <string name="logging_activity_destroyed">Activity destroyed</string>
     <string name="logging_activity_hint">Activity got User Hint</string>
 
     <string name="logging_asyncTask_created" formatted="false">AsyncTask for %s created</string>
@@ -218,6 +218,15 @@
     <string name="logging_exception" formatted="false">Exception %s: %s</string>
 
     <string name="logging_error_switch_bounds">%s Switch out of bounds</string>
+
+    <string name="logging_config_saved" formatted="false">commit SharedPreference %s</string>
+    <string name="logging_alarm_boot">Boot received Successful</string>
+    <string name="logging_alarm_receiver">Alarm received Successful</string>
+    <string name="logging_alarm_intent">Alarm Intent received Successful</string>
+
+    <string name="logging_alarm_set" formatted="false">Alarm set to %b set Time: %s</string>
+    <string name="logging_alarm_cancelled">Alarm cancelled %b</string>
+    <string name="logging_alarm_refresh">Start Alarm refresh</string>
 
     <!-- Option Text -->
     <string name="options_LightSteps">Brightness Steps</string>
