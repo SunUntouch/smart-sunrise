@@ -1,4 +1,4 @@
-package com.zhun.sununtouch.smart_sunrise;
+package com.zhun.sununtouch.smart_sunrise.Configuration;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,24 +9,24 @@ import android.preference.PreferenceManager;
  * Helper Class to Read and Write to Shared Preferences
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
-class AlarmSharedPreferences {
-    static SharedPreferences getSharedPreference(Context context, String settingName){
+public class AlarmSharedPreferences {
+    public static SharedPreferences getSharedPreference(Context context, String settingName){
         return context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
     }
-    static SharedPreferences getSharedPreference(Context context, String settingName, int actualAlarm){
+    public static SharedPreferences getSharedPreference(Context context, String settingName, int actualAlarm){
         return context.getSharedPreferences(settingName + Integer.toString(actualAlarm), Context.MODE_PRIVATE);
     }
-    static SharedPreferences getSharedPreference(Context context){
+    public static SharedPreferences getSharedPreference(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName){
+    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName){
         return getSharedPreference(context, settingsName).edit();
     }
-    static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName, int actualAlarm){
+    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName, int actualAlarm){
         return getSharedPreference(context, settingsName, actualAlarm).edit();
     }
-    static SharedPreferences.Editor getSharedPreferenceEditor(Context context){
+    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context){
         return PreferenceManager.getDefaultSharedPreferences(context).edit();
     }
 }

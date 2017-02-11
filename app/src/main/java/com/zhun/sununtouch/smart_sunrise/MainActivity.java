@@ -23,7 +23,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
-import android.util.Log;
+import android.text.util.Linkify;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -41,6 +41,17 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+
+import com.zhun.sununtouch.smart_sunrise.Alarm.AlarmWorkerThread;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfiguration;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfigurationList;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmLogging;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmSystemConfiguration;
+import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
+import com.zhun.sununtouch.smart_sunrise.Information.ColorPickingDialog;
+import com.zhun.sununtouch.smart_sunrise.Information.SettingTimeFragment;
+import com.zhun.sununtouch.smart_sunrise.Information.SongDatabase;
+import com.zhun.sununtouch.smart_sunrise.Information.SongInformation;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,6 +80,8 @@ public class MainActivity extends AppCompatActivity
     private AlarmConfigurationList m_AlarmConfigurations;
     private AlarmSystemConfiguration m_SystemConfiguration;
 
+    private AlarmLogging m_Log;
+
     //Last Clicked AlarmGroup
     private int actualAlarm    =-1;
 
@@ -83,6 +96,8 @@ public class MainActivity extends AppCompatActivity
 
     private boolean m_isVisible = false;
 
+    private String TAG = "MainActivity";
+
     /***********************************************************************************************
      * ON_CREATE AND HELPER
      **********************************************************************************************/
@@ -92,6 +107,8 @@ public class MainActivity extends AppCompatActivity
         mThread = new AlarmWorkerThread("Smart_Sunrise_Main_Worker");
         m_AlarmConfigurations = new AlarmConfigurationList(getApplicationContext());
         m_SystemConfiguration = new AlarmSystemConfiguration(getApplicationContext());
+        m_Log = new AlarmLogging(getApplicationContext());
+        m_Log.i(TAG, getString(R.string.logging_activity_creating));
 
         //Set MainView//////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
@@ -141,15 +158,12 @@ public class MainActivity extends AppCompatActivity
 
         //Set View
         switchAlarmView(!m_AlarmConfigurations.isEmpty());
+        m_Log.i(TAG, getString(R.string.logging_activity_created));
     }
     protected void onDestroy() {
         mThread.quit();
+        m_Log.i(TAG, getString(R.string.logging_activity_destroyed));
         super.onDestroy();
-    }
-    private void debug_assertion(boolean check){
-
-        if(BuildConfig.DEBUG && check)
-            throw new AssertionError();
     }
 
     private void switchAlarmView(boolean visible){
@@ -161,6 +175,7 @@ public class MainActivity extends AppCompatActivity
             AlarmGroupView.setVisibility(ExpandableListView.VISIBLE);
             AlarmGroupView.invalidateViews();
             m_isVisible = true;
+
         }else if(!visible && m_isVisible){
 
             AlarmNoLayout.setVisibility(LinearLayout.VISIBLE);
@@ -168,6 +183,8 @@ public class MainActivity extends AppCompatActivity
             AlarmGroupView.invalidateViews();
             m_isVisible = false;
         }
+
+        m_Log.d(TAG, getString(R.string.logging_view_switched));
     }
 
     private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int max, int increment, int progress){
@@ -187,6 +204,8 @@ public class MainActivity extends AppCompatActivity
         seekBar.setKeyProgressIncrement(increment);
         seekBar.setProgress(progress);
         linearLayout.addView(seekBar);
+
+        m_Log.d(TAG, getString(R.string.logging_linearLayout));
         return linearLayout;
     }
     private int getSeekBarPosition(int progress, int right, int left, int width, int offset, int max){
@@ -206,12 +225,15 @@ public class MainActivity extends AppCompatActivity
         {
             thread.start();
             thread.prepareHandler();
+            m_Log.d(TAG, getString(R.string.logging_runnable_set, thread.getName()));
         }
 
         if(millis == 0)
             thread.postTask(runnable);
         else
             thread.postDelayedTask(runnable, millis);
+
+        m_Log.i(TAG, getString(R.string.logging_runnable_set_to, thread.getName(), millis));
     }
 
     /***********************************************************************************************
@@ -239,6 +261,9 @@ public class MainActivity extends AppCompatActivity
 
                 if(!m_AlarmConfigurations.isEmpty())
                 {
+                    AlarmConfiguration alarm = m_AlarmConfigurations.getAlarm(actualAlarm);
+                    m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName())  + " deleted");
+
                     m_AlarmConfigurations.removeAlarm(actualAlarm);
                     AlarmViewAdapter.notifyDataSetChanged(m_AlarmConfigurations);
                 }
@@ -293,6 +318,8 @@ public class MainActivity extends AppCompatActivity
         boolean alarmSet = (activeAlarmToggle.isChecked()) ? alarm.activateAlarm() : alarm.cancelAlarm();
         activeAlarmToggle.setChecked(alarmSet);
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " set to " + alarmSet);
     }
 
     /***********************************************************************************************
@@ -338,7 +365,7 @@ public class MainActivity extends AppCompatActivity
             AlarmNameAlert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
         catch (NullPointerException e)
-        {   AlarmToast.showToastShort(getApplicationContext(), getAlarm(actualAlarm).isAlarmSet(), "Error: " + e.getMessage(), getString(R.string.toast_negative_alarm)); }
+        {   m_Log.e(TAG, getString(R.string.logging_exception_null, "onShowName", e.getMessage()));}
 
         AlarmNameAlert.show();
     }
@@ -346,8 +373,11 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings and reactivate Alarm
         AlarmConfiguration alarm = getAlarm(actualAlarm);
+        final String before = alarm.getAlarmName();
         alarm.setAlarmName(name);
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " changed name to " + alarm.getAlarmName());
     }
     /***********************************************************************************************
      * DAY SETTING DIALOG
@@ -365,7 +395,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.wakeup_friday   : alarm.setFriday   (toggle.isChecked()); break;
             case R.id.wakeup_saturday : alarm.setSaturday (toggle.isChecked()); break;
             case R.id.wakeup_sunday   : alarm.setSunday   (toggle.isChecked()); break;
-            default: debug_assertion(true); break;
+            default: m_Log.e(TAG, getString(R.string.logging_error_switch_bounds, "onDaySet")); break;
         }
         //save Settings and reactivate Alarm
         updateChanges(alarm);
@@ -373,6 +403,8 @@ public class MainActivity extends AppCompatActivity
         //refresh Alarm separate only for some Key Values
         if(alarm.isAlarmSet())
             alarm.refreshAlarm();
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " a day changed to: " + toggle.isChecked());
     }
     /***********************************************************************************************
      * TIME SETTING DIALOG
@@ -400,6 +432,8 @@ public class MainActivity extends AppCompatActivity
         //refresh Alarm separate only for some Key Values
         if(alarm.isAlarmSet())
             alarm.refreshAlarm();
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " set to " + alarm.getHour() + ":" + alarm.getMinute());
     }
     /***********************************************************************************************
      * MINUTE SETTING DIALOG
@@ -460,6 +494,9 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setSnooze(minutes + 1); //we Start with 1 minute
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " snooze set to " + alarm.getSnooze() + "m");
+
     }
     /***********************************************************************************************
      * MUSIC SET DIALOG
@@ -602,6 +639,8 @@ public class MainActivity extends AppCompatActivity
         alarm.setSongLength((int) (Long.parseLong(metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)) / 1000));
         alarm.setSongURI(uri);
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " song length set to " + alarm.getSongLength() + "s Song: " + alarm.getSongName());
     }
 
     private void searchMusic(int modeID){
@@ -678,6 +717,8 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void run() {
 
+                        m_Log.i(TAG, getString(R.string.logging_start_music, uri));
+
                         if(stop)
                             stopMusic(false);
 
@@ -694,8 +735,7 @@ public class MainActivity extends AppCompatActivity
                             mediaPlayer.setDataSource(getApplicationContext(), uri);
                             mediaPlayer.prepare();
                         } catch (IOException e) {
-                            Log.e("Exception: ", e.getMessage());
-                        }
+                            m_Log.e(TAG, getString(R.string.logging_exception_io, "startMusic", e.getMessage())); }
 
                         mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(startTime));
 
@@ -708,6 +748,8 @@ public class MainActivity extends AppCompatActivity
                             mediaPlayer.setVolume(vol, vol);
                         }
                         mediaPlayer.setLooping(looping);
+
+                        m_Log.i(TAG, getString(R.string.logging_music_playing));
                     }
                 }
         );
@@ -730,6 +772,8 @@ public class MainActivity extends AppCompatActivity
             mediaPlayer.release();
             mediaPlayer = null;
         }
+
+        m_Log.i(TAG, getString(R.string.logging_music_stopped));
     }
     private boolean checkMusicPermission(){
         return  checkMusicPermission(true);
@@ -745,6 +789,9 @@ public class MainActivity extends AppCompatActivity
         else if(askPermission)
             ActivityCompat.requestPermissions(this, new String[]{READ_EXTERNAL_STORAGE}, AlarmConstants.ALARM_PERMISSION_MUSIC);
 
+        if(askPermission)
+            m_Log.i(TAG, getString(R.string.logging_permission_asked));
+
         //We must wait for granting
         return false;
     }
@@ -758,10 +805,12 @@ public class MainActivity extends AppCompatActivity
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     searchMusic(1); //External Mode
+                    m_Log.i(TAG, getString(R.string.logging_permission_granted));
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
                 } else {
                     Toast.makeText(MainActivity.this, R.string.wakeup_music_no_sd_card, Toast.LENGTH_SHORT).show();
+                    m_Log.i(TAG, getString(R.string.logging_permission_denied));
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
@@ -840,6 +889,8 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setVolume(volume);
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " Volume set to " + alarm.getVolume());
     }
     /***********************************************************************************************
      * MUSIC START TIME DIALOG
@@ -909,6 +960,8 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setSongStart(seconds);
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " music starts at " + alarm.getSongStart() + "s");
     }
     /***********************************************************************************************
      * MUSIC FADE_IN TIME DIALOG
@@ -989,6 +1042,8 @@ public class MainActivity extends AppCompatActivity
         alarm.setFadeInTime(seconds);
         alarm.setFadeIn(true);
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " fade in time set to " + alarm.getFadeInTime() + "s");
     }
     /***********************************************************************************************
      * MUSIC VIBRATION DIALOG
@@ -1058,6 +1113,8 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setVibration(vibrationToggle.isChecked());
         updateChanges(alarm, false);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " vibration set to " + alarm.getVibration());
     }
     private void onVibrationStrengthSet(int strength){
 
@@ -1066,6 +1123,8 @@ public class MainActivity extends AppCompatActivity
         alarm.setVibrationStrength(strength);
         alarm.setVibration(true);
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " vibration strength set to " + alarm.getVibrationStrength());
     }
 
     private void setVibrationStart(final int _intensity){
@@ -1080,6 +1139,8 @@ public class MainActivity extends AppCompatActivity
                     m_Vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
                 m_Vibrator.vibrate(new long[]{0, 8 * _intensity + 350, (4000 / (long) Math.sqrt(_intensity + 1))}, 0);
+
+                m_Log.i(TAG, getString(R.string.logging_vibration_started));
             }
         });
     }
@@ -1091,6 +1152,8 @@ public class MainActivity extends AppCompatActivity
             m_Vibrator.cancel();
             m_Vibrator = null;
         }
+
+        m_Log.i(TAG, getString(R.string.logging_vibration_stopped));
     }
     /***********************************************************************************************
      * SCREEN LIGHT SETTING DIALOG
@@ -1169,6 +1232,8 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setScreen(screenToggle.isChecked());
         updateChanges(alarm, false);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " screen set to " + alarm.getScreen());
     }
     private void onScreenBrightnessSet(int brightness){
 
@@ -1183,6 +1248,8 @@ public class MainActivity extends AppCompatActivity
         Window win = getWindow();
         win.getAttributes().screenBrightness = brightness;
         getWindow().setAttributes(win.getAttributes());
+
+        m_Log.i(TAG, getString(R.string.logging_brightness_set, brightness));
     }
     public void showScreenLightStartSettingDialog(View v){
 
@@ -1240,6 +1307,8 @@ public class MainActivity extends AppCompatActivity
         //refresh Alarm separate only for some Key Values
         if(alarm.isAlarmSet())
             alarm.refreshAlarm();
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " screen starts " + alarm.getScreenStartTime() + "m before music");
     }
     /***********************************************************************************************
      * SCREEN COLOR SETTING DIALOG
@@ -1267,10 +1336,11 @@ public class MainActivity extends AppCompatActivity
             alarm.setLightColor1(color);
         else if(color2.equals(bView.getText().toString()))
             alarm.setLightColor2(color);
-        else debug_assertion(true);
 
         //save Settings
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " " + bView.getText() + " set to " + color);
     }
     /***********************************************************************************************
      * SCREEN COLOR FADE SETTING DIALOG
@@ -1284,6 +1354,8 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setLightFade(screenFadeToggle.isChecked());
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " color fade set to " + alarm.getLightFade());
     }
     /***********************************************************************************************
      * LED LIGHT SETTING DIALOG
@@ -1297,6 +1369,8 @@ public class MainActivity extends AppCompatActivity
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setLED(LEDToggle.isChecked());
         updateChanges(alarm);
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + alarm.getAlarmName() + " led set to " + alarm.getLED());
     }
     public void showLEDLightStartSettingDialog(View v){
 
@@ -1353,6 +1427,8 @@ public class MainActivity extends AppCompatActivity
         //refresh Alarm separate only for some Key Values
         if(alarm.isAlarmSet())
             alarm.refreshAlarm();
+
+        m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + alarm.getAlarmName() + " led start time " + alarm.getLEDStartTime() + "m before music");
     }
     /***********************************************************************************************
      * OPTIONS_MENU
@@ -1384,6 +1460,7 @@ public class MainActivity extends AppCompatActivity
                 item.setChecked(!item.isChecked());
                 m_SystemConfiguration.enableLogging(item.isChecked()); //Commit the Values in the set Method
             } break;
+            case  R.id.options_about: showAboutOptionsDialog(); break;
             default: break;
         }
         return super.onOptionsItemSelected(item);
@@ -1426,6 +1503,8 @@ public class MainActivity extends AppCompatActivity
                 final int steps = seekBar.getProgress() + AlarmConstants.BRIGHTNESS_STEPS_MINIMUM;
                 item.setTitle(getString(R.string.options_LightSteps_short) + " " + steps);
                 m_SystemConfiguration.setBrightnessSteps(steps); //Commit the Values in the set Method
+
+                m_Log.i(TAG, getString(R.string.logging_brightness_steps_set));
                 dialog.dismiss();
             }
         });
@@ -1452,6 +1531,30 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialog, int which) {
                 item.setTitle(themes.get(which));
                 m_SystemConfiguration.setAlarmTheme(themes.get(which)); //Commit the Values in the set Method
+
+                m_Log.i(TAG, "Theme set to " + item.getTitle());
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+    private void showAboutOptionsDialog(){
+
+        //TextView to show Value of SeekBar
+        final TextView textView = new TextView(this);
+        textView.setText(getString(R.string.options_about_text));
+        Linkify.addLinks(textView, Linkify.WEB_URLS);
+
+        //Create new Builder
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getString(R.string.options_About));
+
+        //Set AlertDialog View
+        builder.setView(textView);
+        builder.setPositiveButton(getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
         });

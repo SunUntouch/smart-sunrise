@@ -1,4 +1,4 @@
-package com.zhun.sununtouch.smart_sunrise;
+package com.zhun.sununtouch.smart_sunrise.Alarm;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -7,6 +7,10 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfiguration;
+import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
+import com.zhun.sununtouch.smart_sunrise.Information.AlarmToast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,7 +27,7 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
     private AlarmManager alarmManager;
     private final AlarmConfiguration config;
 
-    AlarmManage(Context alarmContext, AlarmConfiguration alarmConfig){
+    public AlarmManage(Context alarmContext, AlarmConfiguration alarmConfig){
         context = alarmContext;
         config  = alarmConfig;
         createAlarmManager();

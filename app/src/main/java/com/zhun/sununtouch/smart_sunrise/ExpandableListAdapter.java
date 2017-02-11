@@ -12,6 +12,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfiguration;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfigurationList;
+
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;

@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'SmartSunrise_Key'
+            keyPassword 'SSebd1.0.a.'
+            storeFile file('H:/Private_Programmierung/Android KeyStore/KeyStore.jks')
+            storePassword 'SSiescW.'
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
     defaultConfig {

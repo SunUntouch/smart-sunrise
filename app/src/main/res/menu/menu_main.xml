@@ -18,4 +18,9 @@
         android:title="@string/options_Logging"
         android:checkable="true"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/options_about"
+        android:orderInCategory="4"
+        android:title="@string/options_About"
+        app:showAsAction="never"/>
 </menu>

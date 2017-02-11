@@ -1,7 +1,10 @@
-package com.zhun.sununtouch.smart_sunrise;
+package com.zhun.sununtouch.smart_sunrise.Configuration;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
+import com.zhun.sununtouch.smart_sunrise.Information.AlarmToast;
 
 import java.util.List;
 import java.util.Map;
@@ -13,7 +16,7 @@ import java.util.Vector;
  */
 
 @SuppressWarnings("unused")
-class AlarmConfigurationList {
+public class AlarmConfigurationList {
 
     private int m_Amount;
     private final List<AlarmConfiguration> m_Alarms;
@@ -21,7 +24,7 @@ class AlarmConfigurationList {
     private final Context m_Context;
 
     //Constructor
-    AlarmConfigurationList(Context context){
+    public AlarmConfigurationList(Context context){
 
         //Get Amount and initialize List
         m_Context = context;
@@ -38,7 +41,7 @@ class AlarmConfigurationList {
     }
 
     //Getter and Setter
-    void addAlarm(AlarmConfiguration alarm){
+    public void addAlarm(AlarmConfiguration alarm){
         alarm.setAlarmID(m_Amount);
         alarm.commit();
 
@@ -48,7 +51,7 @@ class AlarmConfigurationList {
         AlarmSharedPreferences.getSharedPreferenceEditor(m_Context).putInt(AlarmConstants.ALARM_VALUE, m_Amount).apply();
     }
     @SuppressWarnings("UnusedReturnValue")
-    boolean removeAlarm(int alarmID){
+    public boolean removeAlarm(int alarmID){
 
         try { m_Alarms.remove(alarmID); }
         catch(Exception e){
@@ -90,11 +93,11 @@ class AlarmConfigurationList {
         AlarmSharedPreferences.getSharedPreferenceEditor(m_Context).putInt(AlarmConstants.ALARM_VALUE, m_Amount).apply();
     }
 
-    AlarmConfiguration getAlarm(int alarmID){
+    public AlarmConfiguration getAlarm(int alarmID){
         return m_Alarms.get(alarmID);
     }
     @SuppressWarnings("UnusedReturnValue")
-    boolean setAlarm(AlarmConfiguration alarm){
+    public boolean setAlarm(AlarmConfiguration alarm){
         try {
             m_Alarms.set(alarm.getAlarmID(), alarm);
         }catch (Exception e){
@@ -105,13 +108,13 @@ class AlarmConfigurationList {
         return true;
     }
 
-    int size(){
+    public int size(){
         return m_Amount;
     }
-    boolean contains(int alarmID){
+    public boolean contains(int alarmID){
         return m_Alarms.size() > alarmID;
     }
-    boolean isEmpty(){
+    public boolean isEmpty(){
         return m_Alarms.isEmpty();
     }
 }

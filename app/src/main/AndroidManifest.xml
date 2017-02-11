@@ -8,7 +8,6 @@
 
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
 
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <uses-permission android:name="android.permission.VIBRATE"/>
@@ -54,13 +53,13 @@
                 android:value="com.zhun.sununtouch.smart_sunrise.MainActivity" />
         </activity>
 
-        <receiver android:name=".AlarmReceiver"/>
+        <receiver android:name=".Alarm.AlarmReceiver"/>
         <service
-            android:name=".AlarmIntentService"
+            android:name=".Alarm.AlarmIntentService"
             android:label="@string/app_name"
             android:enabled="true"/>
 
-        <receiver android:name=".AlarmBootReceiver">
+        <receiver android:name=".Alarm.AlarmBootReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>

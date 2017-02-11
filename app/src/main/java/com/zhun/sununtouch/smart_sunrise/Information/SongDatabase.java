@@ -1,4 +1,4 @@
-package com.zhun.sununtouch.smart_sunrise;
+package com.zhun.sununtouch.smart_sunrise.Information;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
  */
 
 @SuppressWarnings("unused")
-class SongDatabase {
+public class SongDatabase {
 
     private LinkedHashMap<String, LinkedHashMap<String, HashSet<SongInformation>>> mDatabase = null;
 
@@ -18,14 +18,14 @@ class SongDatabase {
     private int albumCount = 0;
     private int artistCount = 0;
 
-    SongDatabase(){
+    public SongDatabase(){
         mDatabase = new LinkedHashMap<>();
     }
-    SongDatabase(SongInformation song){
+    public SongDatabase(SongInformation song){
 
         addSong(song);
     }
-    void addSong(SongInformation song){
+    public void addSong(SongInformation song){
         if(mDatabase == null)
             mDatabase = new LinkedHashMap<>();
 
@@ -63,37 +63,37 @@ class SongDatabase {
         songCount++;
     }
 
-    String[] getArtistStrings(){
+    public String[] getArtistStrings(){
         return mDatabase.keySet().toArray(new String[mDatabase.size()]);
     }
-    String[] getAlbumStrings(String artist){
+    public String[] getAlbumStrings(String artist){
         return (mDatabase.containsKey(artist))? mDatabase.get(artist).keySet().toArray(new String[mDatabase.get(artist).size()]) : null;
     }
-    SongInformation[] getSongs(String artist, String album){
+    public SongInformation[] getSongs(String artist, String album){
 
         if(!mDatabase.containsKey(artist))
             return null;
         return (mDatabase.get(artist).containsKey(album))? mDatabase.get(artist).get(album).toArray(new SongInformation[mDatabase.get(artist).get(album).size()]) : null;
     }
 
-    int getArtistCountCalculate(){
+    public int getArtistCountCalculate(){
         return mDatabase.size();
     }
-    int getArtistCount(){
+    public int getArtistCount(){
         return artistCount;
     }
 
-    int getAlbumCount(){
+    public int getAlbumCount(){
         return albumCount;
     }
-    int getAlbumCount(String artist){
+    public int getAlbumCount(String artist){
         return (mDatabase.containsKey(artist)) ? mDatabase.get(artist).size() : 0;
     }
 
-    int getSongCount(){
+    public int getSongCount(){
         return songCount;
     }
-    int getSongCount(String artist){
+    public int getSongCount(String artist){
 
         if(!mDatabase.containsKey(artist))
             return 0;
@@ -104,7 +104,7 @@ class SongDatabase {
             count += album.getValue().size();
         return count;
     }
-    int getSongCount(String artist, String album){
+    public int getSongCount(String artist, String album){
 
         if(!mDatabase.containsKey(artist))
             return 0;

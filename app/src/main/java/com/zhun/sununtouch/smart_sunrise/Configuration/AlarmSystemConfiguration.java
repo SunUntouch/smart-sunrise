@@ -1,10 +1,14 @@
-package com.zhun.sununtouch.smart_sunrise;
+package com.zhun.sununtouch.smart_sunrise.Configuration;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
+import com.zhun.sununtouch.smart_sunrise.R;
+
 /**
  * Created by Sunny on 10.02.2017.
+ * Helper Class to Load and Save global options
  */
 
 public class AlarmSystemConfiguration {
@@ -15,7 +19,7 @@ public class AlarmSystemConfiguration {
     private String currentTheme;
     private boolean enableLogging = false;
 
-    AlarmSystemConfiguration(final Context context){
+    public AlarmSystemConfiguration(final Context context){
         m_Context = context;
         init();
     }
@@ -37,25 +41,25 @@ public class AlarmSystemConfiguration {
     }
 
     //Getter and Setter
-    void setBrightnessSteps(final int steps){
+    public void setBrightnessSteps(final int steps){
         brightness_steps = steps;
         commit();
     }
-    int getBrightnessSteps(){
+    public int getBrightnessSteps(){
         return brightness_steps;
     }
-    void setAlarmTheme(final String theme){
+    public void setAlarmTheme(final String theme){
         currentTheme = theme;
         commit();
     }
-    String getAlarmTheme(){
+    public String getAlarmTheme(){
         return currentTheme;
     }
-    void enableLogging(boolean enable){
+    public void enableLogging(boolean enable){
         enableLogging = enable;
         commit();
     }
-    boolean loggingEnabled(){
+    public boolean loggingEnabled(){
         return enableLogging;
     }
 }

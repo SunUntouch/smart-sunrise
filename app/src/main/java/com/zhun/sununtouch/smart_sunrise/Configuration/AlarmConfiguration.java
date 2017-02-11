@@ -1,7 +1,10 @@
-package com.zhun.sununtouch.smart_sunrise;
+package com.zhun.sununtouch.smart_sunrise.Configuration;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
+import com.zhun.sununtouch.smart_sunrise.Alarm.AlarmManage;
+import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
 
 import java.util.Calendar;
 
@@ -10,7 +13,7 @@ import java.util.Calendar;
  * Model Class to represent a Alarm
  */
 @SuppressWarnings("WeakerAccess")
-class AlarmConfiguration {
+public class AlarmConfiguration {
 
     private Context m_Context;
 
@@ -59,10 +62,10 @@ class AlarmConfiguration {
     private int m_LightLEDStartTime     = AlarmConstants.ACTUAL_LED_START;
     private int m_LightLEDStartTimeTemp = AlarmConstants.ACTUAL_LED_START;
 
-    AlarmConfiguration(Context context){
+    public AlarmConfiguration(Context context){
         m_Context = context;
     }
-    AlarmConfiguration(Context context, int ID){
+    public AlarmConfiguration(Context context, int ID){
         init(context,ID);
     }
 
@@ -115,7 +118,7 @@ class AlarmConfiguration {
         this.setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES , calendar.get(Calendar.MINUTE)));
         this.setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE  , AlarmConstants.ACTUAL_TIME_SNOOZE));
     }
-    void commit(){
+    public void commit(){
 
         //Load sharedPreferences
         SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreferenceEditor(m_Context, AlarmConstants.ALARM, getAlarmID()).clear();
@@ -170,21 +173,21 @@ class AlarmConfiguration {
     private AlarmManage createAlarmManager(){
             return new AlarmManage(m_Context, this);
     }
-    boolean cancelAlarm(){
+    public boolean cancelAlarm(){
         return createAlarmManager().cancelAlarm();
     }
-    void snoozeAlarm(){
+    public void snoozeAlarm(){
         createAlarmManager().setAlarm(true);
     }
-    boolean activateAlarm(){
+    public boolean activateAlarm(){
         return createAlarmManager().setAlarm(false);
     }
-    void refreshAlarm(){
+    public void refreshAlarm(){
         createAlarmManager().refresh();
     }
 
     //Enums
-    enum childItem{
+    public enum childItem{
         WAKEUP_DELETE,
         WAKEUP_TIME,
         WAKEUP_DAYS,
@@ -192,63 +195,62 @@ class AlarmConfiguration {
         WAKEUP_LIGHT
     }
     private static final int childItems = childItem.values().length;
-    int getChildItemSize(){
+    public int getChildItemSize(){
         return childItems;
     }
 
     //Name
-
-    String getAlarmName(){
+    public String getAlarmName(){
         return actualAlarmName;
     }
-    void setAlarmName(final String name){
+    public void setAlarmName(final String name){
         actualAlarmName = name;
     }
 
     //Actual Alarm Values
-    int getAlarmID(){
+    public int getAlarmID(){
         return actualAlarm;
     }
-    void setAlarmID(final int id){
+    public void setAlarmID(final int id){
         actualAlarm = id;
     }
 
     //Actual Alarm Set
-    boolean isAlarmSet(){
+    public boolean isAlarmSet(){
         return createAlarmManager().checkPendingIntent();
     }
 
     //Time
-    int getHour(){
+    public int getHour(){
         return m_Hour;
     }
-    int getMinute(){
+    public int getMinute(){
         return m_Minutes;
     }
-    int getSnooze(){
+    public int getSnooze(){
         return m_SnoozeTime;
     }
 
-    void setHour(int hour){
+    public void setHour(int hour){
         m_Hour = hour;
     }
-    void setMinute(int minute){
+    public void setMinute(int minute){
         m_Minutes    = minute;
     }
-    void setSnooze(int snooze){
+    public void setSnooze(int snooze){
         m_SnoozeTime = snooze;
     }
 
     //Days
-    String getDayName(int day, boolean longName){
+    public String getDayName(int day, boolean longName){
         if(day < 0 && day > Calendar.SATURDAY)
             return "";
         return (longName) ? AlarmConstants.LONG_DAYS[day] : AlarmConstants.SHORT_DAYS[day];
     }
-    boolean isDaySet(){
+    public boolean isDaySet(){
         return (isMonday()|| isTuesday() || isWednesday() || isThursday() || isFriday() || isSaturday() || isSunday());
     }
-    boolean isDaySet(int day){
+    public boolean isDaySet(int day){
         switch(day)
         {
             case Calendar.MONDAY   : return isMonday();
@@ -262,7 +264,7 @@ class AlarmConfiguration {
         }
     }
 
-    int getTimeToNextDay(){
+    public int getTimeToNextDay(){
 
         //No Repeat Days set, return zero
         if(!isDaySet())
@@ -282,192 +284,192 @@ class AlarmConfiguration {
         }
         return nextDay;
     }
-    boolean isMonday(){
+    public boolean isMonday(){
         return m_MondaySet;
     }
-    boolean isTuesday(){
+    public boolean isTuesday(){
         return m_TuesdaySet;
     }
-    boolean isWednesday(){
+    public boolean isWednesday(){
         return m_WednesdaySet;
     }
-    boolean isThursday(){
+    public boolean isThursday(){
         return m_ThursdaySet;
     }
-    boolean isFriday(){
+    public boolean isFriday(){
         return m_FridaySet;
     }
-    boolean isSaturday(){
+    public boolean isSaturday(){
         return m_SaturdaySet;
     }
-    boolean isSunday(){
+    public boolean isSunday(){
         return m_SundaySet;
     }
 
-    void setMonday(boolean monday){
+    public void setMonday(boolean monday){
         m_MondaySet = monday;
     }
-    void setTuesday(boolean tuesday){
+    public void setTuesday(boolean tuesday){
         m_TuesdaySet = tuesday;
     }
-    void setWednesday(boolean wednesday){
+    public void setWednesday(boolean wednesday){
         m_WednesdaySet = wednesday;
     }
-    void setThursday(boolean thursday){
+    public void setThursday(boolean thursday){
         m_ThursdaySet = thursday;
     }
-    void setFriday(boolean friday){
+    public void setFriday(boolean friday){
         m_FridaySet = friday;
     }
-    void setSaturday(boolean saturday){
+    public void setSaturday(boolean saturday){
         m_SaturdaySet = saturday;
     }
-    void setSunday(boolean sunday){
+    public void setSunday(boolean sunday){
         m_SundaySet = sunday;
     }
 
     //Music
-    String getSongName(){
+    public String getSongName(){
         return m_SongURI.substring(m_SongURI.lastIndexOf('/') + 1);
     }
-    String getSongURI(){
+    public String getSongURI(){
         return m_SongURI;
     }
-    void setSongURI(String uri){
+    public void setSongURI(String uri){
         m_SongURI = uri;
     }
 
-    int getSongStart(){
+    public int getSongStart(){
         return m_SongStart;
     }
-    void setSongStart(int start){
+    public void setSongStart(int start){
         m_SongStart = start;
     }
 
-    int getSongLength(){
+    public int getSongLength(){
         return m_SongLength;
     }
-    void setSongLength(int length){
+    public void setSongLength(int length){
         m_SongLength = length;
     }
 
-    int getVolume(){
+    public int getVolume(){
         return m_Volume;
     }
-    void setVolume(int volume){
+    public void setVolume(int volume){
         m_Volume = volume;
     }
 
-    boolean getFadeIn(){
+    public boolean getFadeIn(){
         return m_FadeInSet;
     }
-    void setFadeIn(boolean fadeIn){
+    public void setFadeIn(boolean fadeIn){
         m_FadeInSet = fadeIn;
     }
 
-    int getFadeInTime(){
+    public int getFadeInTime(){
         return m_FadeInTime;
     }
-    void setFadeInTime(int time){
+    public void setFadeInTime(int time){
         m_FadeInTime = time;
     }
 
-    boolean getVibration(){
+    public boolean getVibration(){
         return m_VibrationSet;
     }
-    void setVibration(boolean vibration){
+    public void setVibration(boolean vibration){
         m_VibrationSet = vibration;
     }
 
-    int getVibrationStrength(){
+    public int getVibrationStrength(){
         return m_VibrationStrength;
     }
-    void setVibrationStrength(int strength){
+    public void setVibrationStrength(int strength){
         m_VibrationStrength = strength;
     }
 
     //Screen
-    boolean getScreen(){
+    public boolean getScreen(){
         return m_ScreenSet;
     }
-    void setScreen(boolean screen){
+    public void setScreen(boolean screen){
         m_ScreenSet = screen;
     }
 
-    int getScreenBrightness(){
+    public int getScreenBrightness(){
         return m_ScreenBrightness;
     }
-    void setScreenBrightness(int brightness){
+    public void setScreenBrightness(int brightness){
         m_ScreenBrightness = brightness;
     }
 
-    int getScreenStartTime(){
+    public int getScreenStartTime(){
         return m_ScreenStartTime;
     }
-    void setScreenStartTime(int time){
+    public void setScreenStartTime(int time){
         m_ScreenStartTime = time;
     }
-    int getScreenStartTemp(){
+    public int getScreenStartTemp(){
         return (m_ScreenStartTimeTemp < 0) ? 0 : m_ScreenStartTimeTemp ;
     }
-    void setScreenStartTemp(int time){
+    public void setScreenStartTemp(int time){
         m_ScreenStartTimeTemp = time;
     }
 
     //Light
-    int getLightColor1(){
+    public int getLightColor1(){
         return m_LightColor1;
     }
-    void setLightColor1(int color){
+    public void setLightColor1(int color){
         m_LightColor1 = color;
     }
 
-    int getLightColor2(){
+    public int getLightColor2(){
         return m_LightColor2;
     }
-    void setLightColor2(int color){
+    public void setLightColor2(int color){
         m_LightColor2 = color;
     }
 
-    boolean getLightFade(){
+    public boolean getLightFade(){
         return m_LightFade ;
     }
-    void setLightFade(boolean fade){
+    public void setLightFade(boolean fade){
         m_LightFade = fade;
     }
 
     //LED
-    boolean getLED(){
+    public boolean getLED(){
         return m_LightLEDSet;
     }
-    void setLED(boolean led){
+    public void setLED(boolean led){
         m_LightLEDSet = led;
     }
 
-    int getLEDStartTime(){
+    public int getLEDStartTime(){
         return m_LightLEDStartTime;
     }
-    void setLEDStartTime(int time){
+    public void setLEDStartTime(int time){
         m_LightLEDStartTime = time;
     }
-    int getLEDStartTemp(){
+    public int getLEDStartTemp(){
         return (m_LightLEDStartTimeTemp < 0) ? 0 : m_LightLEDStartTimeTemp ;
     }
-    void setLEDStartTemp(int time){
+    public void setLEDStartTemp(int time){
         m_LightLEDStartTimeTemp = time;
     }
 
-    void setTemporaryTimes(boolean temp){
+    public void setTemporaryTimes(boolean temp){
         tempTimes = temp;
     }
-    boolean getTemporaryTimes(){
+    public boolean getTemporaryTimes(){
         return tempTimes;
     }
 
-    void setAlarmOneShot(boolean shot){
+    public void setAlarmOneShot(boolean shot){
         alarmOneShot = shot;
     }
-    boolean getAlarmOneShot(){
+    public boolean getAlarmOneShot(){
         return alarmOneShot;
     }
 }
