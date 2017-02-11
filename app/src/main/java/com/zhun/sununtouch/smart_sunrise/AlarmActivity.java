@@ -23,7 +23,6 @@ import android.os.Vibrator;
 import android.support.v4.os.AsyncTaskCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -56,7 +55,7 @@ public class AlarmActivity extends AppCompatActivity {
     private PowerManager.WakeLock lock;
 
     private boolean snoozed = false;
-    private String TAG = "AlarmActivity";
+    private final String TAG = "AlarmActivity";
 
     /***********************************************************************************************
      * ON_CREATE AND HELPER
@@ -458,23 +457,7 @@ public class AlarmActivity extends AppCompatActivity {
 
         m_Log.i(TAG, getString(R.string.logging_view_screen_start, initial));
     }
-    private void startScreen(Window win, boolean initial){
-        if(!initial)
-            win.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
-                    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
-        else
-            win.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN |
-                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
-                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD |
-                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON |
-                    WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON);
 
-        m_Log.i(TAG, getString(R.string.logging_view_screen_start, initial));
-    }
     private void setBrightness(final float brightness){
         WindowManager.LayoutParams layout = getWindow().getAttributes();
         layout.screenBrightness = brightness;

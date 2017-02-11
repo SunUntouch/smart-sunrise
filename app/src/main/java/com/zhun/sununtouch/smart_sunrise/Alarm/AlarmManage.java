@@ -28,7 +28,7 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
     private final Context context;
     private AlarmManager alarmManager;
     private final AlarmConfiguration config;
-    private AlarmLogging m_Log;
+    private final AlarmLogging m_Log;
     private final String TAG = "AlarmManager";
 
     public AlarmManage(Context alarmContext, AlarmConfiguration alarmConfig){

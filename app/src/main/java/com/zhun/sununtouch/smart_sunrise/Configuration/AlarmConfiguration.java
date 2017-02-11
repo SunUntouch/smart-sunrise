@@ -17,7 +17,7 @@ import java.util.Calendar;
 public class AlarmConfiguration {
 
     private Context m_Context;
-    private AlarmLogging m_Log;
+    private final AlarmLogging m_Log;
     private final String TAG = "AlarmConfiguration";
 
     //Actual Alarm Values

@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity
 
     private boolean m_isVisible = false;
 
-    private String TAG = "MainActivity";
+    private final String TAG = "MainActivity";
 
     /***********************************************************************************************
      * ON_CREATE AND HELPER
@@ -373,7 +373,6 @@ public class MainActivity extends AppCompatActivity
 
         //save Settings and reactivate Alarm
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        final String before = alarm.getAlarmName();
         alarm.setAlarmName(name);
         updateChanges(alarm);
 
@@ -967,8 +966,7 @@ public class MainActivity extends AppCompatActivity
      * MUSIC FADE_IN TIME DIALOG
      **********************************************************************************************/
     public void showFadeInSettingsDialog(View v){
-
-        //GEt ToggleButton and Set On LongClickListener
+        //Get ToggleButton and Set On LongClickListener
         final ToggleButton fadeInToggle = (ToggleButton) v.findViewById(R.id.wakeup_timer_music_toggleFadeIn);
         fadeInToggle.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -985,7 +983,6 @@ public class MainActivity extends AppCompatActivity
                         textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
                         textView.setText(String.format(Locale.US, "%02d:%02d", TimeUnit.SECONDS.toMinutes(progress),
                                                                     progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
-                        //TODO Play Music for the User
                     }
                     @Override
                     public void onStartTrackingTouch(SeekBar seekBar) {

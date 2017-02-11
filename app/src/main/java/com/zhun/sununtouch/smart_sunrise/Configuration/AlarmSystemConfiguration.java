@@ -19,8 +19,8 @@ public class AlarmSystemConfiguration {
     private String currentTheme;
     private boolean enableLogging = false;
 
-    private AlarmLogging m_Logs;
-    private String TAG = "AlarmSystemConfiguration";
+    private final AlarmLogging m_Logs;
+    private final String TAG = "AlarmSystemConfiguration";
 
     public AlarmSystemConfiguration(final Context context){
         m_Context = context;
