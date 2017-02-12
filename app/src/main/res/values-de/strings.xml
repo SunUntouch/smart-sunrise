@@ -164,6 +164,64 @@
         <item quantity="other">Musik blendet %d Sekunden ein.\r\nAlarm ist inaktiv</item>
     </plurals>
 
+    <!-- Logging -->
+    <string name="logging_activity_creating">==============================================================\nCreating Activity</string>
+    <string name="logging_activity_created">Activity created</string>
+    <string name="logging_activity_stopped">Activity stopped</string>
+    <string name="logging_activity_destroyed">Activity destroyed</string>
+    <string name="logging_activity_hint">Activity got User Hint</string>
+
+    <string name="logging_asyncTask_created" formatted="false">AsyncTask for %s created</string>
+    <string name="logging_asyncTask_destroyed" formatted="false">AsyncTask %s will be destroyed</string>
+    <string name="logging_asyncTask_finished" formatted="false">AsyncTask %s is finished</string>
+    <string name="logging_asyncTask_started" formatted="false">AsyncTask %s started</string>
+
+    <string name="logging_view_switched">Switched View</string>
+    <string name="logging_linearLayout">Successfully created LinearLayout</string>
+
+    <string name="logging_runnable_set" formatted="false">Runnable %s was already alive, stopped now</string>
+    <string name="logging_runnable_set_to" formatted="false">Runnable %s set to %d ms</string>
+
+    <string name="logging_user_stop" formatted="false">User pressed WakeUp Button</string>
+    <string name="logging_user_snooze" formatted="false">User pressed Snooze Button</string>
+
+    <string name="logging_view_time_build" formatted="false">Time and Calendar Views ready</string>
+    <string name="logging_view_procedure_build" formatted="false">Color fading and LED is ready</string>
+    <string name="logging_view_animation_start" formatted="false">Animation started, Delay: %d</string>
+    <string name="logging_view_animation_end" formatted="false">Animation got cancelled</string>
+    <string name="logging_view_animation_stopped" formatted="false">Animation ended</string>
+    <string name="logging_view_screen_start" formatted="false">Screen start, initial = %b</string>
+
+    <string name="logging_alarm_id" formatted="false">Alarm %d Name: %s.</string>
+    <string name="logging_start_music" formatted="false">Starting Media player with Uri: %s</string>
+    <string name="logging_music_playing">Media player playing</string>
+    <string name="logging_music_stopped">Media player stopped</string>
+    <string name="logging_vibration_started">Vibration started</string>
+    <string name="logging_vibration_stopped">Vibration stopped</string>
+    <string name="logging_brightness_set">Screen brightness set to %f</string>
+    <string name="logging_brightness_steps_set">Screen brightness steps set to %d</string>
+    <string name="logging_led_start">LED started</string>
+    <string name="logging_led_stop">LED stopped</string>
+
+
+    <string name="logging_permission_asked">Asking User for Music Permission</string>
+    <string name="logging_permission_granted">User granted Permission to read Music Files</string>
+    <string name="logging_permission_denied">User denied Permission to read Music Files</string>
+    <string name="logging_exception_null" formatted="false">NullPointerException %s: %s</string>
+    <string name="logging_exception_io" formatted="false">IOException %s: %s</string>
+    <string name="logging_exception" formatted="false">Exception %s: %s</string>
+
+    <string name="logging_error_switch_bounds">%s Switch out of bounds</string>
+
+    <string name="logging_config_saved" formatted="false">commit SharedPreference %s</string>
+    <string name="logging_alarm_boot">Boot received Successful</string>
+    <string name="logging_alarm_receiver">Alarm received Successful</string>
+    <string name="logging_alarm_intent">Alarm Intent received Successful</string>
+
+    <string name="logging_alarm_set" formatted="false">Alarm set to %b set Time: %s</string>
+    <string name="logging_alarm_cancelled">Alarm cancelled %b</string>
+    <string name="logging_alarm_refresh">Start Alarm refresh</string>
+
     <!-- Option Text -->
     <string name="options_LightSteps">Beleuchtungsabstufung</string>
     <string name="options_LightSteps_short">Beleuchtungsabst.</string>
@@ -186,7 +244,7 @@
         \t\t <a href="https://github.com/SunUntouch">www.github.com/SunUntouch</a>\n
         \n
         \t\t Einen guten Schlaf\n
-        \t\t und einen angenehmen Start in den Tag ;)\n
+        \t\t und einen angenehmen Start ;)\n
     </string>
 
 </resources>

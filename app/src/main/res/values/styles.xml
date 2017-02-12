@@ -123,7 +123,7 @@
     <style name="custom_text_view" parent="@android:style/TextAppearance.Widget.TextView">
 
         <item name="android:textSize">20sp</item>
-        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColor">@color/textColorPrimaryInverse</item>
         <item name="android:gravity">center</item>
         <item name="android:paddingTop">5dp</item>
         <item name="android:paddingBottom">5dp</item>
@@ -148,6 +148,10 @@
 
     <style name="custom_text_view_colorful" parent="@android:style/TextAppearance.Widget.TextView">
 
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+
+        <item name="android:textStyle">bold</item>
         <item name="android:gravity">center</item>
         <item name="android:background">@drawable/custom_textview</item>
     </style>

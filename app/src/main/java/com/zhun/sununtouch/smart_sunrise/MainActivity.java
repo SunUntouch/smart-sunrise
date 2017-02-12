@@ -26,6 +26,7 @@ import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.util.Linkify;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -230,6 +231,7 @@ public class MainActivity extends AppCompatActivity
         textView.setVisibility(TextView.INVISIBLE);
         textView.setPadding(0, 0, 0, 0);
         textView.setGravity(Gravity.NO_GRAVITY);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 15);
         linearLayout.addView(textView);
 
         ///SeekBar
@@ -1631,6 +1633,7 @@ public class MainActivity extends AppCompatActivity
         final TextView textView = new TextView(this);
         textView.setText(getString(R.string.options_about_text));
         textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         Linkify.addLinks(textView, Linkify.WEB_URLS);
 
         //Create new Builder
