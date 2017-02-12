@@ -7,117 +7,77 @@
 
     <TextView
         android:id="@+id/wakeup_timer_days_text_view"
-        android:textColor="@color/buttonTextColorPrimary"
-        android:textColorHighlight="@color/buttonTextColorSecondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
         android:textSize="17sp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:background="@drawable/custom_textview"/>
+        android:background="?custom_color_text_view"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal">
 
         <ToggleButton
+            android:id="@+id/wakeup_monday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_day_monday_short"
             android:textOff="@string/wakeup_day_monday_short"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:background="@drawable/custom_toggle"
-            android:id="@+id/wakeup_monday"
-            android:scaleType="centerInside"
-            android:layout_weight="1"
-            android:padding="2dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
 
         <ToggleButton
+            android:id="@+id/wakeup_tuesday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_day_tuesday_short"
             android:textOff="@string/wakeup_day_tuesday_short"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:background="@drawable/custom_toggle"
-            android:id="@+id/wakeup_tuesday"
-            android:scaleType="centerInside"
-            android:layout_weight="1"
-            android:padding="2dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
 
         <ToggleButton
+            android:id="@+id/wakeup_wednesday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_day_wednesday_short"
             android:textOff="@string/wakeup_day_wednesday_short"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:background="@drawable/custom_toggle"
-            android:id="@+id/wakeup_wednesday"
-            android:scaleType="centerInside"
-            android:layout_weight="1"
-            android:padding="2dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
 
         <ToggleButton
+            android:id="@+id/wakeup_thursday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_day_thursday_short"
             android:textOff="@string/wakeup_day_thursday_short"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:background="@drawable/custom_toggle"
-            android:id="@+id/wakeup_thursday"
-            android:scaleType="centerInside"
-            android:layout_weight="1"
-            android:padding="2dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
 
         <ToggleButton
+            android:id="@+id/wakeup_friday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_day_friday_short"
             android:textOff="@string/wakeup_day_friday_short"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:background="@drawable/custom_toggle"
-            android:id="@+id/wakeup_friday"
-            android:scaleType="centerInside"
-            android:layout_weight="1"
-            android:padding="2dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
 
         <ToggleButton
+            android:id="@+id/wakeup_saturday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_day_saturday_short"
             android:textOff="@string/wakeup_day_saturday_short"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:background="@drawable/custom_toggle"
-            android:id="@+id/wakeup_saturday"
-            android:scaleType="centerInside"
-            android:layout_weight="1"
-            android:padding="2dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
 
         <ToggleButton
+            android:id="@+id/wakeup_sunday"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_day_sunday_short"
             android:textOff="@string/wakeup_day_sunday_short"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:background="@drawable/custom_toggle"
-            android:id="@+id/wakeup_sunday"
-            android:scaleType="centerInside"
-            android:layout_weight="1"
-            android:padding="2dip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:onClick="onDaysSet"/>
     </LinearLayout>
 </LinearLayout>

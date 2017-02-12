@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.GradientDrawable;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,9 +15,11 @@ import android.widget.ToggleButton;
 
 import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfiguration;
 import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfigurationList;
+import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmSystemConfiguration;
 
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Vector;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -28,16 +31,28 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private final Context context;
     private AlarmConfigurationList configuration;
+    private String theme;
 
+    private Vector<String> themes;
     /***********************************************************************************************
      * HELPER
      **********************************************************************************************/
     ExpandableListAdapter(Context context, AlarmConfigurationList alarms){
         this.context       = context;
         this.configuration = alarms;
+        theme = new AlarmSystemConfiguration(context).getAlarmTheme();
+
+        themes = new Vector<>();
+        themes.add(context.getString(R.string.options_theme_default));
+        themes.add(context.getString(R.string.options_theme_dark));
+        themes.add(context.getString(R.string.options_theme_light));
     }
     void notifyDataSetChanged(AlarmConfigurationList config) {
         this.configuration = config;
+        super.notifyDataSetChanged();
+    }
+    void notifyDataSetChanged(String theme) {
+        this.theme = theme;
         super.notifyDataSetChanged();
     }
 
@@ -53,14 +68,14 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_time, v, false);
 
         //Get TextChild from View
-        //TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_time_text_view);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_time_text_view);
+        setTextViewTheme(txtListChild);
 
         Button setTimeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonTime);
         setTimeButton.setText(String.format(Locale.US, "%02d:%02d",config.getHour(), config.getMinute()));
 
         Button setSnoozeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonSnooze);
         setSnoozeButton.setText(view.getContext().getResources().getQuantityString(R.plurals.wakeup_time_snooze, config.getSnooze(), config.getSnooze()));
-
         return view;
     }
     private View createDayView(ViewGroup v,int ID){
@@ -74,6 +89,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         //Get TextChild from View
         TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_days_text_view);
         txtListChild.setText(view.getContext().getString(R.string.wakeup_day));
+        setTextViewTheme(txtListChild);
+
         createButton(view, R.id.wakeup_monday   , config.getDayName(Calendar.MONDAY   , false), config.isMonday());
         createButton(view, R.id.wakeup_tuesday  , config.getDayName(Calendar.TUESDAY  , false), config.isTuesday());
         createButton(view, R.id.wakeup_wednesday, config.getDayName(Calendar.WEDNESDAY, false), config.isWednesday());
@@ -91,6 +108,15 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         button.setChecked(checked);
         return button;
     }
+    private void setTextViewTheme(TextView txtView){
+
+        if( theme.equals(themes.get(0))) //Default Theme
+            txtView.setBackground(ContextCompat.getDrawable(this.context, R.drawable.custom_textview));
+        else if( theme.equals(themes.get(1))) //Dark Theme
+            txtView.setBackground(ContextCompat.getDrawable(this.context, R.drawable.custom_textview_dark));
+        else if( theme.equals(themes.get(2))) //Light Theme
+            txtView.setBackground(ContextCompat.getDrawable(this.context, R.drawable.custom_textview_light));
+    }
 
     private View createMusicView(ViewGroup v, int ID){
 
@@ -101,7 +127,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_music, v, false);
 
         //Get TextChild from View
-        //TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_music_text_view);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_music_text_view);
+        setTextViewTheme(txtListChild);
 
         //Choosing Music Button
         final String newMusicText = (config.getSongName().indexOf('.') == -1) ?  config.getSongName() : config.getSongName().substring(0, config.getSongName().lastIndexOf('.'));
@@ -142,7 +169,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         View view = inflater.inflate(R.layout.wakeup_timer_listitem_light, v, false);
 
         //Get TextChild from View
-        //TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_light_text_view);
+        TextView txtListChild = (TextView) view.findViewById(R.id.wakeup_timer_light_text_view);
+        setTextViewTheme(txtListChild);
 
         //Toggle Screen light
         ToggleButton setLightButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonLight);
@@ -159,10 +187,12 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //First Color
         Button setColorButton1 = (Button) view.findViewById(R.id.wakeup_timer_light_buttonColor1);
+        setColorButton1.setBackgroundColor(Color.WHITE);
         setColorButton1.getBackground().setColorFilter(config.getLightColor1(), PorterDuff.Mode.MULTIPLY);
 
         //Second Color
         Button setColorButton2 = (Button) view.findViewById(R.id.wakeup_timer_light_buttonColor2);
+        setColorButton2.setBackgroundColor(Color.WHITE);
         setColorButton2.setEnabled(config.getLightFade());
 
         //Gradient View
@@ -171,6 +201,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         {
             //Set Color Filter to second Button
             setColorButton2.getBackground().setColorFilter(config.getLightColor2(), PorterDuff.Mode.MULTIPLY);
+            setColorButton2.setText(v.getContext().getString(R.string.wakeup_light_screen_color2));
 
             //Get ViewGradient
             GradientDrawable gd = new GradientDrawable(
@@ -182,6 +213,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         else{
             gradient.setBackgroundColor(Color.WHITE);
             gradient.getBackground().setColorFilter(config.getLightColor1(), PorterDuff.Mode.MULTIPLY);
+            setColorButton2.setBackgroundColor(config.getLightColor1());
+            setColorButton2.setText("");
         }
 
         //Toggle LED

@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item android:state_pressed="true" >
         <shape>
             <solid
-                android:color="?attr/colorPrimaryDark"/>
+                android:color="@android:color/white"/>
             <stroke
                 android:width = "4dp"
                 android:color = "?attr/colorAccent" />
@@ -21,7 +20,7 @@
     <item android:state_focused="true" >
         <shape>
             <solid
-                android:color="?attr/colorPrimary"/>
+                android:color="@android:color/white"/>
             <stroke
                 android:width = "2dp"
                 android:color = "?attr/colorPrimaryDark" />
@@ -38,7 +37,7 @@
     <item>
         <shape>
             <solid
-                android:color="?attr/colorPrimary"/>
+                android:color="@android:color/white"/>
             <stroke
                 android:width = "1dp"
                 android:color = "@android:color/black" />
@@ -46,5 +45,4 @@
                 android:radius = "@dimen/button_corners" />
         </shape>
     </item>
-
 </selector>

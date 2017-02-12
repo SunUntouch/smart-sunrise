@@ -1,30 +1,64 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
 
         <item name="colorAccent">@color/colorAccent</item>
 
+        <item name="android:colorForeground">@color/colorForeground</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+
+        <item name="android:buttonStyle">@style/custom_button</item>
+        <item name="android:buttonStyleToggle">@style/custom_toggle</item>
+        <item name="android:textViewStyle">@style/custom_text_view</item>
+
+        <item name="custom_color_text_view">@drawable/custom_textview</item>
     </style>
 
-    <style name="LightTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="DarkTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorSecondary</item>
+        <item name="colorPrimaryDark">@color/colorSecondaryDark</item>
 
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorAccentSecondary</item>
 
+        <item name="android:colorForeground">@color/colorBackground</item>
+        <item name="android:colorBackground">@color/colorForeground</item>
+
+        <item name="android:textColorPrimary">@color/textColorPrimaryInverse</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimary</item>
+
+        <item name="android:buttonStyle">@style/custom_button_dark</item>
+        <item name="android:buttonStyleToggle">@style/custom_toggle</item>
+        <item name="android:textViewStyle">@style/custom_text_view_dark</item>
+
+        <item name="custom_color_text_view">@drawable/custom_textview_dark</item>
     </style>
 
-    <style name="DarkTheme" parent="Theme.AppCompat.DayNight.DarkActionBar">
+    <style name="LightTheme" parent="Theme.AppCompat.DayNight">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">@color/colorThird</item>
+        <item name="colorPrimaryDark">@color/colorThirdDark</item>
 
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">@color/colorAccentThird</item>
+
+        <item name="android:colorForeground">@color/colorForeground</item>
+        <item name="android:colorBackground">@color/colorBackground</item>
+
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+
+        <item name="android:buttonStyle">@style/custom_button_light</item>
+        <item name="android:buttonStyleToggle">@style/custom_toggle</item>
+        <item name="android:textViewStyle">@style/custom_text_view_light</item>
+
+        <item name="custom_color_text_view">@drawable/custom_textview_light</item>
 
     </style>
 
@@ -33,6 +67,98 @@
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-    <style name="AppTheme.PopupOverlay"  parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar" />
+    <style name="AppTheme.PopupOverlay"  parent="ThemeOverlay.AppCompat.ActionBar" />
+    <style name="DarkTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="DarkTheme.PopupOverlay"  parent="ThemeOverlay.AppCompat.Dark.ActionBar"/>
+    <style name="LightTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="LightTheme.PopupOverlay"  parent="ThemeOverlay.AppCompat.Light" />
+
+    <!-- Helper Styles -->
+    <style name = "custom_button" parent="@android:style/Widget.Holo.Button">
+        <item name="android:background">@drawable/custom_button_white</item>
+
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:layout_gravity">fill</item>
+        <item name="android:layout_margin">@dimen/button_margin</item>
+
+        <item name="android:padding">0dp</item>
+
+    </style>
+    <style name = "custom_button_dark" parent="@style/custom_button">
+
+        <item name="android:background">@drawable/custom_button</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/textColorPrimaryInverse</item>
+        <item name="android:textColorPrimary">@color/textColorPrimaryInverse</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimary</item>
+    </style>
+    <style name = "custom_button_light" parent="@style/custom_button">
+
+        <item name="android:background">@drawable/custom_button</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/textColorPrimaryInverse</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+    </style>
+    <style name = "custom_toggle" parent="@android:style/Widget.Holo.Button.Toggle">
+        <item name="android:background">@drawable/custom_toggle</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColorPrimary">@color/textColorPrimary</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+
+        <item name="android:scaleType">centerInside</item>
+        <item name="android:layout_gravity">fill</item>
+        <item name="android:layout_margin">@dimen/button_margin</item>
+
+        <item name="android:padding">0dp</item>
+    </style>
+
+    <style name="custom_text_view" parent="@android:style/TextAppearance.Widget.TextView">
+
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
+
+    <style name="custom_text_view_dark" parent="@android:style/TextAppearance.Widget.TextView">
+
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/textColorPrimaryInverse</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
+    <style name="custom_text_view_light" parent="@android:style/TextAppearance.Widget.TextView">
+
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">5dp</item>
+        <item name="android:paddingBottom">5dp</item>
+    </style>
+
+    <style name="custom_text_view_colorful" parent="@android:style/TextAppearance.Widget.TextView">
+
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/custom_textview</item>
+    </style>
+
+    <style name="custom_main_layout_default">
+        <item name="android:background">@android:color/white</item>
+    </style>
+    <style name="custom_main_layout_dark">
+        <item name="android:background">@android:color/white</item>
+    </style>
+    <style name="custom_main_layout_white">
+        <item name="android:background">@android:color/white</item>
+    </style>
 </resources>

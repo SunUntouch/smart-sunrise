@@ -15,9 +15,10 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:textSize="30sp"
-        android:textColor="@color/textColorPrimaryInverse"
+        android:textColor="?attr/colorAccent"
         android:textStyle="bold"
-        android:onClick="showNameSettingDialog"/>
+        android:onClick="showNameSettingDialog"
+        android:background="@drawable/custom_textview_transparent"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -31,18 +32,20 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="end"
+            android:textColor="?attr/colorAccent"
             android:textSize="20sp"
-            android:textColor="@color/textColorPrimary"
-            android:alpha="0.7"/>
+            android:alpha="0.7"
+            android:background="@drawable/custom_textview_transparent"/>
 
         <TextView
             android:id="@+id/wakeup_group_days"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:textColor="?attr/colorAccent"
             android:textSize="15sp"
-            android:textColor="@color/textColorPrimary"
             android:layout_gravity="end"
-            android:alpha="0.7"/>
+            android:alpha="0.7"
+            android:background="@drawable/custom_textview_transparent"/>
 
     </LinearLayout>
 </LinearLayout>

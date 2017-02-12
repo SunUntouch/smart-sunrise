@@ -74,6 +74,7 @@
 
     <!-- Music Text -->
     <string name="wakeup_music">Music</string>
+    <string name="wakeup_music_100">100</string>
     <string name="wakeup_music_choose">Choose Music</string>
     <string name="wakeup_music_ringtone">Ringtone</string>
     <string name="wakeup_music_music">Music</string>
@@ -89,6 +90,7 @@
 
     <!-- Light Text -->
     <string name="wakeup_light">Light</string>
+    <string name="wakeup_light_zero">0 Minutes</string>
     <string name="wakeup_light_screen_brightness">Screen Brightness</string>
     <string name="wakeup_light_screen_brightness_off">Use System Illumination</string>
 

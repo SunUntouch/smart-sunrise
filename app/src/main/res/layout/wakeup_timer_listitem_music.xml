@@ -11,106 +11,101 @@
         android:layout_height="wrap_content"
         android:text="@string/wakeup_music"
         android:textSize="17sp"
-        android:textColor="@color/buttonTextColorPrimary"
-        android:gravity="center"
-        android:textColorHighlight="@color/buttonTextColorSecondary"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:background="@drawable/custom_textview"/>
+        android:background="?custom_color_text_view"/>
 
-    <GridLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="2"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/wakeup_timer_music_buttonMusic"
-            android:text="@string/wakeup_music_choose"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:layout_column="0"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="fill"
-            android:layout_margin="@dimen/button_margin"
-            android:onClick="showMusicSettingDialog"
-            android:background="@drawable/custom_button"/>
+            android:layout_weight="4"
+            android:text="@string/wakeup_music_choose"
+            android:onClick="showMusicSettingDialog"/>
 
         <Button
             android:id="@+id/wakeup_timer_music_buttonMusicVolume"
-            android:text="100%"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:textSize="12sp"
-            android:layout_column="1"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/button_margin"
-            android:onClick="showMusicVolumeSettingDialog"
-            android:background="@drawable/custom_button"/>
+            android:layout_weight="2"
+            android:text="@string/wakeup_music_100"
+            android:textSize="12sp"
+            android:onClick="showMusicVolumeSettingDialog"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <TextView
             android:text="@string/wakeup_music_text_startTime"
-            android:textColor="@color/textColorPrimary"
-            android:textColorHighlight="@color/textColorSecondary"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center"/>
+            android:layout_weight="4"
+            android:textSize="12sp"/>
 
         <Button
             android:id="@+id/wakeup_timer_music_SongStart"
-            android:text="@string/wakeup_zero_time"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
-            android:textSize="12sp"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/button_margin"
-            android:onClick="showMusicStartSettingDialog"
-            android:background="@drawable/custom_button"/>
+            android:layout_weight="2"
+            android:text="@string/wakeup_zero_time"
+            android:textSize="12sp"
+            android:onClick="showMusicStartSettingDialog"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <TextView
             android:text="@string/wakeup_music_text_fadeIn"
-            android:textColor="@color/textColorPrimary"
-            android:textColorHighlight="@color/textColorSecondary"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center"/>
+            android:layout_weight="2"
+            android:textSize="12sp"/>
 
         <ToggleButton
             android:id="@+id/wakeup_timer_music_toggleFadeIn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_music_fadeOn"
             android:textOff="@string/wakeup_music_fadeOff"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:textSize="12sp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/button_margin"
             android:onClick="showFadeInSettingsDialog"
-            android:background="@drawable/custom_toggle"/>
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <TextView
             android:text="@string/wakeup_music_text_vibration"
-            android:textColor="@color/textColorPrimary"
-            android:textColorHighlight="@color/textColorSecondary"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center"/>
+            android:layout_weight="2"
+            android:textSize="12sp"/>
 
         <ToggleButton
             android:id="@+id/wakeup_timer_music_toggleVibration"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
             android:textOn="@string/wakeup_music_vibraOn"
             android:textOff="@string/wakeup_music_vibraOff"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:textSize="12sp"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_margin="@dimen/button_margin"
-            android:onClick="showVibrationSettingDialog"
-            android:background="@drawable/custom_toggle"/>
-    </GridLayout>
+            android:onClick="showVibrationSettingDialog"/>
 
+    </LinearLayout>
 </LinearLayout>

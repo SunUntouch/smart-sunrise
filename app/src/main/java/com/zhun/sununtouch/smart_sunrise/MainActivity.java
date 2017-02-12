@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.media.AudioManager;
 import android.media.MediaMetadataRetriever;
@@ -21,9 +22,11 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.text.util.Linkify;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -103,18 +106,32 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         mThread = new AlarmWorkerThread("Smart_Sunrise_Main_Worker");
         m_AlarmConfigurations = new AlarmConfigurationList(getApplicationContext());
         m_SystemConfiguration = new AlarmSystemConfiguration(getApplicationContext());
         m_Log = new AlarmLogging(getApplicationContext());
         m_Log.i(TAG, getString(R.string.logging_activity_creating));
 
+        //Set View
         //Set MainView//////////////////////////////////////////////////////////////////////////////
         setContentView(R.layout.activity_main);
+        buildView();
+        setTheme(m_SystemConfiguration.getAlarmTheme());
+        setContentView(R.layout.activity_main);
+        buildView();
 
+        m_Log.i(TAG, getString(R.string.logging_activity_created));
+    }
+    protected void onDestroy() {
+        mThread.quit();
+        m_Log.i(TAG, getString(R.string.logging_activity_destroyed));
+        super.onDestroy();
+    }
+
+    private void buildView(){
         //Set Toolbar///////////////////////////////////////////////////////////////////////////////
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setBackgroundColor(Color.TRANSPARENT);
         setSupportActionBar(toolbar);
 
         //Floating ActionButton/////////////////////////////////////////////////////////////////////
@@ -134,7 +151,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         // New com.zhun.sununtouch.smart_sunrise.Configuration and List View//////////////////////////////////////////////////////////
-        AlarmViewAdapter = new ExpandableListAdapter(this, m_AlarmConfigurations);
+        AlarmViewAdapter = new ExpandableListAdapter(getBaseContext(), m_AlarmConfigurations);
         AlarmGroupView = (ExpandableListView) findViewById(R.id.wakeup_timer_expendableList);
 
         AlarmGroupView.setAdapter(AlarmViewAdapter);
@@ -156,14 +173,7 @@ public class MainActivity extends AppCompatActivity
         });
         AlarmGroupView.requestFocus();
 
-        //Set View
-        switchAlarmView(!m_AlarmConfigurations.isEmpty());
-        m_Log.i(TAG, getString(R.string.logging_activity_created));
-    }
-    protected void onDestroy() {
-        mThread.quit();
-        m_Log.i(TAG, getString(R.string.logging_activity_destroyed));
-        super.onDestroy();
+        switchAlarmView();
     }
 
     private void switchAlarmView(boolean visible){
@@ -186,6 +196,25 @@ public class MainActivity extends AppCompatActivity
 
         m_Log.d(TAG, getString(R.string.logging_view_switched));
     }
+    private void switchAlarmView(){
+
+        LinearLayout AlarmNoLayout  = (LinearLayout) findViewById(R.id.wakeup_timer_no_Alarm_set_View);
+        if(!m_AlarmConfigurations.isEmpty()){
+
+            AlarmNoLayout.setVisibility(LinearLayout.GONE);
+            AlarmGroupView.setVisibility(ExpandableListView.VISIBLE);
+            AlarmGroupView.invalidateViews();
+            m_isVisible = true;
+
+        }else {
+
+            AlarmNoLayout.setVisibility(LinearLayout.VISIBLE);
+            AlarmGroupView.setVisibility(ExpandableListView.GONE);
+            AlarmGroupView.invalidateViews();
+            m_isVisible = false;
+        }
+        m_Log.d(TAG, getString(R.string.logging_view_switched));
+    }
 
     private LinearLayout createAlertLinearLayout(View v, TextView textView, SeekBar seekBar, int max, int increment, int progress){
         return createAlertLinearLayout(v.getContext(), textView, seekBar, max, increment, progress);
@@ -194,15 +223,21 @@ public class MainActivity extends AppCompatActivity
         //LinearLayout
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
+        linearLayout.setPadding(0,0,0,0);
+        linearLayout.setGravity(Gravity.NO_GRAVITY);
 
         //TextView to show Value of SeekBar
         textView.setVisibility(TextView.INVISIBLE);
+        textView.setPadding(0, 0, 0, 0);
+        textView.setGravity(Gravity.NO_GRAVITY);
         linearLayout.addView(textView);
 
         ///SeekBar
         seekBar.setMax(max);
         seekBar.setKeyProgressIncrement(increment);
         seekBar.setProgress(progress);
+        seekBar.setPadding(0, 0, 0, 0);
+
         linearLayout.addView(seekBar);
 
         m_Log.d(TAG, getString(R.string.logging_linearLayout));
@@ -441,6 +476,7 @@ public class MainActivity extends AppCompatActivity
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
+
         //SeekBar
         final SeekBar seekBar = new SeekBar(v.getContext());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -465,7 +501,8 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create new Builder
-        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_minutes));
         builder.setView(createAlertLinearLayout(v, textView, seekBar, 99, 1, getAlarm(actualAlarm).getSnooze() - 1));
         builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
@@ -497,6 +534,12 @@ public class MainActivity extends AppCompatActivity
         m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " snooze set to " + alarm.getSnooze() + "m");
 
     }
+
+    Context getThemedContext(Context context){
+        return m_SystemConfiguration.getAlarmTheme().equals(getApplicationContext().getString(R.string.options_theme_dark)) ?
+                new ContextThemeWrapper(context, android.R.style.Theme_Holo) :
+                new ContextThemeWrapper(context, android.R.style.Theme_Holo_Light);
+    }
     /***********************************************************************************************
      * MUSIC SET DIALOG
      **********************************************************************************************/
@@ -518,7 +561,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create and show new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_menu));
         builder.setView(listView);
         builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
@@ -549,7 +592,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create and show new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(MainActivity.this));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_artist));
         builder.setView(listView);
         mDialogs.addElement(builder.show());
@@ -574,7 +617,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create and show new Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(this));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_album));
         builder.setView(listView);
         mDialogs.addElement(builder.show());
@@ -594,7 +637,7 @@ public class MainActivity extends AppCompatActivity
             namedSongs.add(song.getTitle());
 
         //Create new Builder and Get Song Name Array and set it for Alarm Dialog Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(this));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song));
         builder.setItems(namedSongs.toArray(new String[namedSongs.size()]), new DialogInterface.OnClickListener() {
 
@@ -826,6 +869,7 @@ public class MainActivity extends AppCompatActivity
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
+
         //SeekBar
         final SeekBar seekBar = new SeekBar(v.getContext());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -854,7 +898,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create new Builder
-        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Volume));
         builder.setView(createAlertLinearLayout(v, textView, seekBar, 100, 1, alarm.getVolume()));
         builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
@@ -901,6 +945,7 @@ public class MainActivity extends AppCompatActivity
 
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(v.getContext());
+
         //SeekBar
         final SeekBar seekBar = new SeekBar(v.getContext());
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -926,7 +971,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create new Builder
-        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Start));
         builder.setView(createAlertLinearLayout( v, textView, seekBar, alarm.getSongLength(), 1, alarm.getSongStart()));
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -973,6 +1018,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onLongClick(View v) {
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
+
                 //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -995,7 +1041,7 @@ public class MainActivity extends AppCompatActivity
                 });
 
                 //Create new Builder
-                final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
                 builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_song_fadeIn));
 
                 //Set AlertDialog View
@@ -1054,6 +1100,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onLongClick(View v) {
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
+
                 //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1079,7 +1126,7 @@ public class MainActivity extends AppCompatActivity
 
 
                 //Create new Builder
-                final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
                 builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_song_vibration));
                 builder.setView(createAlertLinearLayout(v, textView, seekBar, 100, 1, getAlarm(actualAlarm).getVibrationStrength()));
                 builder.setPositiveButton(v.getContext().getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
@@ -1163,6 +1210,7 @@ public class MainActivity extends AppCompatActivity
             public boolean onLongClick(View v) {
                 //TextView to show Value of SeekBar
                 final TextView textView = new TextView(v.getContext());
+
                 //SeekBar
                 final SeekBar seekBar = new SeekBar(v.getContext());
                 seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -1194,7 +1242,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Create new Builder
                 final float currentBrightness = getWindow().getAttributes().screenBrightness;
-                final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+                final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
                 builder.setTitle(v.getContext().getString(R.string.wakeup_set_alarm_light_brightness));
                 //Set AlertDialog View
                 builder.setView(createAlertLinearLayout(v, textView, seekBar, 99, 1, getAlarm(actualAlarm).getScreenBrightness() - 1)); //We must -1 because we don't want to have zero brightness
@@ -1275,7 +1323,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create new Builder
-        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_light_minutes));
         builder.setView(createAlertLinearLayout(v, textView, seekBar, 100, 1, getAlarm(actualAlarm).getScreenStartTime()));
         builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
@@ -1396,7 +1444,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create new Builder
-        final AlertDialog.Builder builder = new AlertDialog.Builder(v.getContext());
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_LED_time));
         builder.setView(createAlertLinearLayout(v, textView, seekBar, 100, 1, getAlarm(actualAlarm).getLEDStartTime()));
         builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
@@ -1435,7 +1483,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-
         final String brightness = getString(R.string.options_LightSteps_short) + " " + m_SystemConfiguration.getBrightnessSteps();
         menu.findItem(R.id.options_brightness_steps).setTitle(brightness);
         menu.findItem(R.id.options_theme           ).setTitle(m_SystemConfiguration.getAlarmTheme());
@@ -1489,7 +1536,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create new Builder
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(this));
         builder.setTitle(getString(R.string.options_LightSteps));
 
         //Set AlertDialog View
@@ -1521,19 +1568,61 @@ public class MainActivity extends AppCompatActivity
         themes.add(getString(R.string.options_theme_dark));
 
         //Create new Builder and Get Song Name Array and set it for Alarm Dialog Builder
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(this));
         builder.setTitle(this.getString(R.string.options_Theme));
         builder.setItems(themes.toArray(new String[themes.size()]), new DialogInterface.OnClickListener() {
 
             public void onClick(DialogInterface dialog, int which) {
-                item.setTitle(themes.get(which));
-                m_SystemConfiguration.setAlarmTheme(themes.get(which)); //Commit the Values in the set Method
 
-                m_Log.i(TAG, "Theme set to " + item.getTitle());
+                final String theme = themes.get(which);
+                item.setTitle(theme);
+                switchTheme(theme);
+                setContentView(R.layout.activity_main);
+                buildView();
                 dialog.dismiss();
             }
         });
         builder.show();
+    }
+
+    private void setTheme(String theme)
+    {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        if(theme.equals(getString(R.string.options_theme_default)))
+        {
+            setTheme(R.style.AppTheme);
+            toolbar.setPopupTheme(R.style.AppTheme);
+            toolbar.setTitleTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorPrimaryInverse));
+        }
+
+        else if(theme.equals(getString(R.string.options_theme_dark)))
+        {
+            setTheme(R.style.DarkTheme);
+            toolbar.setPopupTheme(R.style.DarkTheme_PopupOverlay);
+            toolbar.setTitleTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorPrimaryInverse));
+        }
+        else if(theme.equals(getString(R.string.options_theme_light)))
+        {
+            setTheme(R.style.LightTheme);
+            toolbar.setPopupTheme(R.style.LightTheme_PopupOverlay);
+            toolbar.setTitleTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColorPrimary));
+        }
+        toolbar.invalidate();
+        setSupportActionBar(toolbar);
+
+        //Set Theme
+        m_SystemConfiguration.setAlarmTheme(theme); //Commit the Values in the set Method
+        AlarmViewAdapter.notifyDataSetChanged(theme);
+
+        m_Log.i(TAG, "Theme set to " + theme);
+    }
+    private void switchTheme(String theme){
+
+        //Check if already set
+        if(m_SystemConfiguration.getAlarmTheme().equals(theme))
+            return;
+
+        setTheme(theme);
     }
 
     private void showAboutOptionsDialog(){
@@ -1541,10 +1630,11 @@ public class MainActivity extends AppCompatActivity
         //TextView to show Value of SeekBar
         final TextView textView = new TextView(this);
         textView.setText(getString(R.string.options_about_text));
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_TEXT_START);
         Linkify.addLinks(textView, Linkify.WEB_URLS);
 
         //Create new Builder
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(this));
         builder.setTitle(getString(R.string.options_About));
 
         //Set AlertDialog View

@@ -2,20 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    
+    tools:context="com.zhun.sununtouch.smart_sunrise.MainActivity"
+    tools:showIn="@layout/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-
-    tools:context="com.zhun.sununtouch.smart_sunrise.MainActivity"
-    tools:showIn="@layout/activity_main">
+>
 
     <LinearLayout
         android:layout_height="0dp"
         android:layout_width="match_parent"
-        android:layout_weight="7"
+        android:layout_weight="60"
         android:orientation="vertical" >
 
         <LinearLayout
@@ -36,26 +34,26 @@
 
         </LinearLayout>
 
+        <!--TODO change Arrow-->
         <ExpandableListView
             android:id="@+id/wakeup_timer_expendableList"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:groupIndicator="@android:drawable/arrow_down_float"
             android:dividerHeight="2dp"
-            android:divider="@color/colorPrimary"
+            android:divider="?attr/colorPrimary"
             android:visibility="gone"/>
-
-
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="10dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:background="?attr/colorPrimary"/>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_weight="1"
+        android:layout_height="0dp"
+        android:layout_weight="6"
         android:background="?attr/colorPrimaryDark"/>
 </LinearLayout>

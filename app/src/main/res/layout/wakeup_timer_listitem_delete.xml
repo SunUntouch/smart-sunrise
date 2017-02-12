@@ -10,8 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="0sp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"/>
+        android:background="?custom_color_text_view"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,35 +18,25 @@
         android:orientation="horizontal">
 
         <Button
-            android:layout_weight="0"
             android:id="@+id/wakeup_timer_deleteButton"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/button_margin"
+            android:layout_weight="2"
             android:text="@string/wakeup_delete"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:textSize="12sp"
             android:focusable="false"
-            android:onClick="deleteChild"
-            android:background="@drawable/custom_button"/>
+            android:onClick="deleteChild"/>
 
         <ToggleButton
-            android:layout_weight="1"
             android:id="@+id/wakeup_timer_setAlarmButton"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/button_margin"
+            android:layout_weight="4"
             android:textOn="@string/wakeup_AlarmSet"
             android:textOff="@string/wakeup_AlarmNotSet"
-            android:textColor="@color/buttonTextColorPrimary"
-            android:textColorHighlight="@color/buttonTextColorSecondary"
             android:textSize="16sp"
             android:focusable="false"
-            android:onClick="setNewAlarm"
-            android:background="@drawable/custom_toggle"/>
+            android:onClick="setNewAlarm"/>
 
     </LinearLayout>
-
-
 </LinearLayout>

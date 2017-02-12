@@ -4,12 +4,12 @@
     <item android:state_pressed="true" >
         <shape>
             <gradient
-                android:startColor="@color/togglePRESSEDBackgroundColorStart"
-                android:endColor  ="@color/togglePRESSEDBackgroundColorEnd"
+                android:startColor="?attr/colorPrimary"
+                android:endColor  ="?attr/colorPrimaryDark"
                 android:angle     ="135" />
             <stroke
                 android:width="2dp"
-                android:color="@color/colorAccent" />
+                android:color="?attr/colorAccent" />
             <corners
                 android:radius="@dimen/button_corners" />
             <padding
@@ -23,8 +23,8 @@
     <item android:state_checked ="false" >
         <shape>
             <gradient
-                android:endColor   = "@color/toggleUNSETBackgroundColorEnd"
-                android:startColor = "@color/toggleUNSETBackgroundColorStart"
+                android:endColor   = "@color/toggleRed"
+                android:startColor = "@color/toggleRedDark"
                 android:angle      = "45" />
             <stroke
                 android:width = "2dp"
@@ -36,15 +36,14 @@
                 android:top    = "@dimen/button_padding"
                 android:right  = "@dimen/button_padding"
                 android:bottom = "@dimen/button_padding" />
-
         </shape>
     </item>
 
     <item android:state_checked="true" >
         <shape>
             <gradient
-                android:endColor   = "@color/toggleSETBackgroundColorEnd"
-                android:startColor = "@color/toggleSETBackgroundColorStart"
+                android:endColor   = "@color/toggleGreen"
+                android:startColor = "@color/toggleGreenDark"
                 android:angle      = "225" />
             <stroke
                 android:width = "2dp"

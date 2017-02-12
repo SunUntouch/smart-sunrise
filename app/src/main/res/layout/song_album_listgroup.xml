@@ -10,10 +10,10 @@
         android:id="@+id/song_album_groupItem"
         android:layout_gravity="center"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:textSize="15sp"
-        android:textColor="@color/textColorPrimary"
+        android:gravity="start"
         android:textStyle="bold"/>
 </LinearLayout>
