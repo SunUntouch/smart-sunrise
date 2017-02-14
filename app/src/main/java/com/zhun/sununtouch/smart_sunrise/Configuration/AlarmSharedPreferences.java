@@ -10,23 +10,34 @@ import android.preference.PreferenceManager;
  */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class AlarmSharedPreferences {
-    public static SharedPreferences getSharedPreference(Context context, String settingName){
+
+    /*****************************************************************************************
+     * Shared Preference
+     ****************************************************************************************/
+    public static SharedPreferences getSharedPreference(Context context, String settingName) {
         return context.getSharedPreferences(settingName, Context.MODE_PRIVATE);
     }
-    public static SharedPreferences getSharedPreference(Context context, String settingName, int actualAlarm){
+
+    public static SharedPreferences getSharedPreference(Context context, String settingName, int actualAlarm) {
         return context.getSharedPreferences(settingName + Integer.toString(actualAlarm), Context.MODE_PRIVATE);
     }
-    public static SharedPreferences getSharedPreference(Context context){
+
+    public static SharedPreferences getSharedPreference(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName){
+    /*****************************************************************************************
+     * Shared Preference Editor
+     ****************************************************************************************/
+    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName) {
         return getSharedPreference(context, settingsName).edit();
     }
-    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName, int actualAlarm){
+
+    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context, String settingsName, int actualAlarm) {
         return getSharedPreference(context, settingsName, actualAlarm).edit();
     }
-    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context){
+
+    public static SharedPreferences.Editor getSharedPreferenceEditor(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).edit();
     }
 }

@@ -11,7 +11,7 @@ import com.zhun.sununtouch.smart_sunrise.R;
  * Created by Sunny on 26.12.2015.
  * Receives Alarm Intent when Alarm Time is Current Time
  */
-public class AlarmReceiver extends WakefulBroadcastReceiver{
+public class AlarmReceiver extends WakefulBroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {

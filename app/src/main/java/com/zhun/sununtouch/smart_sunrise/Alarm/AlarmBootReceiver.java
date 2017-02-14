@@ -18,11 +18,10 @@ public class AlarmBootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        if(intent != null && intent.getAction() != null && "android.intent.action.BOOT_COMPLETED".equals(intent.getAction()))
-        {
+        if (intent != null && intent.getAction() != null && "android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
             //This is the ON BOOT Intent
             AlarmConfiguration alarm = new AlarmConfiguration(context, intent.getExtras().getInt(AlarmConstants.ALARM_ID));
-            if(alarm.isDaySet() || alarm.getAlarmOneShot())
+            if (alarm.isDaySet() || alarm.getAlarmOneShot())
                 alarm.activateAlarm();
 
             AlarmLogging log = new AlarmLogging(context);

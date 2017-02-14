@@ -18,30 +18,29 @@ import java.util.Vector;
 @SuppressWarnings("unused")
 public class AlarmConfigurationList {
 
-    private int m_Amount;
     private final List<AlarmConfiguration> m_Alarms;
-
     private final Context m_Context;
+    private int m_Amount;
 
     //Constructor
-    public AlarmConfigurationList(Context context){
+    public AlarmConfigurationList(Context context) {
 
         //Get Amount and initialize List
         m_Context = context;
-        m_Alarms  = new Vector<>();
-        m_Amount  = AlarmSharedPreferences.getSharedPreference(context).getInt(AlarmConstants.ALARM_VALUE, 0);
+        m_Alarms = new Vector<>();
+        m_Amount = AlarmSharedPreferences.getSharedPreference(context).getInt(AlarmConstants.ALARM_VALUE, 0);
 
         //If no Alarms are set, we Add a Default Alarm
-        if(m_Amount == 0)
+        if (m_Amount == 0)
             return;
 
         //Fill Alarm List
-        for(int alarmID = 0; alarmID < m_Amount; ++alarmID)
+        for (int alarmID = 0; alarmID < m_Amount; ++alarmID)
             m_Alarms.add(new AlarmConfiguration(context, alarmID));
     }
 
     //Getter and Setter
-    public void addAlarm(AlarmConfiguration alarm){
+    public void addAlarm(AlarmConfiguration alarm) {
         alarm.setAlarmID(m_Amount);
         alarm.commit();
 
@@ -50,21 +49,24 @@ public class AlarmConfigurationList {
 
         AlarmSharedPreferences.getSharedPreferenceEditor(m_Context).putInt(AlarmConstants.ALARM_VALUE, m_Amount).apply();
     }
-    @SuppressWarnings("UnusedReturnValue")
-    public boolean removeAlarm(int alarmID){
 
-        try { m_Alarms.remove(alarmID); }
-        catch(Exception e){
-            AlarmToast.showToastShort(m_Context,  "Error: " + e.getMessage());
-            return false; }
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean removeAlarm(int alarmID) {
+
+        try {
+            m_Alarms.remove(alarmID);
+        } catch (Exception e) {
+            AlarmToast.showToastShort(m_Context, "Error: " + e.getMessage());
+            return false;
+        }
         removeSharedPreference(alarmID);
         return true;
     }
 
-    private void removeSharedPreference(int alarmID){
+    private void removeSharedPreference(int alarmID) {
 
         //Copy Data to fill AlarmCount Gap
-        if( m_Amount > 0) {
+        if (m_Amount > 0) {
             m_Amount = m_Alarms.size();
             for (int id = alarmID; id < m_Amount; ++id) {
                 SharedPreferences sharedPrefs = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.ALARM, id++);
@@ -93,28 +95,31 @@ public class AlarmConfigurationList {
         AlarmSharedPreferences.getSharedPreferenceEditor(m_Context).putInt(AlarmConstants.ALARM_VALUE, m_Amount).apply();
     }
 
-    public AlarmConfiguration getAlarm(int alarmID){
+    public AlarmConfiguration getAlarm(int alarmID) {
         return m_Alarms.get(alarmID);
     }
+
     @SuppressWarnings("UnusedReturnValue")
-    public boolean setAlarm(AlarmConfiguration alarm){
+    public boolean setAlarm(AlarmConfiguration alarm) {
         try {
             m_Alarms.set(alarm.getAlarmID(), alarm);
-        }catch (Exception e){
-            AlarmToast.showToastShort(m_Context,  "Error: " + e.getMessage());
+        } catch (Exception e) {
+            AlarmToast.showToastShort(m_Context, "Error: " + e.getMessage());
             return false;
         }
         alarm.commit();
         return true;
     }
 
-    public int size(){
+    public int size() {
         return m_Amount;
     }
-    public boolean contains(int alarmID){
+
+    public boolean contains(int alarmID) {
         return m_Alarms.size() > alarmID;
     }
-    public boolean isEmpty(){
+
+    public boolean isEmpty() {
         return m_Alarms.isEmpty();
     }
 }

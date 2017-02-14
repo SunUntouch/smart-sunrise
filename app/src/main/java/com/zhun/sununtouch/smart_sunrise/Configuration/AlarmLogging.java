@@ -18,71 +18,78 @@ import java.util.Calendar;
 public class AlarmLogging {
 
     private final Context mContext;
-    public AlarmLogging(Context context){
+
+    public AlarmLogging(Context context) {
         mContext = context;
     }
-    public void i(String TAG, String message){
+
+    public void i(String TAG, String message) {
 
         //Printing to LogCat
         Log.i(TAG, message);
 
         //Print to File if Activated
         AlarmSystemConfiguration config = new AlarmSystemConfiguration(mContext);
-        if(config.loggingEnabled())
+        if (config.loggingEnabled())
             appendLog("INFORMATION", TAG, message);
     }
-    public void d(String TAG, String message){
+
+    public void d(String TAG, String message) {
 
         //Printing to LogCat
         Log.d(TAG, message);
 
         //Print to File if Activated
         AlarmSystemConfiguration config = new AlarmSystemConfiguration(mContext);
-        if(config.loggingEnabled() && BuildConfig.DEBUG)
+        if (config.loggingEnabled() && BuildConfig.DEBUG)
             appendLog("DEBUG", TAG, message);
     }
-    public void e(String TAG, String message){
+
+    public void e(String TAG, String message) {
 
         //Printing to LogCat
         Log.e(TAG, message);
 
         //Print to File if Activated
         AlarmSystemConfiguration config = new AlarmSystemConfiguration(mContext);
-        if(config.loggingEnabled())
+        if (config.loggingEnabled())
             appendLog("ERROR", TAG, message);
     }
-    public void v(String TAG, String message){
+
+    public void v(String TAG, String message) {
 
         //Printing to LogCat
         Log.v(TAG, message);
 
         //Print to File if Activated
         AlarmSystemConfiguration config = new AlarmSystemConfiguration(mContext);
-        if(config.loggingEnabled())
+        if (config.loggingEnabled())
             appendLog("VERBOSE", TAG, message);
     }
-    public void w(String TAG, String message){
+
+    public void w(String TAG, String message) {
 
         //Printing to LogCat
         Log.w(TAG, message);
 
         //Print to File if Activated
         AlarmSystemConfiguration config = new AlarmSystemConfiguration(mContext);
-        if(config.loggingEnabled())
+        if (config.loggingEnabled())
             appendLog("WARNING", TAG, message);
     }
-    public void wtf(String TAG, String message){
+
+    public void wtf(String TAG, String message) {
 
         //Printing to LogCat
         Log.wtf(TAG, message);
 
         //Print to File if Activated
         AlarmSystemConfiguration config = new AlarmSystemConfiguration(mContext);
-        if(config.loggingEnabled())
+        if (config.loggingEnabled())
             appendLog("WHAT A TERRIBLE FAILURE", TAG, message);
     }
 
-    private void appendLog(String Level, String TAG, String message){
+    private void appendLog(String Level, String TAG, String message) {
 
         //Create Directory
         File directory = new File("sdcard/SmartSunrise/");
@@ -94,14 +101,14 @@ public class AlarmLogging {
                         Integer.toString(calendar.get(Calendar.YEAR)) + "_" +
                         Integer.toString(calendar.get(Calendar.MONTH)) + "_" +
                         Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)) +
-                ".txt";
+                        ".txt";
 
         //Create File
         File logFile = new File(fileName);
         if (!logFile.exists()) {
             try {
                 logFile.createNewFile();
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
                 Log.e("IOException: ", e.getMessage());
             }

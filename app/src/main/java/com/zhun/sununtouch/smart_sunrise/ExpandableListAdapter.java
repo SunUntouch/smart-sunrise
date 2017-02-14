@@ -34,11 +34,12 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     private String theme;
 
     private Vector<String> themes;
+
     /***********************************************************************************************
      * HELPER
      **********************************************************************************************/
-    ExpandableListAdapter(Context context, AlarmConfigurationList alarms){
-        this.context       = context;
+    ExpandableListAdapter(Context context, AlarmConfigurationList alarms) {
+        this.context = context;
         this.configuration = alarms;
         theme = new AlarmSystemConfiguration(context).getAlarmTheme();
 
@@ -47,10 +48,12 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         themes.add(context.getString(R.string.options_theme_dark));
         themes.add(context.getString(R.string.options_theme_light));
     }
+
     void notifyDataSetChanged(AlarmConfigurationList config) {
         this.configuration = config;
         super.notifyDataSetChanged();
     }
+
     void notifyDataSetChanged(String theme) {
         this.theme = theme;
         super.notifyDataSetChanged();
@@ -59,7 +62,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     /***********************************************************************************************
      * VIEWS
      **********************************************************************************************/
-    private View createTimeView(ViewGroup v, int ID){
+    private View createTimeView(ViewGroup v, int ID) {
 
         final AlarmConfiguration config = configuration.getAlarm(ID);
 
@@ -72,13 +75,14 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         setTextViewTheme(txtListChild);
 
         Button setTimeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonTime);
-        setTimeButton.setText(String.format(Locale.US, "%02d:%02d",config.getHour(), config.getMinute()));
+        setTimeButton.setText(String.format(Locale.US, "%02d:%02d", config.getHour(), config.getMinute()));
 
         Button setSnoozeButton = (Button) view.findViewById(R.id.wakeup_timer_time_buttonSnooze);
         setSnoozeButton.setText(view.getContext().getResources().getQuantityString(R.plurals.wakeup_time_snooze, config.getSnooze(), config.getSnooze()));
         return view;
     }
-    private View createDayView(ViewGroup v,int ID){
+
+    private View createDayView(ViewGroup v, int ID) {
 
         final AlarmConfiguration config = configuration.getAlarm(ID);
 
@@ -91,34 +95,36 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         txtListChild.setText(view.getContext().getString(R.string.wakeup_day));
         setTextViewTheme(txtListChild);
 
-        createButton(view, R.id.wakeup_monday   , config.getDayName(Calendar.MONDAY   , false), config.isMonday());
-        createButton(view, R.id.wakeup_tuesday  , config.getDayName(Calendar.TUESDAY  , false), config.isTuesday());
+        createButton(view, R.id.wakeup_monday, config.getDayName(Calendar.MONDAY, false), config.isMonday());
+        createButton(view, R.id.wakeup_tuesday, config.getDayName(Calendar.TUESDAY, false), config.isTuesday());
         createButton(view, R.id.wakeup_wednesday, config.getDayName(Calendar.WEDNESDAY, false), config.isWednesday());
-        createButton(view, R.id.wakeup_thursday , config.getDayName(Calendar.THURSDAY , false), config.isThursday());
-        createButton(view, R.id.wakeup_friday   , config.getDayName(Calendar.FRIDAY   , false), config.isFriday());
-        createButton(view, R.id.wakeup_saturday , config.getDayName(Calendar.SATURDAY , false), config.isSaturday());
-        createButton(view, R.id.wakeup_sunday   , config.getDayName(Calendar.SUNDAY   , false), config.isSunday());
+        createButton(view, R.id.wakeup_thursday, config.getDayName(Calendar.THURSDAY, false), config.isThursday());
+        createButton(view, R.id.wakeup_friday, config.getDayName(Calendar.FRIDAY, false), config.isFriday());
+        createButton(view, R.id.wakeup_saturday, config.getDayName(Calendar.SATURDAY, false), config.isSaturday());
+        createButton(view, R.id.wakeup_sunday, config.getDayName(Calendar.SUNDAY, false), config.isSunday());
         return view;
     }
+
     @SuppressWarnings("UnusedReturnValue")
-    private ToggleButton createButton(View view, int id, String text, boolean checked){
+    private ToggleButton createButton(View view, int id, String text, boolean checked) {
         ToggleButton button = (ToggleButton) view.findViewById(id);
         button.setTextOn(text);
         button.setTextOff(text);
         button.setChecked(checked);
         return button;
     }
-    private void setTextViewTheme(TextView txtView){
 
-        if( theme.equals(themes.get(0))) //Default Theme
+    private void setTextViewTheme(TextView txtView) {
+
+        if (theme.equals(themes.get(0))) //Default Theme
             txtView.setBackground(ContextCompat.getDrawable(this.context, R.drawable.custom_textview));
-        else if( theme.equals(themes.get(1))) //Dark Theme
+        else if (theme.equals(themes.get(1))) //Dark Theme
             txtView.setBackground(ContextCompat.getDrawable(this.context, R.drawable.custom_textview_dark));
-        else if( theme.equals(themes.get(2))) //Light Theme
+        else if (theme.equals(themes.get(2))) //Light Theme
             txtView.setBackground(ContextCompat.getDrawable(this.context, R.drawable.custom_textview_light));
     }
 
-    private View createMusicView(ViewGroup v, int ID){
+    private View createMusicView(ViewGroup v, int ID) {
 
         final AlarmConfiguration config = configuration.getAlarm(ID);
 
@@ -131,7 +137,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         setTextViewTheme(txtListChild);
 
         //Choosing Music Button
-        final String newMusicText = (config.getSongName().indexOf('.') == -1) ?  config.getSongName() : config.getSongName().substring(0, config.getSongName().lastIndexOf('.'));
+        final String newMusicText = (config.getSongName().indexOf('.') == -1) ? config.getSongName() : config.getSongName().substring(0, config.getSongName().lastIndexOf('.'));
         Button setMusicButton = (Button) view.findViewById(R.id.wakeup_timer_music_buttonMusic);
         setMusicButton.setText(newMusicText);
 
@@ -140,15 +146,15 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         setMusicVolumeButton.setText(String.format(Locale.US, "%d%s", config.getVolume(), "%"));
 
         //Set Start Time Button
-        long seconds  = config.getSongStart();
+        long seconds = config.getSongStart();
         long minutes = TimeUnit.SECONDS.toMinutes(seconds);
         seconds -= TimeUnit.MINUTES.toSeconds(minutes);
         Button setMusicStartTime = (Button) view.findViewById(R.id.wakeup_timer_music_SongStart);
-        setMusicStartTime.setText(String.format(Locale.US,"%02d:%02d", minutes, seconds));
+        setMusicStartTime.setText(String.format(Locale.US, "%02d:%02d", minutes, seconds));
 
         //Set FadeIn ToggleButton
-        seconds  = config.getFadeInTime();
-        minutes  = TimeUnit.SECONDS.toMinutes(seconds);
+        seconds = config.getFadeInTime();
+        minutes = TimeUnit.SECONDS.toMinutes(seconds);
         seconds -= TimeUnit.MINUTES.toSeconds(minutes);
         ToggleButton setFadeIn = (ToggleButton) view.findViewById(R.id.wakeup_timer_music_toggleFadeIn);
         setFadeIn.setTextOn(String.format(Locale.US, "%02d:%02d", minutes, seconds));
@@ -160,7 +166,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
         setVibrationButton.setChecked(config.getVibration());
         return view;
     }
-    private View createLightView(ViewGroup v, int ID){
+
+    private View createLightView(ViewGroup v, int ID) {
 
         final AlarmConfiguration config = configuration.getAlarm(ID);
 
@@ -174,7 +181,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Toggle Screen light
         ToggleButton setLightButton = (ToggleButton) view.findViewById(R.id.wakeup_timer_light_buttonLight);
-        setLightButton.setTextOn(view.getContext().getString( R.string.wakeup_light_screen_brightness) + " " +  config.getScreenBrightness() + "%");
+        setLightButton.setTextOn(view.getContext().getString(R.string.wakeup_light_screen_brightness) + " " + config.getScreenBrightness() + "%");
         setLightButton.setChecked(config.getScreen());
 
         //Set Start Time Button
@@ -197,8 +204,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Gradient View
         View gradient = view.findViewById(R.id.wakeup_timer_light_gradient);
-        if(config.getLightFade())
-        {
+        if (config.getLightFade()) {
             //Set Color Filter to second Button
             setColorButton2.getBackground().setColorFilter(config.getLightColor2(), PorterDuff.Mode.MULTIPLY);
             setColorButton2.setText(v.getContext().getString(R.string.wakeup_light_screen_color2));
@@ -206,11 +212,10 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
             //Get ViewGradient
             GradientDrawable gd = new GradientDrawable(
                     GradientDrawable.Orientation.LEFT_RIGHT,
-                    new int[] {config.getLightColor1(),config.getLightColor2()});
+                    new int[]{config.getLightColor1(), config.getLightColor2()});
             gd.setCornerRadius(0f);
             gradient.setBackground(gd);
-        }
-        else{
+        } else {
             gradient.setBackgroundColor(Color.WHITE);
             gradient.getBackground().setColorFilter(config.getLightColor1(), PorterDuff.Mode.MULTIPLY);
             setColorButton2.setBackgroundColor(config.getLightColor1());
@@ -227,7 +232,8 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         return view;
     }
-    private View createDeleteView(ViewGroup v, int ID){
+
+    private View createDeleteView(ViewGroup v, int ID) {
 
         final AlarmConfiguration config = configuration.getAlarm(ID);
 
@@ -255,22 +261,26 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     public int getGroupCount() {
         return this.configuration.size();
     }
+
     @Override
     public long getGroupId(int groupPosition) {
         return groupPosition;
     }
+
     @Override
     public boolean hasStableIds() {
         return false;
     }
+
     @Override
     public Object getGroup(int groupPosition) {
         return groupPosition;
     }
+
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-        if(convertView == null){
+        if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.wakeup_timer_listgroup, parent, false);
         }
@@ -279,26 +289,27 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Set Group Title
         TextView txtListHeader = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
-        txtListHeader.setCompoundDrawablesWithIntrinsicBounds(isExpanded ? android.R.drawable.ic_menu_my_calendar : android.R.drawable.ic_menu_more, 0, 0, 0 );
+        txtListHeader.setCompoundDrawablesWithIntrinsicBounds(isExpanded ? android.R.drawable.ic_menu_my_calendar : android.R.drawable.ic_menu_more, 0, 0, 0);
         txtListHeader.setText(config.getAlarmName());
         txtListHeader.setClickable(isExpanded);
 
         //time Text
         TextView txtListTime = (TextView) convertView.findViewById(R.id.wakeup_group_time);
-        txtListTime.setText(String.format(Locale.US, "%02d:%02d",config.getHour(), config.getMinute()));
+        txtListTime.setText(String.format(Locale.US, "%02d:%02d", config.getHour(), config.getMinute()));
 
         //Day Text
         TextView txtListDays = (TextView) convertView.findViewById(R.id.wakeup_group_days);
         txtListDays.setText(String.format("%s %s %s %s %s %s %s",
-                (config.isMonday())    ? config.getDayName(Calendar.MONDAY   , false) : "",
-                (config.isTuesday())   ? config.getDayName(Calendar.TUESDAY  , false) : "",
+                (config.isMonday()) ? config.getDayName(Calendar.MONDAY, false) : "",
+                (config.isTuesday()) ? config.getDayName(Calendar.TUESDAY, false) : "",
                 (config.isWednesday()) ? config.getDayName(Calendar.WEDNESDAY, false) : "",
-                (config.isThursday())  ? config.getDayName(Calendar.THURSDAY , false) : "",
-                (config.isFriday())    ? config.getDayName(Calendar.FRIDAY   , false) : "",
-                (config.isSaturday())  ? config.getDayName(Calendar.SATURDAY , false) : "",
-                (config.isSunday())    ? config.getDayName(Calendar.SUNDAY   , false) : ""));
+                (config.isThursday()) ? config.getDayName(Calendar.THURSDAY, false) : "",
+                (config.isFriday()) ? config.getDayName(Calendar.FRIDAY, false) : "",
+                (config.isSaturday()) ? config.getDayName(Calendar.SATURDAY, false) : "",
+                (config.isSunday()) ? config.getDayName(Calendar.SUNDAY, false) : ""));
         return convertView;
     }
+
     /***********************************************************************************************
      * CHILD
      **********************************************************************************************/
@@ -306,29 +317,38 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
     public int getChildrenCount(int groupPosition) {
         return this.configuration.getAlarm(groupPosition).getChildItemSize();
     }
+
     @Override
     public long getChildId(int groupPosition, int childPosition) {
         return childPosition;
     }
+
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
         return true;
     }
+
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return  AlarmConfiguration.childItem.values()[childPosition];
+        return AlarmConfiguration.childItem.values()[childPosition];
     }
+
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-        switch ((AlarmConfiguration.childItem) getChild(groupPosition, childPosition))
-        {
-            case WAKEUP_TIME  : return createTimeView  (parent, groupPosition);
-            case WAKEUP_DAYS  : return createDayView   (parent, groupPosition);
-            case WAKEUP_MUSIC : return createMusicView (parent, groupPosition);
-            case WAKEUP_LIGHT : return createLightView (parent, groupPosition);
-            case WAKEUP_DELETE: return createDeleteView(parent, groupPosition);
-            default: return null;
+        switch ((AlarmConfiguration.childItem) getChild(groupPosition, childPosition)) {
+            case WAKEUP_TIME:
+                return createTimeView(parent, groupPosition);
+            case WAKEUP_DAYS:
+                return createDayView(parent, groupPosition);
+            case WAKEUP_MUSIC:
+                return createMusicView(parent, groupPosition);
+            case WAKEUP_LIGHT:
+                return createLightView(parent, groupPosition);
+            case WAKEUP_DELETE:
+                return createDeleteView(parent, groupPosition);
+            default:
+                return null;
         }
     }
 }

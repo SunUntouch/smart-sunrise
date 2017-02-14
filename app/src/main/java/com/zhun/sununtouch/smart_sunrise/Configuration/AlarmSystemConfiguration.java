@@ -14,58 +14,64 @@ import com.zhun.sununtouch.smart_sunrise.R;
 public class AlarmSystemConfiguration {
 
     private final Context m_Context;
-
+    private final AlarmLogging m_Logs;
+    private final String TAG = "AlarmSystemConfiguration";
     private int brightness_steps = 100;
     private String currentTheme;
     private boolean enableLogging = false;
 
-    private final AlarmLogging m_Logs;
-    private final String TAG = "AlarmSystemConfiguration";
-
-    public AlarmSystemConfiguration(final Context context){
+    public AlarmSystemConfiguration(final Context context) {
         m_Context = context;
         m_Logs = new AlarmLogging(context);
         init();
     }
 
-    private void init(){
+    private void init() {
         //Load Settings
         SharedPreferences settings = AlarmSharedPreferences.getSharedPreference(m_Context, AlarmConstants.WAKEUP_OPTIONS);
-        this.brightness_steps = settings.getInt(AlarmConstants.WAKEUP_OPTIONS_BRIGHTNESSSTEPS , AlarmConstants.BRIGHTNESS_STEPS);
-        this.currentTheme     = settings.getString(AlarmConstants.WAKEUP_OPTIONS_THEME        , m_Context.getString(R.string.options_theme_default));
-        this.enableLogging    = settings.getBoolean(AlarmConstants.WAKEUP_OPTIONS_LOGGING     , AlarmConstants.ALARM_LOGGING);
+        this.brightness_steps = settings.getInt(AlarmConstants.WAKEUP_OPTIONS_BRIGHTNESSSTEPS, AlarmConstants.BRIGHTNESS_STEPS);
+        this.currentTheme = settings.getString(AlarmConstants.WAKEUP_OPTIONS_THEME, m_Context.getString(R.string.options_theme_default));
+        this.enableLogging = settings.getBoolean(AlarmConstants.WAKEUP_OPTIONS_LOGGING, AlarmConstants.ALARM_LOGGING);
     }
-    private void commit(){
+
+    private void commit() {
         //Save sharedPreferences
         SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreferenceEditor(m_Context, AlarmConstants.WAKEUP_OPTIONS).clear();
         editor.putInt(AlarmConstants.WAKEUP_OPTIONS_BRIGHTNESSSTEPS, getBrightnessSteps());
-        editor.putString(AlarmConstants.WAKEUP_OPTIONS_THEME       , getAlarmTheme());
-        editor.putBoolean(AlarmConstants.WAKEUP_OPTIONS_LOGGING    , loggingEnabled());
+        editor.putString(AlarmConstants.WAKEUP_OPTIONS_THEME, getAlarmTheme());
+        editor.putBoolean(AlarmConstants.WAKEUP_OPTIONS_LOGGING, loggingEnabled());
         editor.apply();
 
         m_Logs.i(TAG, m_Context.getString(R.string.logging_config_saved, AlarmConstants.WAKEUP_OPTIONS));
     }
 
+    ////////////////////////////////////////////////////////////
     //Getter and Setter
-    public void setBrightnessSteps(final int steps){
+    ///////////////////////////////////////////////////////////
+    public int getBrightnessSteps() {
+        return brightness_steps;
+    }
+
+    public void setBrightnessSteps(final int steps) {
         brightness_steps = steps;
         commit();
     }
-    public int getBrightnessSteps(){
-        return brightness_steps;
+
+    public String getAlarmTheme() {
+        return currentTheme;
     }
-    public void setAlarmTheme(final String theme){
+
+    public void setAlarmTheme(final String theme) {
         currentTheme = theme;
         commit();
     }
-    public String getAlarmTheme(){
-        return currentTheme;
-    }
-    public void enableLogging(boolean enable){
+
+    public void enableLogging(boolean enable) {
         enableLogging = enable;
         commit();
     }
-    public boolean loggingEnabled(){
+
+    public boolean loggingEnabled() {
         return enableLogging;
     }
 }
