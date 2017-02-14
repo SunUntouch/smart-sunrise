@@ -19,57 +19,46 @@
         android:textColor="#80000000"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="4"
+        android:layout_weight="50"
         android:background="@android:color/transparent"
         android:onClick="onWakeUpClick"/>
 
-    <LinearLayout
+    <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
+        android:layout_weight="1"
+        android:background="@android:color/background_dark"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:background="@android:color/background_dark"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="10dp"/>
-
         <TextView
             android:id="@+id/wakeup_wakescreen_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:text="Friday, 14.12.2016"
             android:textColor="#80000000"
             android:textAlignment="center"
             android:textSize="30sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"/>
-
+            android:gravity="center"/>
         <TextClock
             android:id="@+id/wakeup_timer_wakescreen_clock"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:textColor="#80000000"
             android:textAlignment="center"
             android:textSize="50sp"
-            android:gravity="center"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="10dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:background="@android:color/background_dark"/>
-
+            android:gravity="center"/>
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/background_dark"/>
 
     <Button
         android:text="@string/wakeup_time_snooze_big"
@@ -77,7 +66,7 @@
         android:textColor="#80000000"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="4"
+        android:layout_weight="50"
         android:background="@android:color/transparent"
         android:onClick="onSnoozeClick"/>
 
