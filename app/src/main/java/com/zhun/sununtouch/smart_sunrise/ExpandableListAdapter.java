@@ -279,6 +279,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Set Group Title
         TextView txtListHeader = (TextView) convertView.findViewById(R.id.wakeup_timer_groupItem);
+        txtListHeader.setCompoundDrawablesWithIntrinsicBounds(isExpanded ? android.R.drawable.ic_menu_my_calendar : android.R.drawable.ic_menu_more, 0, 0, 0 );
         txtListHeader.setText(config.getAlarmName());
         txtListHeader.setClickable(isExpanded);
 

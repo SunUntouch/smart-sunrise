@@ -1480,7 +1480,6 @@ public class MainActivity extends AppCompatActivity
     /***********************************************************************************************
      * OPTIONS_MENU
      **********************************************************************************************/
-    // TODO OptionsMenu: Set Different Colors for All Elements
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
