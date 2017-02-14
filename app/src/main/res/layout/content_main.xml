@@ -34,7 +34,6 @@
 
         </LinearLayout>
 
-        <!--TODO change Arrow-->
         <ExpandableListView
             android:id="@+id/wakeup_timer_expendableList"
             android:layout_width="match_parent"
