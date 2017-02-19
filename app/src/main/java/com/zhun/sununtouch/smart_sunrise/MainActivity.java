@@ -269,16 +269,17 @@ public class MainActivity extends AppCompatActivity
         minutePick.setOrientation(NumberPicker.VERTICAL);
         minutePick.setPadding(5,0,5,0);
         minutePick.setGravity(Gravity.CENTER);
-        minutePick.setValue(minutesValue);
+        minutePick.setMinValue(0);
         minutePick.setMaxValue(minutesMax);
+        minutePick.setValue(minutesValue);
         linearLayout.addView(minutePick);
 
         secondPick.setOrientation(NumberPicker.VERTICAL);
         secondPick.setPadding(5,0,5,0);
         secondPick.setGravity(Gravity.CENTER);
-        secondPick.setValue(secondsValue);
         secondPick.setMinValue(0);
-        secondPick.setMaxValue((minutesMax == 0) ? secondsMax : 60);
+        secondPick.setMaxValue((minutesMax == minutesValue) ? secondsMax : 60);
+        secondPick.setValue(secondsValue);
         linearLayout.addView(secondPick);
 
         m_Log.d(TAG, getString(R.string.logging_linearLayout));
@@ -991,7 +992,7 @@ public class MainActivity extends AppCompatActivity
         final int seconds = alarm.getSongStart() - (int) TimeUnit.MINUTES.toSeconds(minutes);
 
         final int minutesMax = (int) TimeUnit.SECONDS.toMinutes(alarm.getSongLength());
-        final int secondsMax = alarm.getSongLength() - (int) TimeUnit.MINUTES.toSeconds(minutes);
+        final int secondsMax = alarm.getSongLength() - (int) TimeUnit.MINUTES.toSeconds(minutesMax);
 
         final NumberPicker minutePick = new NumberPicker(v.getContext());
         final NumberPicker secondPick = new NumberPicker(v.getContext());
@@ -1000,9 +1001,14 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
 
-                final int minuteInSeconds = (int) TimeUnit.MINUTES.toSeconds(newVal);
-                if(newVal == picker.getMaxValue() && minuteInSeconds + secondPick.getValue() > alarm.getSongLength() - 1)
-                    secondPick.setValue(secondsMax);
+                if(newVal == picker.getMaxValue())
+                {
+                    secondPick.setMaxValue(secondsMax);
+                    if(secondPick.getValue() > secondsMax)
+                        secondPick.setValue(secondsMax);
+                }
+                else
+                    secondPick.setMaxValue(60);
 
                 if(mediaPlayer != null && mediaPlayer.isPlaying())
                     mediaPlayer.seekTo(
@@ -1015,11 +1021,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
 
-                if(minutePick.getValue() == picker.getMaxValue() && minutePick.getValue() + newVal > alarm.getSongLength() - 1)
-                    picker.setValue(secondsMax);
-
                 final int minute = (int) TimeUnit.MINUTES.toMillis(minutePick.getValue());
-                final int second = (int) TimeUnit.SECONDS.toMillis(picker.getValue());
+                final int second = (int) TimeUnit.SECONDS.toMillis(oldVal);
 
                 //textView.setVisibility(TextView.GONE);
                 if(mediaPlayer != null && mediaPlayer.isPlaying())
