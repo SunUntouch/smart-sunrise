@@ -7,4 +7,7 @@
     <dimen name="button_margin">0dp</dimen>
     <dimen name="button_corners">0dp</dimen>
     <dimen name="button_padding">2dp</dimen>
+
+    <dimen name="widget_margin">8dp</dimen>
+    <dimen name="widget_textview_margin">5dp</dimen>
 </resources>

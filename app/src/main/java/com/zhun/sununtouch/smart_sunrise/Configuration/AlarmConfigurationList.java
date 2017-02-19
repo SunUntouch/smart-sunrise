@@ -21,6 +21,9 @@ public class AlarmConfigurationList {
     private final List<AlarmConfiguration> m_Alarms;
     private final Context m_Context;
     private int m_Amount;
+    private boolean m_AlarmSet;
+    private AlarmConfiguration m_nextAlarm;
+
 
     //Constructor
     public AlarmConfigurationList(Context context) {
@@ -29,6 +32,8 @@ public class AlarmConfigurationList {
         m_Context = context;
         m_Alarms = new Vector<>();
         m_Amount = AlarmSharedPreferences.getSharedPreference(context).getInt(AlarmConstants.ALARM_VALUE, 0);
+        m_AlarmSet = false;
+        m_nextAlarm = new AlarmConfiguration(context);
 
         //If no Alarms are set, we Add a Default Alarm
         if (m_Amount == 0)
@@ -36,7 +41,16 @@ public class AlarmConfigurationList {
 
         //Fill Alarm List
         for (int alarmID = 0; alarmID < m_Amount; ++alarmID)
-            m_Alarms.add(new AlarmConfiguration(context, alarmID));
+        {
+            AlarmConfiguration alarm = new AlarmConfiguration(context, alarmID);
+            m_Alarms.add(alarm);
+
+            if(alarm.isAlarmSet()){
+                m_AlarmSet = true;
+                if(m_nextAlarm.getTimeInMillis() > alarm.getTimeInMillis() )
+                    m_nextAlarm = alarm;
+            }
+        }
     }
 
     //Getter and Setter
@@ -121,5 +135,13 @@ public class AlarmConfigurationList {
 
     public boolean isEmpty() {
         return m_Alarms.isEmpty();
+    }
+
+    public boolean isAlarmSet(){
+        return m_AlarmSet;
+    }
+
+    public AlarmConfiguration getNextSetAlarm(){
+        return m_nextAlarm;
     }
 }

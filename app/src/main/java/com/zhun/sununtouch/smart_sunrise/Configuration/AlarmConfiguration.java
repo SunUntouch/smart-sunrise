@@ -65,6 +65,8 @@ public class AlarmConfiguration {
     private int m_LightLEDStartTime     = AlarmConstants.ACTUAL_LED_START;
     private int m_LightLEDStartTimeTemp = AlarmConstants.ACTUAL_LED_START;
 
+    private long m_AlarmTimeMillis = Long.MAX_VALUE;
+
     public AlarmConfiguration(Context context){
         m_Context = context;
         m_Log = new AlarmLogging(context);
@@ -85,6 +87,7 @@ public class AlarmConfiguration {
         this.setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(ID)));
         this.setTemporaryTimes(settings.getBoolean(AlarmConstants.ALARM_TEMPORARY , AlarmConstants.ACTUAL_TEMPORARY));
         this.setAlarmOneShot  (settings.getBoolean(AlarmConstants.ALARM_ONESHOT   , AlarmConstants.ACTUAL_ONESHOT));
+        this.setTimeInMillis(settings.getLong(AlarmConstants.ALARM_TIME_IN_MILLIS , AlarmConstants.TIME_IN_MILLIS));
 
         //Days
         this.setMonday   (settings.getBoolean(AlarmConstants.ALARM_DAY_MONDAY    , AlarmConstants.ACTUAL_DAY_MONDAY));
@@ -136,9 +139,10 @@ public class AlarmConfiguration {
         editor.putBoolean(AlarmConstants.ALARM_TEMPORARY,  getTemporaryTimes());
 
         //Time
-        editor.putInt(AlarmConstants.ALARM_TIME_MINUTES  , getMinute());
-        editor.putInt(AlarmConstants.ALARM_TIME_HOUR     , getHour());
-        editor.putInt(AlarmConstants.ALARM_TIME_SNOOZE   , getSnooze());
+        editor.putInt(AlarmConstants.ALARM_TIME_MINUTES    , getMinute());
+        editor.putInt(AlarmConstants.ALARM_TIME_HOUR       , getHour());
+        editor.putInt(AlarmConstants.ALARM_TIME_SNOOZE     , getSnooze());
+        editor.putLong(AlarmConstants.ALARM_TIME_IN_MILLIS , getTimeInMillis());
 
         //Days
         editor.putBoolean(AlarmConstants.ALARM_DAY_MONDAY    , isMonday());
@@ -478,5 +482,12 @@ public class AlarmConfiguration {
     }
     public boolean getAlarmOneShot(){
         return alarmOneShot;
+    }
+
+    public void setTimeInMillis(final long millis){
+        m_AlarmTimeMillis  = millis;
+    }
+    public  long getTimeInMillis(){
+        return m_AlarmTimeMillis;
     }
 }

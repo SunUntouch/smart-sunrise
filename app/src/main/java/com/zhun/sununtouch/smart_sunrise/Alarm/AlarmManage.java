@@ -2,12 +2,15 @@ package com.zhun.sununtouch.smart_sunrise.Alarm;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
+import com.zhun.sununtouch.smart_sunrise.AlarmWidgetProvider;
 import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfiguration;
 import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
 import com.zhun.sununtouch.smart_sunrise.Information.AlarmToast;
@@ -99,7 +102,6 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         //Check if the complete start time is in the past, if so change light to better suiting values
         final long alarmTimeWithLight = calendar.getTimeInMillis() - timeBeforeMusic;
 
-        boolean changed = false;
         if (alarmTimeWithLight < currentTime) {
             //Calculate Times
             final long screenTime = getBeforeScreenTime();
@@ -111,25 +113,21 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
 
             //Safe newly set Values
             if (timeBeforeMusic < screenTime) {
-                changed = true;
                 conf.setTemporaryTimes(true);
                 conf.setScreenStartTemp((!snooze) ? (int) TimeUnit.MILLISECONDS.toMinutes(timeBeforeMusic) : 0);
             }
 
             if (timeBeforeMusic < ledTime) {
-                changed = true;
                 conf.setTemporaryTimes(true);
                 conf.setLEDStartTemp((!snooze) ? (int) TimeUnit.MILLISECONDS.toMinutes(timeBeforeMusic) : 0);
             }
         }
 
-        if (!conf.isDaySet()) {
-            changed = true;
+        if (!conf.isDaySet())
             conf.setAlarmOneShot(true);
-        }
 
-        if (changed)
-            conf.commit();
+        conf.setTimeInMillis(calendar.getTimeInMillis());
+        conf.commit();
 
         //Check for SDK Version and Use different AlarmManager Functions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -147,6 +145,10 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         if (checked)
             AlarmToast.showToastShort(context, date);
 
+        final int widgetIDs[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, AlarmWidgetProvider.class));
+        AlarmWidgetProvider alarmWidgets = new AlarmWidgetProvider();
+        alarmWidgets.onUpdate(context, AppWidgetManager.getInstance(context),widgetIDs );
+
         //m_Log.i(TAG, getString(R.string.logging_alarm_set, checked, date));
         return checked;
     }
@@ -158,6 +160,10 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         final PendingIntent intent = getPendingIntent();
         alarmManager.cancel(intent);
         intent.cancel();
+
+        final int widgetIDs[] = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, AlarmWidgetProvider.class));
+        AlarmWidgetProvider alarmWidgets = new AlarmWidgetProvider();
+        alarmWidgets.onUpdate(context, AppWidgetManager.getInstance(context),widgetIDs );
 
         final boolean checked = checkPendingIntent();
         //m_Log.i(TAG, getString(R.string.logging_alarm_cancelled, checked));

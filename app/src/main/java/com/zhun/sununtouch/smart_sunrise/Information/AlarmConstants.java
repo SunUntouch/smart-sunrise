@@ -39,6 +39,7 @@ public abstract class AlarmConstants {
     public final static String ALARM_TIME_MINUTES         = "Alarm_Minutes";
     public final static String ALARM_TIME_HOUR            = "Alarm_Hour";
     public final static String ALARM_TIME_SNOOZE          = "Alarm_Snooze";
+    public final static String ALARM_TIME_IN_MILLIS       = "Alarm_Time_In_Millis";
 
     //Alarm Days
     public final static String ALARM_DAY_MONDAY           = "Alarm_Monday";
@@ -125,4 +126,7 @@ public abstract class AlarmConstants {
     public  final static int BRIGHTNESS_STEPS_MINIMUM = 5;
     public  final static int BRIGHTNESS_STEPS  = 100;
     public  final static boolean ALARM_LOGGING = false;
+
+    //Time in Millis
+    public  final static long TIME_IN_MILLIS  = Long.MAX_VALUE;
 }
