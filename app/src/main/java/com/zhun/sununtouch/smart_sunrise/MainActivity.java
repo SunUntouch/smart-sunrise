@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity
         //LinearLayout
         LinearLayout linearLayout = new LinearLayout(context);
         linearLayout.setOrientation(LinearLayout.VERTICAL);
-        linearLayout.setPadding(0,0,0,0);
+        linearLayout.setPadding(10,0,10,0);
         linearLayout.setGravity(Gravity.NO_GRAVITY);
 
         //TextView to show Value of SeekBar
@@ -503,7 +503,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         //Create new Builder
-
         final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_minutes));
         builder.setView(createAlertLinearLayout(v, textView, seekBar, 99, 1, getAlarm(actualAlarm).getSnooze() - 1));
@@ -527,14 +526,12 @@ public class MainActivity extends AppCompatActivity
         builder.show();
     }
     private void onSnoozeMinutesSet(int minutes){
-
         //Save Snooze Minutes
         AlarmConfiguration alarm = getAlarm(actualAlarm);
         alarm.setSnooze(minutes + 1); //we Start with 1 minute
         updateChanges(alarm);
 
         m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " snooze set to " + alarm.getSnooze() + "m");
-
     }
 
     Context getThemedContext(Context context){
@@ -548,6 +545,8 @@ public class MainActivity extends AppCompatActivity
     private final Vector<AlertDialog> mDialogs = new Vector<>();
     @SuppressWarnings("UnusedParameters")
     public void showMusicSettingDialog(View v){
+
+        //TODO get User to switch a alarm theme or find a way to set a default alarm theme from the current android
         //Builder List view
         ListView listView = new ListView(this);
         listView.setAdapter(new ArrayAdapter<>(
