@@ -40,6 +40,7 @@ import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -87,7 +88,8 @@ public class MainActivity extends AppCompatActivity
     private AlarmLogging m_Log;
 
     //Last Clicked AlarmGroup
-    private int actualAlarm    =-1;
+    private int actualAlarm   = -1;
+    private int previousAlarm = -1;
 
     //Media Player
     private MediaPlayer mediaPlayer;
@@ -129,6 +131,19 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
     }
 
+    @Override
+    public void onBackPressed() {
+
+        if(AlarmGroupView != null && actualAlarm != -1 && AlarmGroupView.isGroupExpanded(actualAlarm))
+        {
+            AlarmGroupView.collapseGroup(actualAlarm);
+            actualAlarm = -1;
+            previousAlarm = -1;
+        }
+        else
+            super.onBackPressed();
+    }
+
     private void buildView(){
         //Set Toolbar///////////////////////////////////////////////////////////////////////////////
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -158,16 +173,15 @@ public class MainActivity extends AppCompatActivity
         AlarmGroupView.setAdapter(AlarmViewAdapter);
         AlarmGroupView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
 
-            int previousGroup = -1;
             @Override
             public void onGroupExpand(int groupPosition) {
 
-                if (groupPosition != previousGroup)
+                if (groupPosition != previousAlarm)
                 {
-                    if(previousGroup != -1)
-                        AlarmGroupView.collapseGroup(previousGroup);
+                    if(previousAlarm != -1)
+                        AlarmGroupView.collapseGroup(previousAlarm);
 
-                    previousGroup = groupPosition;
+                    previousAlarm = groupPosition;
                     actualAlarm = groupPosition;
                 }
             }
@@ -241,6 +255,31 @@ public class MainActivity extends AppCompatActivity
         seekBar.setPadding(0, 0, 0, 0);
 
         linearLayout.addView(seekBar);
+
+        m_Log.d(TAG, getString(R.string.logging_linearLayout));
+        return linearLayout;
+    }
+    private LinearLayout createAlertLinearLayout(Context context, NumberPicker minutePick, NumberPicker secondPick, int minutesValue, int minutesMax, int secondsValue, int secondsMax){
+        //LinearLayout
+        LinearLayout linearLayout = new LinearLayout(context);
+        linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+        linearLayout.setPadding(0,0,0,0);
+        linearLayout.setGravity(Gravity.CENTER);
+
+        minutePick.setOrientation(NumberPicker.VERTICAL);
+        minutePick.setPadding(5,0,5,0);
+        minutePick.setGravity(Gravity.CENTER);
+        minutePick.setValue(minutesValue);
+        minutePick.setMaxValue(minutesMax);
+        linearLayout.addView(minutePick);
+
+        secondPick.setOrientation(NumberPicker.VERTICAL);
+        secondPick.setPadding(5,0,5,0);
+        secondPick.setGravity(Gravity.CENTER);
+        secondPick.setValue(secondsValue);
+        secondPick.setMinValue(0);
+        secondPick.setMaxValue((minutesMax == 0) ? secondsMax : 60);
+        linearLayout.addView(secondPick);
 
         m_Log.d(TAG, getString(R.string.logging_linearLayout));
         return linearLayout;
@@ -774,7 +813,7 @@ public class MainActivity extends AppCompatActivity
                         try
                         {
                             //Set MediaPlayer Values
-                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
                             mediaPlayer.setDataSource(getApplicationContext(), uri);
                             mediaPlayer.prepare();
                         } catch (IOException e) {
@@ -944,42 +983,64 @@ public class MainActivity extends AppCompatActivity
         final AlarmConfiguration alarm = getAlarm(actualAlarm);
         startMusic(Uri.parse(alarm.getSongURI()), true, true, true, alarm.getVolume(), alarm.getSongStart());
 
-        //TextView to show Value of SeekBar
-        final TextView textView = new TextView(v.getContext());
+        final int minutes = (int) TimeUnit.SECONDS.toMinutes(alarm.getSongStart());
+        final int seconds = alarm.getSongStart() - (int) TimeUnit.MINUTES.toSeconds(minutes);
 
-        //SeekBar
-        final SeekBar seekBar = new SeekBar(v.getContext());
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        final int minutesMax = (int) TimeUnit.SECONDS.toMinutes(alarm.getSongLength());
+        final int secondsMax = alarm.getSongLength() - (int) TimeUnit.MINUTES.toSeconds(minutes);
 
+        final NumberPicker minutePick = new NumberPicker(v.getContext());
+        final NumberPicker secondPick = new NumberPicker(v.getContext());
+
+        minutePick.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                //Set Position of Text
-                final int val = getSeekBarPosition(progress, 5, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
-                textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
-                textView.setText(String.format(Locale.US, "%02d:%02d", TimeUnit.SECONDS.toMinutes(progress),
-                                                            progress - TimeUnit.MINUTES.toSeconds(TimeUnit.SECONDS.toMinutes(progress))));
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+
+                final int minuteInSeconds = (int) TimeUnit.MINUTES.toSeconds(newVal);
+                if(newVal == picker.getMaxValue() && minuteInSeconds + secondPick.getValue() > alarm.getSongLength() - 1)
+                    secondPick.setValue(secondsMax);
+
+                if(mediaPlayer != null && mediaPlayer.isPlaying())
+                    mediaPlayer.seekTo(
+                            (int) TimeUnit.MINUTES.toMillis(newVal) +
+                            (int) TimeUnit.SECONDS.toMillis(secondPick.getValue()) );
             }
+        });
+
+        secondPick.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                textView.setVisibility(TextView.VISIBLE);
-            }
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
+            public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
+
+                if(minutePick.getValue() == picker.getMaxValue() && minutePick.getValue() + newVal > alarm.getSongLength() - 1)
+                    picker.setValue(secondsMax);
+
+                final int minute = (int) TimeUnit.MINUTES.toMillis(minutePick.getValue());
+                final int second = (int) TimeUnit.SECONDS.toMillis(picker.getValue());
+
                 //textView.setVisibility(TextView.GONE);
                 if(mediaPlayer != null && mediaPlayer.isPlaying())
-                    mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(seekBar.getProgress()));
+                    mediaPlayer.seekTo( minute + second );
             }
         });
 
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_song_Start));
-        builder.setView(createAlertLinearLayout( v, textView, seekBar, alarm.getSongLength(), 1, alarm.getSongStart()));
+        builder.setView(createAlertLinearLayout(
+                                            v.getContext(),
+                                            minutePick,
+                                            secondPick,
+                                            minutes,
+                                            minutesMax,
+                                            seconds,
+                                            secondsMax));
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //Set and Save Vibration Strength
-                onMusicStartSet(seekBar.getProgress());
+                final int minute = (int) TimeUnit.MINUTES.toSeconds(minutePick.getValue());
+                final int second = secondPick.getValue();
+                onMusicStartSet(minute + second);
                 dialog.dismiss();
             }
         });

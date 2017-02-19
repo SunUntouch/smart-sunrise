@@ -533,7 +533,7 @@ public class AlarmActivity extends AppCompatActivity {
         else
             mediaPlayer.reset();
 
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
         mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(_SongUri));
         mediaPlayer.setLooping(true);
         mediaPlayer.prepare();
