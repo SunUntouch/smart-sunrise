@@ -496,7 +496,7 @@ public class AlarmActivity extends AppCompatActivity {
 
                     //Get MaxVolume of Music
                     final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+                    audioManager.setStreamVolume(AudioManager.STREAM_ALARM, audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM), 0);
 
                     mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(getConfig().getSongStart()));
                     mediaPlayer.setVolume(currentVolume, currentVolume);
