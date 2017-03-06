@@ -1,8 +1,11 @@
 package com.zhun.sununtouch.smart_sunrise;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.widget.RemoteViews;
 
 import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfigurationList;
@@ -22,25 +25,69 @@ public class AlarmWidgetProvider extends AppWidgetProvider {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
         AlarmConfigurationList alarms = new AlarmConfigurationList(context);
+        for(int widgetId = 0; widgetId < appWidgetIds.length; ++widgetId )
+            appWidgetManager.updateAppWidget(appWidgetIds[widgetId], getRemoteView(context, appWidgetManager, widgetId, alarms));
+    }
 
-        for(int widgetIdx = 0; widgetIdx < appWidgetIds.length; ++widgetIdx ){
+    @Override
+    public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
 
-            RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.widget_alarm_time);
+        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+        int minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
+        int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
 
-            if(alarms.size() == 0 || !alarms.isAlarmSet()){
-                remoteViews.setTextViewText(R.id.alarm_widget_text_view, context.getString(R.string.wakeup_no_alarm));
-                remoteViews.setTextViewText(R.id.alarm_widget_text_view_Before, "");
-            }
-            else
-            {
-                Calendar calendar = Calendar.getInstance();
-                calendar.setTimeInMillis(alarms.getNextSetAlarm().getTimeInMillis());
-                remoteViews.setTextViewText(R.id.alarm_widget_text_view, SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()));
-                remoteViews.setTextViewText(R.id.alarm_widget_text_view_Before,
-                        "Screen: "  + alarms.getNextSetAlarm().getScreenStartTime() +
-                        "m | LED: " + alarms.getNextSetAlarm().getLEDStartTime() + "m" );
-            }
-            appWidgetManager.updateAppWidget(appWidgetIds[widgetIdx], remoteViews);
+        appWidgetManager.updateAppWidget(appWidgetId, getRemoteView(context, appWidgetManager, appWidgetId, new AlarmConfigurationList(context)));
+        super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
+    }
+
+    private RemoteViews getRemoteView(Context context, AppWidgetManager appWidgetManager, int appWidgetId, AlarmConfigurationList alarms){
+
+        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
+        final int rows = getCellsForSize(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT));
+        final int columns = getCellsForSize(options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH));
+
+        RemoteViews widgetView;
+        switch (columns){
+            case 1: widgetView = new RemoteViews(context.getPackageName(), R.layout.widget_alarm_time_1x1); break;
+            case 2: widgetView = new RemoteViews(context.getPackageName(), R.layout.widget_alarm_time_1x2); break;
+            case 3: widgetView = new RemoteViews(context.getPackageName(), R.layout.widget_alarm_time_1x3); break;
+            case 4: widgetView = new RemoteViews(context.getPackageName(), R.layout.widget_alarm_time_1x4); break;
+            default: widgetView = new RemoteViews(context.getPackageName(), R.layout.widget_alarm_time_1x4);
         }
+
+        if(alarms.size() == 0 || !alarms.isAlarmSet())
+            widgetView.setTextViewText(R.id.alarm_widget_text_view, context.getString(R.string.wakeup_no_alarm));
+        else
+        {
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(alarms.getNextSetAlarm().getTimeInMillis());
+            switch (columns){
+                case 1:
+                case 2: {
+                    widgetView.setTextViewText(R.id.alarm_widget_text_view, SimpleDateFormat.getTimeInstance().format(calendar.getTime()));
+                    widgetView.setTextViewText(R.id.alarm_widget_text_view_Before, SimpleDateFormat.getDateInstance().format(calendar.getTime()));
+
+                } break;
+                default: {
+                    widgetView.setTextViewText(R.id.alarm_widget_text_view, SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()));
+                    widgetView.setTextViewText(R.id.alarm_widget_text_view_Before, "Screen: "  + alarms.getNextSetAlarm().getScreenStartTime() +
+                                                                                   "m | LED: " + alarms.getNextSetAlarm().getLEDStartTime() + "m" );
+                }
+            }
+        }
+
+        Intent alarmIntent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent =  PendingIntent.getActivity(context, 0, alarmIntent, 0);
+
+        widgetView.setOnClickPendingIntent(R.id.alarm_widget_layout, pendingIntent);
+        return  widgetView;
+    }
+
+    private static int getCellsForSize(int size) {
+        int n = 2;
+        while (70 * n - 30 < size) {
+            ++n;
+        }
+        return n - 1;
     }
 }

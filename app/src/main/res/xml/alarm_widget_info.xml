@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
-    android:minWidth="120dp"
+    android:minWidth="60dp"
     android:minHeight="60dp"
     android:updatePeriodMillis="1800000"
-    android:initialLayout="@layout/widget_alarm_time"
-    android:resizeMode="horizontal|vertical"
+    android:initialLayout="@layout/widget_alarm_time_1x2"
+    android:resizeMode="horizontal"
     android:widgetCategory="home_screen|keyguard"
     android:previewImage="@mipmap/smart_sunrise_symbol">
 </appwidget-provider>

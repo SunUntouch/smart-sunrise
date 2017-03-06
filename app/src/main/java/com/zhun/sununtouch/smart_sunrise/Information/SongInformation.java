@@ -14,26 +14,26 @@ public class SongInformation {
 
     public SongInformation(long songID, String songTitle, String songArtist, String songAlbum, String songPath){
 
-        this.id     = songID;
-        this.title  = songTitle;
-        this.artist = songArtist;
-        this.album  = songAlbum;
-        this.path   = songPath;
+        id     = songID;
+        title  = songTitle;
+        artist = songArtist;
+        album  = songAlbum;
+        path   = songPath;
     }
 
     public long getID(){
-        return this.id;
+        return id;
     }
     public String getTitle(){
-        return this.title;
+        return title;
     }
     public String getArtist(){
-        return this.artist;
+        return artist;
     }
     public String getAlbum(){
-        return this.album;
+        return album;
     }
     public String getPath(){
-        return this.path;
+        return path;
     }
 }

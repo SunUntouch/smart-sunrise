@@ -12,8 +12,7 @@ import java.util.Map;
 @SuppressWarnings("unused")
 public class SongDatabase {
 
-    private LinkedHashMap<String, LinkedHashMap<String, HashSet<SongInformation>>> mDatabase = null;
-
+    private final LinkedHashMap<String, LinkedHashMap<String, HashSet<SongInformation>>> mDatabase;
     private int songCount = 0;
     private int albumCount = 0;
     private int artistCount = 0;
@@ -22,16 +21,13 @@ public class SongDatabase {
         mDatabase = new LinkedHashMap<>();
     }
     public SongDatabase(SongInformation song){
-
+        mDatabase = new LinkedHashMap<>();
         addSong(song);
     }
     public void addSong(SongInformation song){
-        if(mDatabase == null)
-            mDatabase = new LinkedHashMap<>();
 
         String artist = song.getArtist();
         String album = song.getAlbum();
-
 
         if(mDatabase.containsKey(artist))
         {
@@ -39,25 +35,22 @@ public class SongDatabase {
                 mDatabase.get(artist).get(album).add(song);
             else
             {
-                albumCount++;
                 HashSet<SongInformation> songs = new HashSet<>();
                 songs.add(song);
                 mDatabase.get(artist).put(album, songs);
+                ++albumCount;
             }
         }
-
         else
         {
-            artistCount++;
-            albumCount++;
-
+            LinkedHashMap<String, HashSet<SongInformation>> albumEntry = new LinkedHashMap<>();
             HashSet<SongInformation> songs = new HashSet<>();
             songs.add(song);
-
-            LinkedHashMap<String, HashSet<SongInformation>> albumEntry = new LinkedHashMap<>();
             albumEntry.put(album, songs);
 
             mDatabase.put(artist, albumEntry);
+            ++artistCount;
+            ++albumCount;
         }
 
         songCount++;
@@ -73,7 +66,9 @@ public class SongDatabase {
 
         if(!mDatabase.containsKey(artist))
             return null;
-        return (mDatabase.get(artist).containsKey(album))? mDatabase.get(artist).get(album).toArray(new SongInformation[mDatabase.get(artist).get(album).size()]) : null;
+        return (mDatabase.get(artist).containsKey(album))?
+                mDatabase.get(artist).get(album).toArray(new SongInformation[mDatabase.get(artist).get(album).size()]) :
+                null;
     }
 
     public int getArtistCountCalculate(){
@@ -95,20 +90,19 @@ public class SongDatabase {
     }
     public int getSongCount(String artist){
 
-        if(!mDatabase.containsKey(artist))
-            return 0;
-
         int count = 0;
-        Map<String, HashSet<SongInformation>> artistAlbums = mDatabase.get(artist);
-        for( Map.Entry<String, HashSet<SongInformation>> album : artistAlbums.entrySet())
-            count += album.getValue().size();
+        if(mDatabase.containsKey(artist))
+        {
+            for( Map.Entry<String, HashSet<SongInformation>> album : mDatabase.get(artist).entrySet())
+                count += album.getValue().size();
+        }
         return count;
     }
     public int getSongCount(String artist, String album){
 
-        if(!mDatabase.containsKey(artist))
+        if (!mDatabase.containsKey(artist) && !mDatabase.get(artist).containsKey(album))
             return 0;
 
-        return (mDatabase.get(artist).containsKey(album)) ? mDatabase.get(artist).get(album).size() : 0;
+        return mDatabase.get(artist).get(album).size();
     }
 }

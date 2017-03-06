@@ -23,7 +23,7 @@ public class AlarmIntentService extends IntentService {
         //this is the alarm Intent
         startActivity(new Intent(this, AlarmActivity.class)
                 .putExtras(intent)
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK));
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS | Intent.FLAG_ACTIVITY_MULTIPLE_TASK));
         AlarmReceiver.completeWakefulIntent(intent);
 
         AlarmLogging log = new AlarmLogging(this);

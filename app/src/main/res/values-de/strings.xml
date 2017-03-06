@@ -170,6 +170,7 @@
     <string name="logging_activity_stopped">Activity stopped</string>
     <string name="logging_activity_destroyed">Activity destroyed</string>
     <string name="logging_activity_hint">Activity got User Hint</string>
+    <string name="logging_activity_action">Activity got User Action</string>
 
     <string name="logging_asyncTask_created" formatted="false">AsyncTask for %s created</string>
     <string name="logging_asyncTask_destroyed" formatted="false">AsyncTask %s will be destroyed</string>
@@ -179,7 +180,7 @@
     <string name="logging_view_switched">Switched View</string>
     <string name="logging_linearLayout">Successfully created LinearLayout</string>
 
-    <string name="logging_runnable_set" formatted="false">Runnable %s was already alive, stopped now</string>
+    <string name="logging_runnable_set" formatted="false">Runnable %s set</string>
     <string name="logging_runnable_set_to" formatted="false">Runnable %s set to %d ms</string>
 
     <string name="logging_user_stop" formatted="false">User pressed WakeUp Button</string>
@@ -213,7 +214,9 @@
 
     <string name="logging_error_switch_bounds">%s Switch out of bounds</string>
 
+    <string name="logging_config_initialized" formatted="false">SharedPreference %s created</string>
     <string name="logging_config_saved" formatted="false">commit SharedPreference %s</string>
+    <string name="logging_config_no_changes" formatted="false">no changes to commit SharedPreference %s</string>
     <string name="logging_alarm_boot">Boot received Successful</string>
     <string name="logging_alarm_receiver">Alarm received Successful</string>
     <string name="logging_alarm_intent">Alarm Intent received Successful</string>
@@ -221,6 +224,8 @@
     <string name="logging_alarm_set" formatted="false">Alarm set to %b set Time: %s</string>
     <string name="logging_alarm_cancelled">Alarm cancelled %b</string>
     <string name="logging_alarm_refresh">Start Alarm refresh</string>
+
+    <string name="logging_alarm_list_initial">%d Alarm loaded</string>
 
     <!-- Option Text -->
     <string name="options_LightSteps">Beleuchtungsabstufung</string>

@@ -109,11 +109,14 @@ public class MainActivity extends AppCompatActivity
      **********************************************************************************************/
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mThread = new AlarmWorkerThread("Smart_Sunrise_Main_Worker");
-        m_AlarmConfigurations = new AlarmConfigurationList(getApplicationContext());
-        m_SystemConfiguration = new AlarmSystemConfiguration(getApplicationContext());
+
         m_Log = new AlarmLogging(getApplicationContext());
         m_Log.i(TAG, getString(R.string.logging_activity_creating));
+
+        mThread = new AlarmWorkerThread("Smart_Sunrise_Main_Worker");
+
+        m_AlarmConfigurations = new AlarmConfigurationList(getApplicationContext());
+        m_SystemConfiguration = new AlarmSystemConfiguration(getApplicationContext());
 
         //Set View
         //Set MainView//////////////////////////////////////////////////////////////////////////////
@@ -527,7 +530,7 @@ public class MainActivity extends AppCompatActivity
 
                 //Set Position of Text
                 int val = getSeekBarPosition(progress, 6, seekBar.getWidth(), seekBar.getThumbOffset(), seekBar.getMax());
-                String message = Integer.toString(++progress) + "min";
+                String message = Integer.toString(progress) + "min";
                 textView.setText(message);
                 textView.setX(seekBar.getX() + val + seekBar.getThumbOffset() / 2);
             }
@@ -545,7 +548,7 @@ public class MainActivity extends AppCompatActivity
         //Create new Builder
         final AlertDialog.Builder builder = new AlertDialog.Builder(getThemedContext(v.getContext()));
         builder.setTitle(this.getString(R.string.wakeup_set_alarm_minutes));
-        builder.setView(createAlertLinearLayout(v, textView, seekBar, 99, 1, getAlarm(actualAlarm).getSnooze() - 1));
+        builder.setView(createAlertLinearLayout(v, textView, seekBar, 100, 1, getAlarm(actualAlarm).getSnooze()));
         builder.setPositiveButton(this.getString(R.string.wakeup_OK), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -568,7 +571,7 @@ public class MainActivity extends AppCompatActivity
     private void onSnoozeMinutesSet(int minutes){
         //Save Snooze Minutes
         AlarmConfiguration alarm = getAlarm(actualAlarm);
-        alarm.setSnooze(minutes + 1); //we Start with 1 minute
+        alarm.setSnooze(minutes);
         updateChanges(alarm);
 
         m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " snooze set to " + alarm.getSnooze() + "m");

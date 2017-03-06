@@ -21,9 +21,9 @@ public class AlarmConfiguration {
     private final String TAG = "AlarmConfiguration";
 
     //Actual Alarm Values
-    private int actualAlarm    = 0;
+    private int m_AlarmID = 0;
 
-    private String actualAlarmName = AlarmConstants.ALARM;
+    private String m_Name = AlarmConstants.ALARM;
 
     //Actual Alarm Set
     private boolean tempTimes    = false;
@@ -67,13 +67,16 @@ public class AlarmConfiguration {
 
     private long m_AlarmTimeMillis = Long.MAX_VALUE;
 
+    private boolean dirty = false;
+    private boolean initial = true;
+
     public AlarmConfiguration(Context context){
         m_Context = context;
         m_Log = new AlarmLogging(context);
     }
     public AlarmConfiguration(Context context, int ID){
-        init(context,ID);
         m_Log = new AlarmLogging(context);
+        init(context,ID);
     }
 
     private void init(Context context,int ID){
@@ -125,8 +128,17 @@ public class AlarmConfiguration {
         this.setHour  (settings.getInt(AlarmConstants.ALARM_TIME_HOUR    , calendar.get(Calendar.HOUR_OF_DAY)));
         this.setMinute(settings.getInt(AlarmConstants.ALARM_TIME_MINUTES , calendar.get(Calendar.MINUTE)));
         this.setSnooze(settings.getInt(AlarmConstants.ALARM_TIME_SNOOZE  , AlarmConstants.ACTUAL_TIME_SNOOZE));
+
+        initial = false;
+        m_Log.i(TAG, m_Context.getString(R.string.logging_config_initialized, AlarmConstants.ALARM + getAlarmID()));
     }
     public void commit(){
+
+        if(!isDirty())
+        {
+            m_Log.i(TAG, m_Context.getString(R.string.logging_config_no_changes, AlarmConstants.ALARM + getAlarmID()));
+            return;
+        }
 
         //Load sharedPreferences
         SharedPreferences.Editor editor = AlarmSharedPreferences.getSharedPreferenceEditor(m_Context, AlarmConstants.ALARM, getAlarmID()).clear();
@@ -177,8 +189,19 @@ public class AlarmConfiguration {
 
         //apply Values to settings
         editor.apply();
+        setDirty(false);
 
         m_Log.i(TAG, m_Context.getString(R.string.logging_config_saved, AlarmConstants.ALARM + getAlarmID()));
+    }
+
+    private void setDirty(boolean dirt){
+        if(initial)
+            return;
+
+        dirty = dirt;
+    }
+    private boolean isDirty(){
+        return dirty;
     }
 
     private AlarmManage createAlarmManager(){
@@ -212,18 +235,27 @@ public class AlarmConfiguration {
 
     //Name
     public String getAlarmName(){
-        return actualAlarmName;
+        return m_Name;
     }
     public void setAlarmName(final String name){
-        actualAlarmName = name;
+
+        if(name.equals(m_Name))
+            return;
+
+        m_Name = name;
+        setDirty(true);
     }
 
     //Actual Alarm Values
     public int getAlarmID(){
-        return actualAlarm;
+        return m_AlarmID;
     }
     public void setAlarmID(final int id){
-        actualAlarm = id;
+        if(m_AlarmID == id)
+            return;
+
+        m_AlarmID = id;
+        setDirty(true);
     }
 
     //Actual Alarm Set
@@ -243,13 +275,25 @@ public class AlarmConfiguration {
     }
 
     public void setHour(int hour){
+        if(m_Hour == hour)
+            return;
+
         m_Hour = hour;
+        setDirty(true);
     }
     public void setMinute(int minute){
+        if(m_Minutes == minute)
+            return;
+
         m_Minutes    = minute;
+        setDirty(true);
     }
     public void setSnooze(int snooze){
+        if(m_SnoozeTime == snooze)
+            return;
+
         m_SnoozeTime = snooze;
+        setDirty(true);
     }
 
     //Days
@@ -318,25 +362,53 @@ public class AlarmConfiguration {
     }
 
     public void setMonday(boolean monday){
+        if(monday == m_MondaySet)
+            return;
+
         m_MondaySet = monday;
+        setDirty(true);
     }
     public void setTuesday(boolean tuesday){
+        if(m_TuesdaySet == tuesday)
+            return;
+
         m_TuesdaySet = tuesday;
+        setDirty(true);
     }
     public void setWednesday(boolean wednesday){
+        if(m_WednesdaySet == wednesday)
+            return;
+
         m_WednesdaySet = wednesday;
+        setDirty(true);
     }
     public void setThursday(boolean thursday){
+        if(m_ThursdaySet == thursday)
+            return;
+
         m_ThursdaySet = thursday;
+        setDirty(true);
     }
     public void setFriday(boolean friday){
+        if(m_FridaySet == friday)
+            return;
+
         m_FridaySet = friday;
+        setDirty(true);
     }
     public void setSaturday(boolean saturday){
+        if(m_SaturdaySet == saturday)
+            return;
+
         m_SaturdaySet = saturday;
+        setDirty(true);
     }
     public void setSunday(boolean sunday){
+        if(m_SundaySet == sunday)
+            return;
+
         m_SundaySet = sunday;
+        setDirty(true);
     }
 
     //Music
@@ -347,56 +419,88 @@ public class AlarmConfiguration {
         return m_SongURI;
     }
     public void setSongURI(String uri){
+        if(uri.equals(m_SongURI))
+            return;
+
         m_SongURI = uri;
+        setDirty(true);
     }
 
     public int getSongStart(){
         return m_SongStart;
     }
     public void setSongStart(int start){
+        if(m_SongStart == start)
+            return;
+
         m_SongStart = start;
+        setDirty(true);
     }
 
     public int getSongLength(){
         return m_SongLength;
     }
     public void setSongLength(int length){
+        if(m_SongLength == length)
+            return;
+
         m_SongLength = length;
+        setDirty(true);
     }
 
     public int getVolume(){
         return m_Volume;
     }
     public void setVolume(int volume){
+        if(m_Volume == volume)
+            return;
+
         m_Volume = volume;
+        setDirty(true);
     }
 
     public boolean getFadeIn(){
         return m_FadeInSet;
     }
     public void setFadeIn(boolean fadeIn){
+        if(m_FadeInSet == fadeIn)
+            return;
+
         m_FadeInSet = fadeIn;
+        setDirty(true);
     }
 
     public int getFadeInTime(){
         return m_FadeInTime;
     }
     public void setFadeInTime(int time){
+        if(m_FadeInTime == time)
+            return;
+
         m_FadeInTime = time;
+        setDirty(true);
     }
 
     public boolean getVibration(){
         return m_VibrationSet;
     }
     public void setVibration(boolean vibration){
+        if(m_VibrationSet == vibration)
+            return;
+
         m_VibrationSet = vibration;
+        setDirty(true);
     }
 
     public int getVibrationStrength(){
         return m_VibrationStrength;
     }
     public void setVibrationStrength(int strength){
+        if(m_VibrationStrength == strength)
+            return;
+
         m_VibrationStrength = strength;
+        setDirty(true);
     }
 
     //Screen
@@ -404,14 +508,22 @@ public class AlarmConfiguration {
         return m_ScreenSet;
     }
     public void setScreen(boolean screen){
+        if(m_ScreenSet == screen)
+            return;
+
         m_ScreenSet = screen;
+        setDirty(true);
     }
 
     public int getScreenBrightness(){
         return m_ScreenBrightness;
     }
     public void setScreenBrightness(int brightness){
+        if(m_ScreenBrightness == brightness)
+            return;
+
         m_ScreenBrightness = brightness;
+        setDirty(true);
     }
 
     public int getScreenStartTime(){
@@ -424,7 +536,11 @@ public class AlarmConfiguration {
         return (m_ScreenStartTimeTemp < 0) ? 0 : m_ScreenStartTimeTemp ;
     }
     public void setScreenStartTemp(int time){
+        if(m_ScreenStartTimeTemp == time)
+            return;
+
         m_ScreenStartTimeTemp = time;
+        setDirty(true);
     }
 
     //Light
@@ -432,21 +548,33 @@ public class AlarmConfiguration {
         return m_LightColor1;
     }
     public void setLightColor1(int color){
+        if(m_LightColor1 == color)
+            return;
+
         m_LightColor1 = color;
+        setDirty(true);
     }
 
     public int getLightColor2(){
         return m_LightColor2;
     }
     public void setLightColor2(int color){
+        if(m_LightColor2 == color)
+            return;
+
         m_LightColor2 = color;
+        setDirty(true);
     }
 
     public boolean getLightFade(){
         return m_LightFade ;
     }
     public void setLightFade(boolean fade){
+        if(m_LightFade == fade)
+            return;
+
         m_LightFade = fade;
+        setDirty(true);
     }
 
     //LED
@@ -454,38 +582,62 @@ public class AlarmConfiguration {
         return m_LightLEDSet;
     }
     public void setLED(boolean led){
+        if(m_LightLEDSet == led)
+            return;
+
         m_LightLEDSet = led;
+        setDirty(true);
     }
 
     public int getLEDStartTime(){
         return m_LightLEDStartTime;
     }
     public void setLEDStartTime(int time){
+        if(m_LightLEDStartTime == time)
+            return;
+
         m_LightLEDStartTime = time;
+        setDirty(true);
     }
     public int getLEDStartTemp(){
         return (m_LightLEDStartTimeTemp < 0) ? 0 : m_LightLEDStartTimeTemp ;
     }
     public void setLEDStartTemp(int time){
+        if(m_LightLEDStartTimeTemp == time)
+            return;
+
         m_LightLEDStartTimeTemp = time;
+        setDirty(true);
     }
 
     public void setTemporaryTimes(boolean temp){
+        if(tempTimes == temp)
+            return;
+
         tempTimes = temp;
+        setDirty(true);
     }
     public boolean getTemporaryTimes(){
         return tempTimes;
     }
 
     public void setAlarmOneShot(boolean shot){
+        if(alarmOneShot == shot)
+            return;
+
         alarmOneShot = shot;
+        setDirty(true);
     }
     public boolean getAlarmOneShot(){
         return alarmOneShot;
     }
 
     public void setTimeInMillis(final long millis){
-        m_AlarmTimeMillis  = millis;
+        if(m_AlarmTimeMillis == millis)
+            return;
+
+        m_AlarmTimeMillis = millis;
+        setDirty(true);
     }
     public  long getTimeInMillis(){
         return m_AlarmTimeMillis;

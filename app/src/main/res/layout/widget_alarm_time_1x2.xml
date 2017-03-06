@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/widget_margin"
+    android:background="#21000000"
+    android:id="@+id/alarm_widget_layout">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:background="#9c000000"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/alarm_widget_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/widget_textview_margin"
+            android:paddingEnd="@dimen/widget_textview_margin"
+            android:textColor="#fefefe"
+            android:shadowColor="#95000000"
+            android:shadowDx="1.5"
+            android:shadowDy="1.5"
+            android:shadowRadius="15"
+            android:textSize="15sp"
+            android:gravity="center"/>
+
+        <TextView
+            android:id="@+id/alarm_widget_text_view_Before"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="@dimen/widget_textview_margin"
+            android:paddingEnd="@dimen/widget_textview_margin"
+            android:textColor="#8a8a8a"
+            android:shadowColor="#95000000"
+            android:shadowDx="1.5"
+            android:shadowDy="1.5"
+            android:shadowRadius="10"
+            android:textSize="12sp"
+            android:gravity="center"/>
+
+    </LinearLayout>
+
+</LinearLayout>

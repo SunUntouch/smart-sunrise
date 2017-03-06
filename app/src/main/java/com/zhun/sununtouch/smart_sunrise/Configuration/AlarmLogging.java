@@ -8,6 +8,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.Calendar;
 
 /**
@@ -99,7 +100,7 @@ public class AlarmLogging {
         final String fileName =
                 "sdcard/SmartSunrise/Logging" +
                         Integer.toString(calendar.get(Calendar.YEAR)) + "_" +
-                        Integer.toString(calendar.get(Calendar.MONTH)) + "_" +
+                        Integer.toString((calendar.get(Calendar.MONTH)) + 1) + "_" +
                         Integer.toString(calendar.get(Calendar.DAY_OF_MONTH)) +
                         ".txt";
 
@@ -117,6 +118,8 @@ public class AlarmLogging {
         //Write to File
         try {
             BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+            buf.append(DateFormat.getTimeInstance().format(calendar.getTime()));
+            buf.append(": ");
             buf.append(Level);
             buf.append(": ");
             buf.append(TAG);

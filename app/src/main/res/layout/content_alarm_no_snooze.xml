@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.zhun.sununtouch.smart_sunrise.AlarmActivity"
+    android:id="@+id/wakeup_wakescreen_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    android:background="@drawable/custom_alarm_view">
+
+    <Button
+        android:text=""
+        android:textSize="50sp"
+        android:textColor="#80000000"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="50"
+        android:background="@android:color/transparent"
+        android:onClick="onWakeUpClick"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/background_dark"
+        android:onClick="onWakeUpClick"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/wakeup_wakescreen_date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Friday, 14.12.2016"
+            android:textColor="#80000000"
+            android:textAlignment="center"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:onClick="onWakeUpClick"/>
+        <TextClock
+            android:id="@+id/wakeup_timer_wakescreen_clock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="#80000000"
+            android:textAlignment="center"
+            android:textSize="50sp"
+            android:gravity="center"
+            android:onClick="onWakeUpClick"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/background_dark"
+        android:onClick="onWakeUpClick"/>
+
+    <Button
+        android:text=""
+        android:textSize="50sp"
+        android:textColor="#80000000"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="50"
+        android:background="@android:color/transparent"
+        android:onClick="onWakeUpClick"/>
+
+</LinearLayout>

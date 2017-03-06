@@ -4,7 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.zhun.sununtouch.smart_sunrise.Information.AlarmConstants;
-import com.zhun.sununtouch.smart_sunrise.Information.AlarmToast;
+import com.zhun.sununtouch.smart_sunrise.R;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +23,9 @@ public class AlarmConfigurationList {
     private int m_Amount;
     private boolean m_AlarmSet;
     private AlarmConfiguration m_nextAlarm;
+    private AlarmLogging m_Log;
+
+    private final String TAG = "AlarmConfigurationList";
 
 
     //Constructor
@@ -34,6 +37,7 @@ public class AlarmConfigurationList {
         m_Amount = AlarmSharedPreferences.getSharedPreference(context).getInt(AlarmConstants.ALARM_VALUE, 0);
         m_AlarmSet = false;
         m_nextAlarm = new AlarmConfiguration(context);
+        m_Log = new AlarmLogging(context);
 
         //If no Alarms are set, we Add a Default Alarm
         if (m_Amount == 0)
@@ -51,6 +55,7 @@ public class AlarmConfigurationList {
                     m_nextAlarm = alarm;
             }
         }
+        m_Log.i(TAG, m_Context.getString(R.string.logging_alarm_list_initial, m_Amount));
     }
 
     //Getter and Setter
@@ -70,7 +75,7 @@ public class AlarmConfigurationList {
         try {
             m_Alarms.remove(alarmID);
         } catch (Exception e) {
-            AlarmToast.showToastShort(m_Context, "Error: " + e.getMessage());
+            m_Log.e(TAG, m_Context.getString(R.string.logging_exception, " Removing Alarm: ", e.getMessage()));
             return false;
         }
         removeSharedPreference(alarmID);
@@ -118,7 +123,7 @@ public class AlarmConfigurationList {
         try {
             m_Alarms.set(alarm.getAlarmID(), alarm);
         } catch (Exception e) {
-            AlarmToast.showToastShort(m_Context, "Error: " + e.getMessage());
+            m_Log.e(TAG, m_Context.getString(R.string.logging_exception, " Setting Alarm: ", e.getMessage()));
             return false;
         }
         alarm.commit();

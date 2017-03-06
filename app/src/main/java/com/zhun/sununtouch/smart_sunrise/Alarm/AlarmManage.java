@@ -100,8 +100,7 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
             calendar.setTimeInMillis(calendar.getTimeInMillis() + TimeUnit.MINUTES.toMillis(conf.getSnooze())); //+ Snooze
 
         //Check if the complete start time is in the past, if so change light to better suiting values
-        final long alarmTimeWithLight = calendar.getTimeInMillis() - timeBeforeMusic;
-
+        long alarmTimeWithLight = calendar.getTimeInMillis() - timeBeforeMusic;
         if (alarmTimeWithLight < currentTime) {
             //Calculate Times
             final long screenTime = getBeforeScreenTime();
@@ -132,10 +131,10 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         //Check for SDK Version and Use different AlarmManager Functions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //Newer API Level provides a Symbol when Alarm is active
-            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis() - timeBeforeMusic, pendingIntent);
+            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis() + TimeUnit.SECONDS.toMillis(5) - timeBeforeMusic, pendingIntent);
             alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
         } else
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - timeBeforeMusic, pendingIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() + TimeUnit.SECONDS.toMillis(5) - timeBeforeMusic, pendingIntent);
 
         //Show Toast when Set
         final boolean checked = checkPendingIntent();

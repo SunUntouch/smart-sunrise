@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/widget_margin"
-    android:background="#21000000">
+    android:background="#21000000"
+    android:id="@+id/alarm_widget_layout">
 
     <TextView
         android:id="@+id/alarm_widget_text_view"

@@ -55,7 +55,7 @@ public class AlarmActivity extends AppCompatActivity {
     private PowerManager.WakeLock lock;
 
     private boolean snoozed = false;
-    private final String TAG = "AlarmActivity";
+    private String TAG;
 
     /***********************************************************************************************
      * ON_CREATE AND HELPER
@@ -63,22 +63,24 @@ public class AlarmActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_alarm);
         alarmHandler = new Handler();
+
+        //Get Logging Helper
+        m_Log = new AlarmLogging(getApplicationContext());
+        m_Log.i("AlarmActivity", getString(R.string.logging_activity_creating));
 
         //Load Values
         final int actualAlarm = getIntent().getExtras().getInt(AlarmConstants.ALARM_ID);
         config = new AlarmConfiguration(getApplicationContext(), actualAlarm);
         systemConfig = new AlarmSystemConfiguration(getApplicationContext());
+        TAG = "AlarmActivity" + "(" + config.getAlarmID() + ")_" + config.getAlarmName();
+
+        setContentView((config.getSnooze() != 0) ? R.layout.content_alarm : R.layout.content_alarm_no_snooze);
 
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "AlarmActivity_WakeLock");
+        final String wakeLockName = "AlarmActivity_WakeLock_Alarm" + config.getAlarmID();
+        lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, wakeLockName);
         lock.acquire();
-
-        //Get Logging Helper
-        m_Log = new AlarmLogging(getApplicationContext());
-        m_Log.i(TAG, getString(R.string.logging_activity_creating));
 
         //Open Screen
         startScreen(true);
@@ -124,10 +126,17 @@ public class AlarmActivity extends AppCompatActivity {
     }
     @Override
     protected void onUserLeaveHint() {
-        super.onUserLeaveHint();
+        //super.onUserLeaveHint();
         m_Log.i(TAG, getString(R.string.logging_activity_hint));
+    }
+
+    @Override
+    public void onUserInteraction() {
+        //super.onUserInteraction();
+        m_Log.i(TAG, getString(R.string.logging_activity_action));
         this.finish();
     }
+
     @Override
     protected void onStop() {
         m_Log.i(TAG, getString(R.string.logging_activity_stopped));
@@ -272,11 +281,9 @@ public class AlarmActivity extends AppCompatActivity {
 
         if(!thread.isAlive())
         {
-            if(thread.isInterrupted())
-                thread.quit();
+            thread.quitSafely();
             thread.start();
             thread.prepareHandler();
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -325,7 +332,8 @@ public class AlarmActivity extends AppCompatActivity {
      **********************************************************************************************/
     private void doViews(){
         //Date
-        dateThread  = new AlarmWorkerThread(AlarmConstants.ACTIVITY_DATE_THREAD);
+        final String dateThreadName = AlarmConstants.ACTIVITY_DATE_THREAD + "_" + AlarmConstants.ALARM + getConfig().getAlarmID();
+        dateThread  = new AlarmWorkerThread(dateThreadName);
         setRunnable(dateThread, new Runnable() {
             @Override
             public void run() {
@@ -401,8 +409,7 @@ public class AlarmActivity extends AppCompatActivity {
             }
             @Override
             public void onAnimationEnd(Animator animation) {
-
-                m_Log.i(TAG, getString(R.string.logging_view_animation_end));
+                m_Log.i(TAG, getString(R.string.logging_view_animation_stopped));
 
                 //Called after every Animation in the AnimatorSet
                 //Check for More Animations
@@ -416,7 +423,8 @@ public class AlarmActivity extends AppCompatActivity {
             public void onAnimationCancel(Animator animation) {
                 cancelled = true;
                 animation.removeAllListeners();
-                m_Log.i(TAG, getString(R.string.logging_view_animation_stopped));
+                m_Log.i(TAG, getString(R.string.logging_view_animation_end));
+
             }
             @Override
             public void onAnimationRepeat(Animator animation) {
@@ -488,69 +496,113 @@ public class AlarmActivity extends AppCompatActivity {
         catch (IOException e) { m_Log.e(TAG, getString(R.string.logging_exception_io, "prepareMusic",e.getMessage())); }
 
         //Start Runnable and Thread
-        musicThread  = new AlarmWorkerThread(AlarmConstants.ACTIVITY_MUSIC_THREAD);
+        final String musicThreadName = AlarmConstants.ACTIVITY_MUSIC_THREAD + "_" + AlarmConstants.ALARM + getConfig().getAlarmID();
+        musicThread  = new AlarmWorkerThread(musicThreadName);
         setRunnable(musicThread, new Runnable() {
             @Override
             public void run() {
-                if(!mediaPlayer.isPlaying()){
+                try {
+                    if(!mediaPlayer.isPlaying()){
 
-                    //Get MaxVolume of Music
-                    final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-                    audioManager.setStreamVolume(AudioManager.STREAM_ALARM, audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM), 0);
+                        //Get MaxVolume of Music
+                        final AudioManager audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM), 0);
 
-                    mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(getConfig().getSongStart()));
-                    mediaPlayer.setVolume(currentVolume, currentVolume);
-                    mediaPlayer.start();
+                        mediaPlayer.seekTo((int) TimeUnit.SECONDS.toMillis(getConfig().getSongStart()));
+                        mediaPlayer.setVolume(currentVolume, currentVolume);
+                        mediaPlayer.start();
 
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                m_Log.i(TAG, getString(R.string.logging_music_playing));
+                            }
+                        });
+                    }
 
+                    final int musicVolume = getConfig().getVolume();
+                    final boolean fadeIn  = getConfig().getFadeIn();
+                    if( currentVolume <= musicVolume || !fadeIn){
+                        //Set AudioManager
+                        float volume = (fadeIn) ?
+                                1 - (float)(Math.log(100 - currentVolume++)/Math.log(100)) :
+                                1 - (float)(Math.log(100 - musicVolume    )/Math.log(100));
+                        mediaPlayer.setVolume(volume, volume);
+                        //Set new Runnable
+                        if(fadeIn)
+                            setRunnable(musicThread, this, TimeUnit.SECONDS.toMillis(getConfig().getFadeInTime()) / musicVolume);
+                    }
+                }
+                catch (final IllegalStateException e){
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            m_Log.i(TAG, getString(R.string.logging_music_playing));
+                            m_Log.e(TAG, getApplicationContext().getString(R.string.logging_exception, " IllegalState Mediaplayer: ", e.getMessage()));
                         }
                     });
                 }
-
-                final int musicVolume = getConfig().getVolume();
-                final boolean fadeIn  = getConfig().getFadeIn();
-                if( currentVolume <= musicVolume || !fadeIn){
-                    //Set AudioManager
-                    float volume = (fadeIn) ?
-                            1 - (float)(Math.log(100 - currentVolume++)/Math.log(100)) :
-                            1 - (float)(Math.log(100 - musicVolume    )/Math.log(100));
-                    mediaPlayer.setVolume(volume, volume);
-                    //Set new Runnable
-                    if(fadeIn)
-                        setRunnable(musicThread, this, TimeUnit.SECONDS.toMillis(getConfig().getFadeInTime()) / musicVolume);
+                catch (final Exception e){
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            m_Log.e(TAG, getApplicationContext().getString(R.string.logging_exception, " Mediaplayer Error: ", e.getMessage()));
+                        }
+                    });
                 }
             }
         }, TimeUnit.MINUTES.toMillis(minutes) + 1);
     }
     private void prepareMusic(String _SongUri) throws IOException {
-        //Prepare Music Stream
-        if(mediaPlayer == null)
-            mediaPlayer = new MediaPlayer();
-        else
-            mediaPlayer.reset();
+        try{
+            //Prepare Music Stream
+            if(mediaPlayer == null)
+                mediaPlayer = new MediaPlayer();
+            else
+                mediaPlayer.reset();
 
-        mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
-        mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(_SongUri));
-        mediaPlayer.setLooping(true);
-        mediaPlayer.prepare();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_ALARM);
+            mediaPlayer.setDataSource(getApplicationContext(), Uri.parse(_SongUri));
+            mediaPlayer.setLooping(true);
+            mediaPlayer.prepare();
+        }
+        catch (final Exception e){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    m_Log.e(TAG, getApplicationContext().getString(R.string.logging_exception, " Mediaplayer Prepare Error: ", e.getMessage()));
+                }
+            });
+        }
     }
     private void stopMusic(){
-        //Stop and Release Music
-        if(mediaPlayer==null)
-            return;
 
-        if(mediaPlayer.isPlaying())
-            mediaPlayer.stop();
+        try{
+            //Stop and Release Music
+            if(mediaPlayer==null)
+                return;
 
-        mediaPlayer.reset();
-        mediaPlayer.release();
-        mediaPlayer = null;
+            if(mediaPlayer.isPlaying())
+                mediaPlayer.stop();
 
-        m_Log.i(TAG, getString(R.string.logging_music_stopped));
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            mediaPlayer = null;
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    m_Log.i(TAG, getString(R.string.logging_music_stopped));
+                }
+            });
+        }
+        catch (final Exception e){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    m_Log.e(TAG, getApplicationContext().getString(R.string.logging_exception, " Mediaplayer Stop Error: ", e.getMessage()));
+                }
+            });
+        }
     }
     /***********************************************************************************************
      * VIBRATION
@@ -560,7 +612,8 @@ public class AlarmActivity extends AppCompatActivity {
             return;
 
         //Set new Handler
-        vibrationThread = new AlarmWorkerThread(AlarmConstants.ACTIVITY_VIBRATION_THREAD);
+        final String vibrationThreadName = AlarmConstants.ACTIVITY_VIBRATION_THREAD + "_" + AlarmConstants.ALARM + getConfig().getAlarmID();
+        vibrationThread = new AlarmWorkerThread(vibrationThreadName);
         setRunnable(vibrationThread, new Runnable() {
             @Override
             public void run() {
@@ -583,13 +636,27 @@ public class AlarmActivity extends AppCompatActivity {
         });
     }
     private void setVibrationStop(){
-        //Cancel and Release Vibrator
-        if(m_Vibrator == null)
-            return;
-        m_Vibrator.cancel();
-        m_Vibrator = null;
+        try{
+            //Cancel and Release Vibrator
+            if(m_Vibrator == null)
+                return;
+            m_Vibrator.cancel();
+            m_Vibrator = null;
 
-        m_Log.i(TAG, getString(R.string.logging_vibration_stopped));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    m_Log.i(TAG, getString(R.string.logging_vibration_stopped));
+                }
+            });
+        } catch (final Exception e){
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    m_Log.e(TAG, getApplicationContext().getString(R.string.logging_exception, " Vibration Stop Error: ", e.getMessage()));
+                }
+            });
+        }
     }
     /***********************************************************************************************
      * LED
@@ -605,45 +672,57 @@ public class AlarmActivity extends AppCompatActivity {
     @SuppressWarnings("deprecation")
     private void enableLED(final boolean enable){
         //Check if Device has a LED
-        if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH))
-        {
+        if(getApplicationContext().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)) {
             //Check for Build Version
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                try{
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                try {
                     CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
                     final String[] cameraIds = cameraManager.getCameraIdList();
-                    for(String cameraID : cameraIds)
-                    {
+                    for (String cameraID : cameraIds) {
                         final CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraID);
                         final Boolean hasTorch = cameraCharacteristics.get(CameraCharacteristics.FLASH_INFO_AVAILABLE);
-                        if(hasTorch != null && hasTorch)
+                        if (hasTorch != null && hasTorch)
                             cameraManager.setTorchMode(cameraID, enable);
                     }
-                }
-                catch (final Exception e){
+                } catch (final Exception e) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            m_Log.e(TAG, getString(R.string.logging_exception, "LED Starting",e.getMessage()));
-                        }});
+                            m_Log.e(TAG, getString(R.string.logging_exception, "LED Starting", e.getMessage()));
+                        }
+                    });
+                }
+            } else if (enable) { //Start new Cam
+                try {
+                    m_Cam = android.hardware.Camera.open();
+                    //Load Parameters and Set Parameters
+                    android.hardware.Camera.Parameters p = m_Cam.getParameters();
+                    p.setFlashMode(android.hardware.Camera.Parameters.FLASH_MODE_TORCH);
+                    m_Cam.setParameters(p);
+                    //Start LED
+                    m_Cam.startPreview();
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            m_Log.e(TAG, getString(R.string.logging_exception, "LED Starting", e.getMessage()));
+                        }
+                    });
+                }
+            } else if (m_Cam != null) { //Stop and Release LED
+                try {
+                    m_Cam.stopPreview();
+                    m_Cam.release();
+                    m_Cam = null;
+                } catch (final Exception e) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            m_Log.e(TAG, getString(R.string.logging_exception, "LED Starting", e.getMessage()));
+                        }
+                    });
                 }
             }
-            else if(enable) { //Start new Cam
-                m_Cam = android.hardware.Camera.open();
-                //Load Parameters and Set Parameters
-                android.hardware.Camera.Parameters p = m_Cam.getParameters();
-                p.setFlashMode(android.hardware.Camera.Parameters.FLASH_MODE_TORCH);
-                m_Cam.setParameters(p);
-                //Start LED
-                m_Cam.startPreview();
-            }
-            else if(m_Cam != null) { //Stop and Release LED
-                m_Cam.stopPreview();
-                m_Cam.release();
-                m_Cam = null;
-            }
-
-            m_Log.i(TAG, (enable) ? getString(R.string.logging_led_start) : getString(R.string.logging_led_stop));
         }
     }
 }
