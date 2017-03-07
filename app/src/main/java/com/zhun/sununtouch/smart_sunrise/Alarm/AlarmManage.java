@@ -17,6 +17,7 @@ import com.zhun.sununtouch.smart_sunrise.Information.AlarmToast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -138,9 +139,7 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
 
         //Show Toast when Set
         final boolean checked = checkPendingIntent();
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(calendar.getTimeInMillis());
-        final String date = SimpleDateFormat.getDateTimeInstance().format(cal.getTime());
+        final String date = SimpleDateFormat.getDateTimeInstance().format(new Date(calendar.getTimeInMillis()));
         if (checked)
             AlarmToast.showToastShort(context, date);
 

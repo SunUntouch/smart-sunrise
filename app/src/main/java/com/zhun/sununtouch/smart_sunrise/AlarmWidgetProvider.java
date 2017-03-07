@@ -11,7 +11,7 @@ import android.widget.RemoteViews;
 import com.zhun.sununtouch.smart_sunrise.Configuration.AlarmConfigurationList;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by Sunny on 19.02.2017.
@@ -23,7 +23,6 @@ public class AlarmWidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
-
         AlarmConfigurationList alarms = new AlarmConfigurationList(context);
         for(int widgetId = 0; widgetId < appWidgetIds.length; ++widgetId )
             appWidgetManager.updateAppWidget(appWidgetIds[widgetId], getRemoteView(context, appWidgetManager, widgetId, alarms));
@@ -31,11 +30,6 @@ public class AlarmWidgetProvider extends AppWidgetProvider {
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
-
-        Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
-        int minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH);
-        int minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT);
-
         appWidgetManager.updateAppWidget(appWidgetId, getRemoteView(context, appWidgetManager, appWidgetId, new AlarmConfigurationList(context)));
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
     }
@@ -59,17 +53,16 @@ public class AlarmWidgetProvider extends AppWidgetProvider {
             widgetView.setTextViewText(R.id.alarm_widget_text_view, context.getString(R.string.wakeup_no_alarm));
         else
         {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis(alarms.getNextSetAlarm().getTimeInMillis());
             switch (columns){
                 case 1:
                 case 2: {
-                    widgetView.setTextViewText(R.id.alarm_widget_text_view, SimpleDateFormat.getTimeInstance().format(calendar.getTime()));
-                    widgetView.setTextViewText(R.id.alarm_widget_text_view_Before, SimpleDateFormat.getDateInstance().format(calendar.getTime()));
+                    Date date = new Date(alarms.getNextSetAlarm().getTimeInMillis());
+                    widgetView.setTextViewText(R.id.alarm_widget_text_view, SimpleDateFormat.getTimeInstance().format(date));
+                    widgetView.setTextViewText(R.id.alarm_widget_text_view_Before, SimpleDateFormat.getDateInstance().format(date));
 
                 } break;
                 default: {
-                    widgetView.setTextViewText(R.id.alarm_widget_text_view, SimpleDateFormat.getDateTimeInstance().format(calendar.getTime()));
+                    widgetView.setTextViewText(R.id.alarm_widget_text_view, SimpleDateFormat.getDateTimeInstance().format(new Date(alarms.getNextSetAlarm().getTimeInMillis())));
                     widgetView.setTextViewText(R.id.alarm_widget_text_view_Before, "Screen: "  + alarms.getNextSetAlarm().getScreenStartTime() +
                                                                                    "m | LED: " + alarms.getNextSetAlarm().getLEDStartTime() + "m" );
                 }
