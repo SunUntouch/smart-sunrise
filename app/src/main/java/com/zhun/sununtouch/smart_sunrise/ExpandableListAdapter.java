@@ -249,7 +249,7 @@ class ExpandableListAdapter extends BaseExpandableListAdapter {
 
         //Check for Alarm and Set Button to boolean value
         ToggleButton setNewAlarm = (ToggleButton) view.findViewById(R.id.wakeup_timer_setAlarmButton);
-        setNewAlarm.setChecked(config.isAlarmSet());
+        setNewAlarm.setChecked(config.isAlarmSet(false));
 
         return view;
     }

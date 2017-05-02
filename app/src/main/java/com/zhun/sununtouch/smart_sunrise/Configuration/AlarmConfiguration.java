@@ -26,6 +26,7 @@ public class AlarmConfiguration {
     private String m_Name = AlarmConstants.ALARM;
 
     //Actual Alarm Set
+    private boolean m_alarm_is_set = false;
     private boolean tempTimes    = false;
     private boolean alarmOneShot = false;
 
@@ -87,10 +88,11 @@ public class AlarmConfiguration {
 
         //ID, name, AlarmSet
         this.setAlarmID(ID);
-        this.setAlarmName(settings.getString(AlarmConstants.ALARM_NAME, AlarmConstants.ALARM + Integer.toString(ID)));
-        this.setTemporaryTimes(settings.getBoolean(AlarmConstants.ALARM_TEMPORARY , AlarmConstants.ACTUAL_TEMPORARY));
-        this.setAlarmOneShot  (settings.getBoolean(AlarmConstants.ALARM_ONESHOT   , AlarmConstants.ACTUAL_ONESHOT));
-        this.setTimeInMillis(settings.getLong(AlarmConstants.ALARM_TIME_IN_MILLIS , AlarmConstants.TIME_IN_MILLIS));
+        this.setAlarm         (settings.getBoolean(AlarmConstants.ALARM_IS_ALARM_SET   , AlarmConstants.ACTUAL_IS_ACTIV));
+        this.setAlarmName     (settings.getString (AlarmConstants.ALARM_NAME           , AlarmConstants.ALARM + Integer.toString(ID)));
+        this.setTemporaryTimes(settings.getBoolean(AlarmConstants.ALARM_TEMPORARY      , AlarmConstants.ACTUAL_TEMPORARY));
+        this.setAlarmOneShot  (settings.getBoolean(AlarmConstants.ALARM_ONESHOT        , AlarmConstants.ACTUAL_ONESHOT));
+        this.setTimeInMillis  (settings.getLong   (AlarmConstants.ALARM_TIME_IN_MILLIS , AlarmConstants.TIME_IN_MILLIS));
 
         //Days
         this.setMonday   (settings.getBoolean(AlarmConstants.ALARM_DAY_MONDAY    , AlarmConstants.ACTUAL_DAY_MONDAY));
@@ -102,24 +104,24 @@ public class AlarmConfiguration {
         this.setSunday   (settings.getBoolean(AlarmConstants.ALARM_DAY_SUNDAY    , AlarmConstants.ACTUAL_DAY_SUNDAY));
 
         //Load Music
-        this.setSongURI          (settings.getString (AlarmConstants.ALARM_MUSIC_SONG_ID, AlarmConstants.ACTUAL_MUSIC_SONG_URI));
-        this.setSongStart        (settings.getInt    (AlarmConstants.ALARM_MUSIC_SONG_START, AlarmConstants.ACTUAL_MUSIC_START));
-        this.setSongLength       (settings.getInt    (AlarmConstants.ALARM_MUSIC_SONG_LENGTH, AlarmConstants.ACTUAL_MUSIC_LENGTH));
+        this.setSongURI          (settings.getString (AlarmConstants.ALARM_MUSIC_SONG_ID         , AlarmConstants.ACTUAL_MUSIC_SONG_URI));
+        this.setSongStart        (settings.getInt    (AlarmConstants.ALARM_MUSIC_SONG_START      , AlarmConstants.ACTUAL_MUSIC_START));
+        this.setSongLength       (settings.getInt    (AlarmConstants.ALARM_MUSIC_SONG_LENGTH     , AlarmConstants.ACTUAL_MUSIC_LENGTH));
         this.setVolume           (settings.getInt    (AlarmConstants.ALARM_MUSIC_VOLUME          , AlarmConstants.ACTUAL_MUSIC_VOLUME));
-        this.setFadeIn           (settings.getBoolean(AlarmConstants.ALARM_MUSIC_FADE_IN, AlarmConstants.ACTUAL_MUSIC_FADE_IN));
-        this.setFadeInTime       (settings.getInt    (AlarmConstants.ALARM_MUSIC_FADE_IN_TIME, AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME));
+        this.setFadeIn           (settings.getBoolean(AlarmConstants.ALARM_MUSIC_FADE_IN         , AlarmConstants.ACTUAL_MUSIC_FADE_IN));
+        this.setFadeInTime       (settings.getInt    (AlarmConstants.ALARM_MUSIC_FADE_IN_TIME    , AlarmConstants.ACTUAL_MUSIC_FADE_IN_TIME));
         this.setVibration        (settings.getBoolean(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIVE, AlarmConstants.ACTUAL_MUSIC_VIBRATION));
         this.setVibrationStrength(settings.getInt    (AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE , AlarmConstants.ACTUAL_MUSIC_VIBRATION_STRENGTH));
 
         //Load Light
         this.setScreen          (settings.getBoolean(AlarmConstants.ALARM_LIGHT_SCREEN            , AlarmConstants.ACTUAL_SCREEN));
-        this.setScreenBrightness(settings.getInt    (AlarmConstants.ALARM_LIGHT_SCREEN_BRIGHTNESS, AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS));
+        this.setScreenBrightness(settings.getInt    (AlarmConstants.ALARM_LIGHT_SCREEN_BRIGHTNESS , AlarmConstants.ACTUAL_SCREEN_BRIGHTNESS));
         this.setScreenStartTime (settings.getInt    (AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME , AlarmConstants.ACTUAL_SCREEN_START));
         this.setScreenStartTemp (settings.getInt    (AlarmConstants.ALARM_LIGHT_SCREEN_START_TEMP , AlarmConstants.ACTUAL_SCREEN_START));
         this.setLightColor1     (settings.getInt    (AlarmConstants.ALARM_LIGHT_COLOR1            , AlarmConstants.ACTUAL_SCREEN_COLOR1));
         this.setLightColor2     (settings.getInt    (AlarmConstants.ALARM_LIGHT_COLOR2            , AlarmConstants.ACTUAL_SCREEN_COLOR2));
-        this.setLightFade       (settings.getBoolean(AlarmConstants.ALARM_LIGHT_FADE_COLOR, AlarmConstants.ACTUAL_SCREEN_COLOR_FADE));
-        this.setLED             (settings.getBoolean(AlarmConstants.ALARM_LIGHT_USE_LED, AlarmConstants.ACTUAL_LED));
+        this.setLightFade       (settings.getBoolean(AlarmConstants.ALARM_LIGHT_FADE_COLOR        , AlarmConstants.ACTUAL_SCREEN_COLOR_FADE));
+        this.setLED             (settings.getBoolean(AlarmConstants.ALARM_LIGHT_USE_LED           , AlarmConstants.ACTUAL_LED));
         this.setLEDStartTime    (settings.getInt    (AlarmConstants.ALARM_LIGHT_LED_START_TIME    , AlarmConstants.ACTUAL_LED_START));
         this.setLEDStartTemp    (settings.getInt    (AlarmConstants.ALARM_LIGHT_LED_START_TEMP    , AlarmConstants.ACTUAL_LED_START));
 
@@ -147,8 +149,9 @@ public class AlarmConfiguration {
         editor.putString(AlarmConstants.ALARM_NAME, getAlarmName());
 
         //Alarm is Set
-        editor.putBoolean(AlarmConstants.ALARM_ONESHOT, getAlarmOneShot());
-        editor.putBoolean(AlarmConstants.ALARM_TEMPORARY,  getTemporaryTimes());
+        editor.putBoolean(AlarmConstants.ALARM_IS_ALARM_SET, isAlarmSet());
+        editor.putBoolean(AlarmConstants.ALARM_ONESHOT     , getAlarmOneShot());
+        editor.putBoolean(AlarmConstants.ALARM_TEMPORARY   , getTemporaryTimes());
 
         //Time
         editor.putInt(AlarmConstants.ALARM_TIME_MINUTES    , getMinute());
@@ -166,24 +169,24 @@ public class AlarmConfiguration {
         editor.putBoolean(AlarmConstants.ALARM_DAY_SUNDAY    , isSunday());
 
         //Music
-        editor.putString (AlarmConstants.ALARM_MUSIC_SONG_ID, getSongURI());
+        editor.putString (AlarmConstants.ALARM_MUSIC_SONG_ID         , getSongURI());
         editor.putInt    (AlarmConstants.ALARM_MUSIC_VOLUME          , getVolume());
-        editor.putInt    (AlarmConstants.ALARM_MUSIC_SONG_START, getSongStart());
-        editor.putInt    (AlarmConstants.ALARM_MUSIC_SONG_LENGTH, getSongLength());
-        editor.putBoolean(AlarmConstants.ALARM_MUSIC_FADE_IN, getFadeIn());
-        editor.putInt    (AlarmConstants.ALARM_MUSIC_FADE_IN_TIME, getFadeInTime());
+        editor.putInt    (AlarmConstants.ALARM_MUSIC_SONG_START      , getSongStart());
+        editor.putInt    (AlarmConstants.ALARM_MUSIC_SONG_LENGTH     , getSongLength());
+        editor.putBoolean(AlarmConstants.ALARM_MUSIC_FADE_IN         , getFadeIn());
+        editor.putInt    (AlarmConstants.ALARM_MUSIC_FADE_IN_TIME    , getFadeInTime());
         editor.putBoolean(AlarmConstants.ALARM_MUSIC_VIBRATION_ACTIVE, getVibration());
         editor.putInt    (AlarmConstants.ALARM_MUSIC_VIBRATION_VALUE , getVibrationStrength());
 
         //Light
         editor.putBoolean(AlarmConstants.ALARM_LIGHT_SCREEN            , getScreen());
-        editor.putInt    (AlarmConstants.ALARM_LIGHT_SCREEN_BRIGHTNESS, getScreenBrightness());
+        editor.putInt    (AlarmConstants.ALARM_LIGHT_SCREEN_BRIGHTNESS , getScreenBrightness());
         editor.putInt    (AlarmConstants.ALARM_LIGHT_SCREEN_START_TIME , getScreenStartTime());
         editor.putInt    (AlarmConstants.ALARM_LIGHT_SCREEN_START_TEMP , getScreenStartTemp());
         editor.putInt    (AlarmConstants.ALARM_LIGHT_COLOR1            , getLightColor1());
         editor.putInt    (AlarmConstants.ALARM_LIGHT_COLOR2            , getLightColor2());
-        editor.putBoolean(AlarmConstants.ALARM_LIGHT_FADE_COLOR, getLightFade());
-        editor.putBoolean(AlarmConstants.ALARM_LIGHT_USE_LED, getLED());
+        editor.putBoolean(AlarmConstants.ALARM_LIGHT_FADE_COLOR        , getLightFade());
+        editor.putBoolean(AlarmConstants.ALARM_LIGHT_USE_LED           , getLED());
         editor.putInt    (AlarmConstants.ALARM_LIGHT_LED_START_TIME    , getLEDStartTime());
         editor.putInt    (AlarmConstants.ALARM_LIGHT_LED_START_TEMP    , getLEDStartTemp());
 
@@ -208,16 +211,38 @@ public class AlarmConfiguration {
             return new AlarmManage(m_Context, this);
     }
     public boolean cancelAlarm(){
-        return createAlarmManager().cancelAlarm();
+        setAlarm(createAlarmManager().cancelAlarm());
+        commit();
+        return isAlarmSet();
     }
-    public void snoozeAlarm(){
-        createAlarmManager().setAlarm(true);
+    public boolean snoozeAlarm(){
+        setAlarm(createAlarmManager().setAlarm(true));
+        commit();
+        return isAlarmSet();
     }
     public boolean activateAlarm(){
-        return createAlarmManager().setAlarm(false);
+        setAlarm(createAlarmManager().setAlarm(false));
+        commit();
+        return isAlarmSet();
     }
-    public void refreshAlarm(){
-        createAlarmManager().refresh();
+    public boolean refreshAlarm(){
+        setAlarm(createAlarmManager().refresh());
+        commit();
+        return isAlarmSet();
+    }
+
+    //Set alarm
+    private void setAlarm(boolean alarm){
+
+        if(m_alarm_is_set == alarm)
+            return;
+
+        m_alarm_is_set = alarm;
+        setDirty(true);
+    }
+
+    private boolean isAlarmSet(){
+        return m_alarm_is_set;
     }
 
     //Enums
@@ -259,8 +284,8 @@ public class AlarmConfiguration {
     }
 
     //Actual Alarm Set
-    public boolean isAlarmSet(){
-        return createAlarmManager().checkPendingIntent();
+    public boolean isAlarmSet(boolean on_reboot){
+        return (on_reboot) ? m_alarm_is_set : createAlarmManager().checkPendingIntent();
     }
 
     //Time

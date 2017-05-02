@@ -168,10 +168,10 @@ public /*abstract*/ class AlarmManage extends AppCompatActivity {
         return checked;
     }
 
-    public void refresh() {
+    public boolean refresh() {
         //m_Log.i(TAG, getString(R.string.logging_alarm_refresh));
         cancelAlarm();
-        setAlarm(false);
+        return setAlarm(false);
     }
 
     //Getter

@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity
 
         mThread = new AlarmWorkerThread("Smart_Sunrise_Main_Worker");
 
-        m_AlarmConfigurations = new AlarmConfigurationList(getApplicationContext());
+        m_AlarmConfigurations = new AlarmConfigurationList(getApplicationContext(), false);
         m_SystemConfiguration = new AlarmSystemConfiguration(getApplicationContext());
 
         //Set View
@@ -480,7 +480,7 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
 
         //refresh Alarm separate only for some Key Values
-        if(alarm.isAlarmSet())
+        if(alarm.isAlarmSet(false))
             alarm.refreshAlarm();
 
         m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " a day changed to: " + toggle.isChecked());
@@ -509,7 +509,7 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
 
         //refresh Alarm separate only for some Key Values
-        if(alarm.isAlarmSet())
+        if(alarm.isAlarmSet(false))
             alarm.refreshAlarm();
 
         m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " set to " + alarm.getHour() + ":" + alarm.getMinute());
@@ -1422,7 +1422,7 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
 
         //refresh Alarm separate only for some Key Values
-        if(alarm.isAlarmSet())
+        if(alarm.isAlarmSet(false))
             alarm.refreshAlarm();
 
         m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + " screen starts " + alarm.getScreenStartTime() + "m before music");
@@ -1542,7 +1542,7 @@ public class MainActivity extends AppCompatActivity
         updateChanges(alarm);
 
         //refresh Alarm separate only for some Key Values
-        if(alarm.isAlarmSet())
+        if(alarm.isAlarmSet(false))
             alarm.refreshAlarm();
 
         m_Log.i(TAG, getString(R.string.logging_alarm_id, alarm.getAlarmID(), alarm.getAlarmName()) + alarm.getAlarmName() + " led start time " + alarm.getLEDStartTime() + "m before music");

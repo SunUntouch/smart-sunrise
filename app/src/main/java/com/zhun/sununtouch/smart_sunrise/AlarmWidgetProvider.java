@@ -23,14 +23,14 @@ public class AlarmWidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
-        AlarmConfigurationList alarms = new AlarmConfigurationList(context);
+        AlarmConfigurationList alarms = new AlarmConfigurationList(context, false);
         for(int widgetId = 0; widgetId < appWidgetIds.length; ++widgetId )
             appWidgetManager.updateAppWidget(appWidgetIds[widgetId], getRemoteView(context, appWidgetManager, widgetId, alarms));
     }
 
     @Override
     public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager, int appWidgetId, Bundle newOptions) {
-        appWidgetManager.updateAppWidget(appWidgetId, getRemoteView(context, appWidgetManager, appWidgetId, new AlarmConfigurationList(context)));
+        appWidgetManager.updateAppWidget(appWidgetId, getRemoteView(context, appWidgetManager, appWidgetId, new AlarmConfigurationList(context, false)));
         super.onAppWidgetOptionsChanged(context, appWidgetManager, appWidgetId, newOptions);
     }
 

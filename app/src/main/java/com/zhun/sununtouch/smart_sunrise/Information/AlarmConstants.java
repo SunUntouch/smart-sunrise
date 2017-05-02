@@ -32,6 +32,7 @@ public abstract class AlarmConstants {
     public final static String ALARM_NAME                 = "Alarm_Name";
     public final static String ALARM_VALUE                = "Alarm_Value";
 
+    public final static String ALARM_IS_ALARM_SET         = "Alarm_is_set";
     public final static String ALARM_ONESHOT              = "Alarm_One_Shot";
     public final static String ALARM_TEMPORARY            = "Alarm_Temporary";
 
@@ -78,6 +79,7 @@ public abstract class AlarmConstants {
     public final static String[] LONG_DAYS  = DateFormatSymbols.getInstance().getWeekdays();
 
     //AlarmSet
+    public final static boolean ACTUAL_IS_ACTIV  = false;
     public final static boolean ACTUAL_ONESHOT   = false;
     public final static boolean ACTUAL_TEMPORARY = false;
 

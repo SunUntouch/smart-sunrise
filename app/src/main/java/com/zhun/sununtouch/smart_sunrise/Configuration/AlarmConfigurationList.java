@@ -29,7 +29,7 @@ public class AlarmConfigurationList {
 
 
     //Constructor
-    public AlarmConfigurationList(Context context) {
+    public AlarmConfigurationList(Context context, boolean on_reboot) {
 
         //Get Amount and initialize List
         m_Context = context;
@@ -49,7 +49,7 @@ public class AlarmConfigurationList {
             AlarmConfiguration alarm = new AlarmConfiguration(context, alarmID);
             m_Alarms.add(alarm);
 
-            if(alarm.isAlarmSet()){
+            if(alarm.isAlarmSet(on_reboot)){
                 m_AlarmSet = true;
                 if(m_nextAlarm.getTimeInMillis() > alarm.getTimeInMillis() )
                     m_nextAlarm = alarm;
@@ -148,5 +148,16 @@ public class AlarmConfigurationList {
 
     public AlarmConfiguration getNextSetAlarm(){
         return m_nextAlarm;
+    }
+
+    public void restartAlarm(){
+
+        for(AlarmConfiguration alarm : m_Alarms)
+        {
+            if(alarm.isAlarmSet(true))
+                alarm.activateAlarm();
+            else
+                alarm.cancelAlarm();
+        }
     }
 }
